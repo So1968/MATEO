@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search,
   Plus,
@@ -84,6 +84,8 @@ export default function App() {
   const [newProjectName, setNewProjectName] = useState("");
   const [projectCreationStatus, setProjectCreationStatus] = useState("");
   const [meetingExportStatus, setMeetingExportStatus] = useState("");
+  const [inboxItems, setInboxItems] = useState([]);
+  const [inboxStatus, setInboxStatus] = useState("");
   const [meetingMarkers, setMeetingMarkers] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
@@ -288,6 +290,24 @@ export default function App() {
     return results;
   }, [data, query]);
 
+  async function loadInbox() {
+    setInboxStatus("Chargement de la boîte à traiter...");
+
+    try {
+      const response = await fetch("http://127.0.0.1:8010/api/inbox");
+
+      if (!response.ok) {
+        throw new Error("Backend local non disponible.");
+      }
+
+      const result = await response.json();
+      setInboxItems(result.items || []);
+      setInboxStatus("");
+    } catch (error) {
+      setInboxStatus("Impossible de charger la boîte à traiter. Vérifie que le backend est lancé.");
+    }
+  }
+
   async function exportMeetingToDataFolder() {
     if (!selectedProject || !selectedReport) {
       setMeetingExportStatus("Aucune réunion sélectionnée.");
@@ -328,6 +348,7 @@ export default function App() {
 
       if (!audioBlob) {
         setMeetingExportStatus(`Réunion exportée : ${result.meetingDirName}`);
+        loadInbox();
         return;
       }
 
@@ -354,10 +375,12 @@ export default function App() {
         }
 
         setMeetingExportStatus(`Réunion + audio exportés : ${result.meetingDirName}`);
+        loadInbox();
       } catch (audioError) {
         setMeetingExportStatus(
           `Réunion exportée : ${result.meetingDirName}. Audio non exporté.`
         );
+          loadInbox();
       }
     } catch (error) {
       setMeetingExportStatus(
@@ -379,6 +402,10 @@ export default function App() {
     a.click();
     URL.revokeObjectURL(url);
   }
+
+  useEffect(() => {
+    loadInbox();
+  }, []);
 
   const totalReports = data.projects.reduce((sum, p) => sum + p.reports.length, 0);
 
@@ -447,6 +474,42 @@ export default function App() {
           <strong>Suivre</strong>
           <p>Voir les actions, décisions fragiles, questions ouvertes, blocages et réunions à traiter.</p>
         </article>
+      </section>
+
+      <section className="panel inboxPanel">
+        <div className="panelTitle between">
+          <div>
+            <div className="inlineTitle">
+              <FileText size={20} />
+              <h2>À traiter</h2>
+            </div>
+            <p>Les réunions déposées dans MATEO-DONNEES qui attendent une reprise.</p>
+          </div>
+
+          <button onClick={loadInbox}>
+            Rafraîchir
+          </button>
+        </div>
+
+        {inboxStatus && <p className="backendStatus">{inboxStatus}</p>}
+
+        {inboxItems.length ? (
+          <div className="inboxList">
+            {inboxItems.slice(0, 8).map((item) => (
+              <article key={`${item.projectSlug}-${item.meetingDirName}`} className="inboxItem">
+                <div>
+                  <strong>{item.title || "Réunion sans titre"}</strong>
+                  <p>{item.projectName} — {item.date} — {item.meetingType}</p>
+                  <small>{item.meetingDirName}</small>
+                </div>
+
+                <span className="statusPill">{item.status}</span>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="empty">Aucune réunion à traiter pour l’instant.</p>
+        )}
       </section>
 
       <section className="grid">

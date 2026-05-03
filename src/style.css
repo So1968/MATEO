@@ -740,3 +740,51 @@ h3 {
   color: var(--text-soft);
   line-height: 1.45;
 }
+
+.inboxPanel {
+  margin-bottom: 18px;
+}
+
+.inboxList {
+  display: grid;
+  gap: 10px;
+}
+
+.inboxItem {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card-soft);
+}
+
+.inboxItem strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text);
+}
+
+.inboxItem p {
+  margin: 0 0 4px;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.inboxItem small {
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+.statusPill {
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: var(--sapphire-soft);
+  border: 1px solid var(--sapphire-border);
+  color: var(--sapphire);
+  font-size: 0.8rem;
+  font-weight: 800;
+}

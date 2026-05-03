@@ -381,6 +381,84 @@ app.post("/api/meetings/export-audio", upload.single("audio"), (req, res) => {
 });
 
 
+
+function readJsonIfExists(filePath) {
+  try {
+    if (!fs.existsSync(filePath)) return null;
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+app.get("/api/inbox", (req, res) => {
+  try {
+    ensureDir(PROJECTS_ROOT);
+
+    const items = [];
+
+    const projects = fs
+      .readdirSync(PROJECTS_ROOT, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory());
+
+    for (const project of projects) {
+      const projectDir = path.join(PROJECTS_ROOT, project.name);
+      const meetingsDir = path.join(projectDir, "01_reunions");
+
+      if (!fs.existsSync(meetingsDir)) continue;
+
+      const meetings = fs
+        .readdirSync(meetingsDir, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory());
+
+      for (const meeting of meetings) {
+        const meetingDir = path.join(meetingsDir, meeting.name);
+        const data = readJsonIfExists(path.join(meetingDir, "donnees_reunion.json"));
+
+        const hasAudio = fs.existsSync(path.join(meetingDir, "audio_original.webm"));
+        const hasReport = fs.existsSync(path.join(meetingDir, "compte_rendu_exporte.md"));
+        const hasValidatedReport = fs.existsSync(path.join(meetingDir, "compte_rendu_valide.md"));
+        const hasRawNotes = Boolean(data?.rawNotes && String(data.rawNotes).trim());
+
+        let status = "À traiter";
+        if (hasValidatedReport) {
+          status = "Validé";
+        } else if (hasReport && hasRawNotes) {
+          status = "Compte-rendu à valider";
+        } else if (hasAudio && !hasRawNotes) {
+          status = "Audio à transcrire";
+        } else if (hasReport) {
+          status = "Exporté à compléter";
+        }
+
+        items.push({
+          projectSlug: project.name,
+          projectName: data?.projectName || project.name.replaceAll("_", " "),
+          meetingDirName: meeting.name,
+          title: data?.title || meeting.name,
+          date: data?.meetingDate || meeting.name.slice(0, 10),
+          meetingType: data?.meetingType || "",
+          status,
+          hasAudio,
+          hasReport,
+          hasValidatedReport,
+          hasRawNotes,
+          path: meetingDir
+        });
+      }
+    }
+
+    items.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+
+    res.json({ items });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message || "Erreur pendant la lecture de la boîte à traiter."
+    });
+  }
+});
+
+
 app.listen(PORT, "127.0.0.1", () => {
   console.log(`Matéo backend lancé : http://127.0.0.1:${PORT}`);
   console.log(`Dossier données : ${DATA_ROOT}`);
