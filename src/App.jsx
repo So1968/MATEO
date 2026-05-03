@@ -311,6 +311,18 @@ export default function App() {
   }
 
   async function openInboxReport(item) {
+    const sameReportIsOpen =
+      selectedInboxReport &&
+      selectedInboxReport.projectSlug === item.projectSlug &&
+      selectedInboxReport.meetingDirName === item.meetingDirName;
+
+    if (sameReportIsOpen) {
+      setSelectedInboxReport(null);
+      setSelectedInboxContent("");
+      setInboxStatus("");
+      return;
+    }
+
     setInboxStatus("Ouverture du compte-rendu...");
     setSelectedInboxReport(null);
     setSelectedInboxContent("");
@@ -344,6 +356,7 @@ export default function App() {
       setInboxStatus(`Ouverture impossible : ${error.message}`);
     }
   }
+
 
   async function validateInboxMeeting(item) {
     setInboxStatus("Validation de la réunion en cours...");
