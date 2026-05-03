@@ -306,32 +306,66 @@ export default function App() {
           projectName: selectedProject.name,
           meetingDate: selectedReport.date,
           meetingType: selectedReport.meetingType || "Réunion",
-          title: selectedReport.title,
-          participants: selectedReport.participants,
-          context: selectedReport.context,
-          decisions: selectedReport.decisions,
-          rules: selectedReport.rules,
-          screens: selectedReport.screens,
-          openQuestions: selectedReport.openQuestions,
-          actions: selectedReport.actions,
-          risks: selectedReport.risks,
-          keywords: selectedReport.keywords,
-          rawNotes: selectedReport.rawNotes
+          title: selectedReport.title || "sans titre",
+          participants: selectedReport.participants || "",
+          context: selectedReport.context || "",
+          decisions: selectedReport.decisions || "",
+          rules: selectedReport.rules || "",
+          screens: selectedReport.screens || "",
+          openQuestions: selectedReport.openQuestions || "",
+          actions: selectedReport.actions || "",
+          risks: selectedReport.risks || "",
+          keywords: selectedReport.keywords || "",
+          rawNotes: selectedReport.rawNotes || ""
         })
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error("Backend local non disponible.");
+        throw new Error(result.error || "Erreur export réunion.");
       }
 
-      const result = await response.json();
-      setMeetingExportStatus(`Réunion exportée : ${result.meetingDirName}`);
+      if (!audioBlob) {
+        setMeetingExportStatus(`Réunion exportée : ${result.meetingDirName}`);
+        return;
+      }
+
+      try {
+        const formData = new FormData();
+        formData.append("projectName", selectedProject.name);
+        formData.append("meetingDirName", result.meetingDirName);
+        formData.append(
+          "audio",
+          audioBlob,
+          selectedReport.audioFileName || `audio-${selectedReport.date}.webm`
+        );
+
+        const audioResponse = await fetch("http://127.0.0.1:8010/api/meetings/export-audio", {
+          method: "POST",
+          body: formData
+        });
+
+        if (!audioResponse.ok) {
+          setMeetingExportStatus(
+            `Réunion exportée : ${result.meetingDirName}. Audio non exporté.`
+          );
+          return;
+        }
+
+        setMeetingExportStatus(`Réunion + audio exportés : ${result.meetingDirName}`);
+      } catch (audioError) {
+        setMeetingExportStatus(
+          `Réunion exportée : ${result.meetingDirName}. Audio non exporté.`
+        );
+      }
     } catch (error) {
       setMeetingExportStatus(
-        "Export impossible. Vérifie que le backend local est lancé avec npm run backend."
+        `Export impossible : ${error.message || "vérifie que le backend local est lancé."}`
       );
     }
   }
+
 
   function exportData() {
     const blob = new Blob([JSON.stringify(data, null, 2)], {

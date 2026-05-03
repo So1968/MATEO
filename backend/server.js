@@ -3,6 +3,7 @@ import cors from "cors";
 import fs from "fs";
 import path from "path";
 import os from "os";
+import multer from "multer";
 
 const app = express();
 const PORT = 8010;
@@ -13,6 +14,7 @@ const PROJECTS_ROOT = path.join(DATA_ROOT, "01_PROJETS");
 
 app.use(cors());
 app.use(express.json());
+const upload = multer({ storage: multer.memoryStorage() });
 
 function slugify(value) {
   return String(value || "")
@@ -329,6 +331,51 @@ ${rawNotes || ""}
   } catch (error) {
     res.status(400).json({
       error: error.message || "Erreur pendant l’export de la réunion."
+    });
+  }
+});
+
+
+
+app.post("/api/meetings/export-audio", upload.single("audio"), (req, res) => {
+  try {
+    const { projectName, meetingDirName } = req.body;
+
+    if (!req.file) {
+      throw new Error("Aucun fichier audio reçu.");
+    }
+
+    const projectSlug = slugify(projectName);
+    if (!projectSlug) {
+      throw new Error("Projet manquant.");
+    }
+
+    const safeMeetingDirName = String(meetingDirName || "").replace(/[\/\\]/g, "");
+    if (!safeMeetingDirName) {
+      throw new Error("Dossier de réunion manquant.");
+    }
+
+    const meetingDir = path.join(
+      PROJECTS_ROOT,
+      projectSlug,
+      "01_reunions",
+      safeMeetingDirName
+    );
+
+    ensureDir(meetingDir);
+
+    const extension = path.extname(req.file.originalname || "") || ".webm";
+    const audioPath = path.join(meetingDir, `audio_original${extension}`);
+
+    fs.writeFileSync(audioPath, req.file.buffer);
+
+    res.status(201).json({
+      status: "ok",
+      audioPath
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error.message || "Erreur pendant l’export audio."
     });
   }
 });
