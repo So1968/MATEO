@@ -260,6 +260,38 @@ export default function App() {
         </div>
       </section>
 
+      <section className="warning">
+        <AlertTriangle size={20} />
+        <div>
+          <strong>Matéo garde la mémoire pour reposer le cerveau.</strong>
+          <p>
+            Tu restes présente dans l’échange. Matéo capte, classe, structure et prépare la mémoire projet.
+          </p>
+        </div>
+      </section>
+
+      <section className="cockpit">
+        <article className="cockpitCard">
+          <strong>Déposer</strong>
+          <p>Enregistrer une réunion, importer un audio, poser une note brute ou un sujet à ne pas perdre.</p>
+        </article>
+
+        <article className="cockpitCard">
+          <strong>Traiter</strong>
+          <p>Transformer le brut en compte-rendu, décisions, actions, règles, écrans et points ouverts.</p>
+        </article>
+
+        <article className="cockpitCard">
+          <strong>Retrouver</strong>
+          <p>Interroger la mémoire projet sans refaire tout l’historique mental.</p>
+        </article>
+
+        <article className="cockpitCard">
+          <strong>Suivre</strong>
+          <p>Voir les actions, décisions fragiles, questions ouvertes, blocages et réunions à traiter.</p>
+        </article>
+      </section>
+
       <section className="grid">
         <aside className="panel sidebar">
           <div className="panelTitle">
@@ -352,6 +384,15 @@ export default function App() {
 
           {selectedReport ? (
             <div className="form">
+              <MeetingMode
+                projectName={selectedProject?.name}
+                reportTitle={selectedReport?.title}
+                isRecording={isRecording}
+                onStartRecording={startRecording}
+                onStopRecording={stopRecording}
+                onAddMarker={addMeetingMarker}
+                markers={meetingMarkers}
+              />
               <label>
                 Date
                 <input
