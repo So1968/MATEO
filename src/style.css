@@ -713,3 +713,15 @@ h3 {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+.backendStatus {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--sapphire-soft);
+  border: 1px solid var(--sapphire-border);
+  color: var(--sapphire);
+  font-size: 0.86rem;
+  font-weight: 650;
+  line-height: 1.35;
+}

@@ -82,6 +82,7 @@ export default function App() {
   const [selectedReportId, setSelectedReportId] = useState(data.projects[0]?.reports[0]?.id || null);
   const [query, setQuery] = useState("");
   const [newProjectName, setNewProjectName] = useState("");
+  const [projectCreationStatus, setProjectCreationStatus] = useState("");
   const [meetingMarkers, setMeetingMarkers] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
@@ -97,9 +98,31 @@ export default function App() {
     saveData(nextData);
   }
 
-  function addProject() {
+  async function addProject() {
     const name = newProjectName.trim();
     if (!name) return;
+
+    let folderMessage = "";
+
+    try {
+      const response = await fetch("http://127.0.0.1:8010/api/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name })
+      });
+
+      if (!response.ok) {
+        throw new Error("Backend local non disponible.");
+      }
+
+      const result = await response.json();
+      folderMessage = `Dossier créé dans MATEO-DONNEES : ${result.project.slug}`;
+    } catch (error) {
+      folderMessage =
+        "Projet créé dans Matéo, mais le dossier local n’a pas pu être créé. Vérifie que le backend est lancé.";
+    }
 
     const project = {
       id: crypto.randomUUID(),
@@ -117,6 +140,7 @@ export default function App() {
     setSelectedProjectId(project.id);
     setSelectedReportId(null);
     setNewProjectName("");
+    setProjectCreationStatus(folderMessage);
   }
 
   function deleteProject(projectId) {
@@ -362,6 +386,10 @@ export default function App() {
               <Plus size={16} />
             </button>
           </div>
+
+          {projectCreationStatus && (
+            <p className="backendStatus">{projectCreationStatus}</p>
+          )}
 
           <div className="projectList">
             {data.projects.map((project) => (
