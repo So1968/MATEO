@@ -868,3 +868,30 @@ h3 {
   gap: 10px;
   flex-wrap: wrap;
 }
+
+.filePathRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.filePathRow .filePath {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .filePathRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reportSaveStatus {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--sapphire-soft);
+  border: 1px solid var(--sapphire-border);
+  color: var(--sapphire);
+  font-weight: 750;
+}

@@ -88,6 +88,7 @@ export default function App() {
   const [inboxStatus, setInboxStatus] = useState("");
   const [selectedInboxReport, setSelectedInboxReport] = useState(null);
   const [selectedInboxContent, setSelectedInboxContent] = useState("");
+  const [reportSaveStatus, setReportSaveStatus] = useState("");
   const [meetingMarkers, setMeetingMarkers] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
@@ -310,6 +311,20 @@ export default function App() {
     }
   }
 
+  async function copyReportPath() {
+    if (!selectedInboxReport?.reportPath) {
+      setInboxStatus("Aucun chemin à copier.");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(selectedInboxReport.reportPath);
+      setInboxStatus("Chemin du compte-rendu copié.");
+    } catch {
+      setInboxStatus("Impossible de copier le chemin automatiquement.");
+    }
+  }
+
   async function openInboxReport(item) {
     const sameReportIsOpen =
       selectedInboxReport &&
@@ -360,10 +375,12 @@ export default function App() {
 
   async function saveInboxReport() {
     if (!selectedInboxReport) {
+      setReportSaveStatus("Aucun compte-rendu ouvert.");
       setInboxStatus("Aucun compte-rendu ouvert.");
       return;
     }
 
+    setReportSaveStatus("Enregistrement en cours...");
     setInboxStatus("Enregistrement du compte-rendu...");
 
     try {
@@ -385,13 +402,16 @@ export default function App() {
         throw new Error(result.error || "Erreur pendant l’enregistrement.");
       }
 
-      setInboxStatus("Compte-rendu enregistré dans MATEO-DONNEES.");
-      alert("Compte-rendu enregistré dans MATEO-DONNEES.");
+      const time = new Date().toLocaleTimeString();
+      setReportSaveStatus(`Compte-rendu enregistré à ${time}`);
+      setInboxStatus(`Compte-rendu enregistré à ${time}`);
       loadInbox();
     } catch (error) {
+      setReportSaveStatus(`Enregistrement impossible : ${error.message}`);
       setInboxStatus(`Enregistrement impossible : ${error.message}`);
     }
   }
+
 
   async function validateInboxMeeting(item) {
     setInboxStatus("Validation de la réunion en cours...");
@@ -652,7 +672,12 @@ export default function App() {
               </span>
             </div>
 
-            <p className="filePath">{selectedInboxReport.reportPath}</p>
+            <div className="filePathRow">
+              <p className="filePath">{selectedInboxReport.reportPath}</p>
+              <button className="smallButton secondarySmallButton" onClick={copyReportPath}>
+                Copier le chemin
+              </button>
+            </div>
 
             <textarea
               className="reportPreviewText"
@@ -671,6 +696,10 @@ export default function App() {
                 </button>
               )}
             </div>
+
+            {reportSaveStatus && (
+              <p className="reportSaveStatus">{reportSaveStatus}</p>
+            )}
           </section>
         )}
       </section>
