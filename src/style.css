@@ -1166,3 +1166,430 @@ h3 {
     width: 44px;
   }
 }
+
+.heroSignatureRow {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.onePieceMotto {
+  display: grid;
+  gap: 5px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff8e7 0%, #f8edca 100%);
+  border: 1px solid #e3ca7a;
+  color: #6d4b18;
+  max-width: 620px;
+  box-shadow: 0 10px 24px rgba(109, 75, 24, 0.08);
+}
+
+.onePieceMotto span {
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.strawHatSeal {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff8e7 0%, #f7e0a3 100%);
+  border: 1px solid #e0c26b;
+  box-shadow:
+    inset 0 6px 14px rgba(255,255,255,0.55),
+    0 10px 24px rgba(122, 90, 20, 0.12);
+  flex: 0 0 auto;
+}
+
+.strawHatSeal .hatTop {
+  position: absolute;
+  top: 18px;
+  left: 24px;
+  width: 36px;
+  height: 22px;
+  border-radius: 40px 40px 22px 22px;
+  background: #f0d48a;
+  border: 1px solid #c8a34b;
+}
+
+.strawHatSeal .hatBrim {
+  position: absolute;
+  top: 35px;
+  left: 11px;
+  width: 60px;
+  height: 14px;
+  border-radius: 999px;
+  background: #f6dd96;
+  border: 1px solid #c8a34b;
+}
+
+.strawHatSeal .hatBand {
+  position: absolute;
+  top: 34px;
+  left: 17px;
+  width: 48px;
+  height: 5px;
+  border-radius: 999px;
+  background: #d84444;
+}
+
+.heroSignatureRow {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.onePieceMotto {
+  display: grid;
+  gap: 5px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff8e7 0%, #f8edca 100%);
+  border: 1px solid #e3ca7a;
+  color: #6d4b18;
+  max-width: 620px;
+  box-shadow: 0 10px 24px rgba(109, 75, 24, 0.08);
+}
+
+.onePieceMotto span {
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.strawHatSeal {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff8e7 0%, #f7e0a3 100%);
+  border: 1px solid #e0c26b;
+  box-shadow:
+    inset 0 6px 14px rgba(255,255,255,0.55),
+    0 10px 24px rgba(122, 90, 20, 0.12);
+  flex: 0 0 auto;
+}
+
+.strawHatSeal .hatTop {
+  position: absolute;
+  top: 18px;
+  left: 24px;
+  width: 36px;
+  height: 22px;
+  border-radius: 40px 40px 22px 22px;
+  background: #f0d48a;
+  border: 1px solid #c8a34b;
+}
+
+.strawHatSeal .hatBrim {
+  position: absolute;
+  top: 35px;
+  left: 11px;
+  width: 60px;
+  height: 14px;
+  border-radius: 999px;
+  background: #f6dd96;
+  border: 1px solid #c8a34b;
+}
+
+.strawHatSeal .hatBand {
+  position: absolute;
+  top: 34px;
+  left: 17px;
+  width: 48px;
+  height: 5px;
+  border-radius: 999px;
+  background: #d84444;
+}
+
+.heroSignatureRow {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.onePieceMotto {
+  display: grid;
+  gap: 5px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff8e7 0%, #f8edca 100%);
+  border: 1px solid #e3ca7a;
+  color: #6d4b18;
+  max-width: 620px;
+  box-shadow: 0 10px 24px rgba(109, 75, 24, 0.08);
+}
+
+.onePieceMotto span {
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.strawHatSeal {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff8e7 0%, #f7e0a3 100%);
+  border: 1px solid #e0c26b;
+  box-shadow:
+    inset 0 6px 14px rgba(255,255,255,0.55),
+    0 10px 24px rgba(122, 90, 20, 0.12);
+  flex: 0 0 auto;
+}
+
+.strawHatSeal .hatTop {
+  position: absolute;
+  top: 18px;
+  left: 24px;
+  width: 36px;
+  height: 22px;
+  border-radius: 40px 40px 22px 22px;
+  background: #f0d48a;
+  border: 1px solid #c8a34b;
+}
+
+.strawHatSeal .hatBrim {
+  position: absolute;
+  top: 35px;
+  left: 11px;
+  width: 60px;
+  height: 14px;
+  border-radius: 999px;
+  background: #f6dd96;
+  border: 1px solid #c8a34b;
+}
+
+.strawHatSeal .hatBand {
+  position: absolute;
+  top: 34px;
+  left: 17px;
+  width: 48px;
+  height: 5px;
+  border-radius: 999px;
+  background: #d84444;
+}
+
+/* --- Ajustement accueil Matéo : devise fondue dans le décor + chapeau seul --- */
+
+.heroSignatureRow {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.onePieceMotto {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  max-width: 760px;
+  color: var(--text-soft);
+  opacity: 0.92;
+}
+
+.onePieceMotto span {
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--text-soft);
+}
+
+/* Chapeau de paille seul, sans rond ni sceau */
+.strawHatSeal {
+  position: relative;
+  width: 74px;
+  height: 50px;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  flex: 0 0 auto;
+}
+
+.strawHatSeal .hatTop {
+  position: absolute;
+  top: 4px;
+  left: 18px;
+  width: 36px;
+  height: 20px;
+  border-radius: 40px 40px 20px 20px;
+  background: #e8c86d;
+  border: 1px solid #b8922f;
+}
+
+.strawHatSeal .hatBrim {
+  position: absolute;
+  top: 21px;
+  left: 4px;
+  width: 64px;
+  height: 12px;
+  border-radius: 999px;
+  background: #f0d98b;
+  border: 1px solid #b8922f;
+}
+
+.strawHatSeal .hatBand {
+  position: absolute;
+  top: 19px;
+  left: 12px;
+  width: 48px;
+  height: 5px;
+  border-radius: 999px;
+  background: #c83c3c;
+}
+
+/* accueil plus léger */
+.hero p.lead,
+.hero .lead {
+  margin-bottom: 6px;
+}
+
+@media (max-width: 900px) {
+  .heroSignatureRow {
+    gap: 10px;
+  }
+
+  .strawHatSeal {
+    width: 64px;
+    height: 44px;
+  }
+
+  .strawHatSeal .hatTop {
+    left: 15px;
+    width: 32px;
+    height: 18px;
+  }
+
+  .strawHatSeal .hatBrim {
+    left: 3px;
+    width: 56px;
+    height: 11px;
+  }
+
+  .strawHatSeal .hatBand {
+    left: 10px;
+    width: 42px;
+  }
+}
+
+/* --- Chapeau de paille : plus fin + un peu dans le vent --- */
+@keyframes hatWindFloat {
+  0% {
+    transform: rotate(-8deg) translateY(0px);
+  }
+  50% {
+    transform: rotate(-11deg) translateY(-2px);
+  }
+  100% {
+    transform: rotate(-8deg) translateY(0px);
+  }
+}
+
+.strawHatSeal {
+  position: relative;
+  width: 86px;
+  height: 54px;
+  border-radius: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  flex: 0 0 auto;
+  animation: hatWindFloat 3.2s ease-in-out infinite;
+  transform-origin: 55% 65%;
+}
+
+.strawHatSeal .hatTop {
+  position: absolute;
+  top: 8px;
+  left: 27px;
+  width: 28px;
+  height: 16px;
+  border-radius: 18px 18px 10px 10px;
+  background: #ead27a;
+  border: 1px solid #a97e1f;
+  transform: skewX(-6deg);
+}
+
+.strawHatSeal .hatBrim {
+  position: absolute;
+  top: 22px;
+  left: 8px;
+  width: 64px;
+  height: 8px;
+  border-radius: 999px;
+  background: #f2df98;
+  border: 1px solid #a97e1f;
+  transform: rotate(-4deg) skewX(-10deg);
+}
+
+.strawHatSeal .hatBand {
+  position: absolute;
+  top: 20px;
+  left: 17px;
+  width: 45px;
+  height: 4px;
+  border-radius: 999px;
+  background: #c53939;
+  transform: rotate(-4deg) skewX(-10deg);
+}
+
+/* petit trait de vent très discret */
+.strawHatSeal::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  top: 10px;
+  width: 18px;
+  height: 10px;
+  border-top: 1.5px solid rgba(120, 140, 170, 0.45);
+  border-radius: 999px;
+  transform: rotate(-10deg);
+  opacity: 0.8;
+}
+
+@media (max-width: 900px) {
+  .strawHatSeal {
+    width: 72px;
+    height: 46px;
+  }
+
+  .strawHatSeal .hatTop {
+    top: 7px;
+    left: 22px;
+    width: 24px;
+    height: 14px;
+  }
+
+  .strawHatSeal .hatBrim {
+    top: 19px;
+    left: 7px;
+    width: 55px;
+    height: 7px;
+  }
+
+  .strawHatSeal .hatBand {
+    top: 18px;
+    left: 14px;
+    width: 39px;
+  }
+
+  .strawHatSeal::after {
+    right: -8px;
+    width: 14px;
+  }
+}

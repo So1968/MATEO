@@ -620,7 +620,20 @@ export default function App() {
       <header className="hero">
         <div>
           <p className="eyebrow">Matéo V1</p>
-          <h1>Mémoire projet & documents de travail</h1>
+          <h1>Carnet de bord</h1>
+
+        <div className="heroSignatureRow">
+          <div className="onePieceMotto">
+            <span>Garder le cap, protéger la mémoire, avancer avec son équipage.</span>
+          </div>
+
+          <div className="strawHatSeal">
+            <div className="hatTop"></div>
+            <div className="hatBrim"></div>
+            <div className="hatBand"></div>
+          </div>
+        </div>
+        
           <p>
             Classe tes réunions par projet, garde une trace propre, puis retrouve les décisions,
             règles de calcul, écrans, méthodes et points ouverts.
