@@ -487,6 +487,8 @@ app.post("/api/meetings/validate", (req, res) => {
 
     const content = fs.readFileSync(exportedPath, "utf8");
 
+    createFileVersion(validatedPath, "avant_validation");
+
     fs.writeFileSync(
       validatedPath,
       content + "\n\n---\n\nValidé dans Matéo le " + new Date().toISOString() + "\n",
@@ -578,6 +580,8 @@ app.post("/api/meetings/save-report", (req, res) => {
 
     const exportedPath = path.join(meetingDir, "compte_rendu_exporte.md");
 
+    createFileVersion(exportedPath, "avant_sauvegarde");
+
     fs.writeFileSync(
       exportedPath,
       String(content || ""),
@@ -594,6 +598,47 @@ app.post("/api/meetings/save-report", (req, res) => {
     });
   }
 });
+
+
+
+function timestampForFile() {
+  return new Date()
+    .toISOString()
+    .replace("T", "_")
+    .replace(/:/g, "-")
+    .replace(/\..+/, "");
+}
+
+function createFileVersion(filePath, reason = "version") {
+  try {
+    if (!fs.existsSync(filePath)) {
+      return null;
+    }
+
+    const dir = path.dirname(filePath);
+    const versionsDir = path.join(dir, "99_versions");
+    ensureDir(versionsDir);
+
+    const parsed = path.parse(filePath);
+    const versionFileName = `${timestampForFile()}_${parsed.name}_${reason}${parsed.ext}`;
+    const versionPath = path.join(versionsDir, versionFileName);
+
+    fs.copyFileSync(filePath, versionPath);
+
+    if (typeof logAudit === "function") {
+      logAudit("file_version_created", {
+        originalPath: filePath,
+        versionPath,
+        reason
+      });
+    }
+
+    return versionPath;
+  } catch (error) {
+    console.error("Erreur création version :", error.message);
+    return null;
+  }
+}
 
 
 app.listen(PORT, "127.0.0.1", () => {

@@ -16,6 +16,21 @@ import "./style.css";
 
 const STORAGE_KEY = "mateo_v1_data";
 
+const participantOptions = [
+  "Matéo",
+  "Matito",
+  "Matita",
+  "Nora",
+  "Léo",
+  "Samia",
+  "Alex"
+];
+
+function buildDefaultMeetingTitle(projectName) {
+  const date = new Date().toLocaleDateString("fr-FR");
+  return `Réunion ${projectName || "projet"} — ${date}`;
+}
+
 const initialData = {
   projects: [
     {
@@ -30,12 +45,12 @@ const initialData = {
           meetingType: "Cadrage",
           participants: "Sofia, équipe projet",
           context: "Première réunion de cadrage du projet.",
-          decisions: "Créer une mémoire projet structurée par comptes-rendus.",
+          decisions: "Créer une mémoire projet structurée par documents de travail.",
           rules: "Chaque réunion doit produire une trace exploitable.",
-          screens: "Tableau de bord, recherche, fiche compte-rendu.",
+          screens: "Tableau de bord, recherche, fiche document.",
           openQuestions: "Quel outil de transcription audio choisir ?",
           actions: "Tester Matéo sur une vraie réunion.",
-          risks: "Perte d'information si les comptes-rendus ne sont pas rangés.",
+          risks: "Perte d'information si les documents de travail ne sont pas rangés.",
           keywords: "EPM, cadrage, règle de calcul, écran, méthode",
           rawNotes: "Notes brutes ou transcription à coller ici."
         }
@@ -57,11 +72,11 @@ function saveData(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-function emptyReport() {
+function emptyReport(projectName = "projet") {
   return {
     id: crypto.randomUUID(),
     date: new Date().toISOString().slice(0, 10),
-    title: "",
+    title: buildDefaultMeetingTitle(projectName),
     meetingType: "Cadrage",
     participants: "",
     context: "",
@@ -82,6 +97,7 @@ export default function App() {
   const [selectedReportId, setSelectedReportId] = useState(data.projects[0]?.reports[0]?.id || null);
   const [query, setQuery] = useState("");
   const [newProjectName, setNewProjectName] = useState("");
+  const [newParticipantName, setNewParticipantName] = useState("");
   const [projectCreationStatus, setProjectCreationStatus] = useState("");
   const [meetingExportStatus, setMeetingExportStatus] = useState("");
   const [inboxItems, setInboxItems] = useState([]);
@@ -91,6 +107,9 @@ export default function App() {
   const [reportSaveStatus, setReportSaveStatus] = useState("");
   const [meetingMarkers, setMeetingMarkers] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const [audioUrl, setAudioUrl] = useState("");
+  const [audioStatus, setAudioStatus] = useState("");
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
 
@@ -159,7 +178,7 @@ export default function App() {
 
   function addReport() {
     if (!selectedProject) return;
-    const report = emptyReport();
+    const report = emptyReport(selectedProject.name);
 
     const nextData = {
       ...data,
@@ -212,6 +231,36 @@ export default function App() {
     updateData(nextData);
   }
 
+  function addParticipantToMeeting() {
+    const name = newParticipantName.trim();
+
+    if (!name || !selectedReport) return;
+
+    const current = selectedReport.participants
+      ? selectedReport.participants.split(",").map((item) => item.trim()).filter(Boolean)
+      : [];
+
+    if (!current.includes(name)) {
+      updateReport("participants", [...current, name].join(", "));
+    }
+
+    setNewParticipantName("");
+  }
+
+  function toggleParticipant(name) {
+    if (!selectedReport) return;
+
+    const current = selectedReport.participants
+      ? selectedReport.participants.split(",").map((item) => item.trim()).filter(Boolean)
+      : [];
+
+    const next = current.includes(name)
+      ? current.filter((item) => item !== name)
+      : [...current, name];
+
+    updateReport("participants", next.join(", "));
+  }
+
   function addMeetingMarker(marker) {
     setMeetingMarkers((current) => [marker, ...current]);
 
@@ -224,6 +273,11 @@ export default function App() {
   }
 
   async function startRecording() {
+    if (!selectedReport) {
+      setAudioStatus("Crée d’abord une source de réunion.");
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       chunksRef.current = [];
@@ -238,16 +292,32 @@ export default function App() {
       };
 
       recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+
         stream.getTracks().forEach((track) => track.stop());
+
+        if (audioUrl) {
+          URL.revokeObjectURL(audioUrl);
+        }
+
+        const nextAudioUrl = URL.createObjectURL(blob);
+        const fileName = `audio-${selectedReport.date || new Date().toISOString().slice(0, 10)}.webm`;
+
+        setAudioBlob(blob);
+        setAudioUrl(nextAudioUrl);
+        setAudioStatus("Audio enregistré et attaché à cette source de réunion.");
+        updateReport("audioFileName", fileName);
       };
 
       recorder.start();
       setMeetingMarkers([]);
       setIsRecording(true);
+      setAudioStatus("Enregistrement en cours...");
     } catch (error) {
-      alert("Impossible d’accéder au micro. Vérifie l’autorisation du navigateur.");
+      setAudioStatus("Impossible d’accéder au micro. Vérifie l’autorisation du navigateur.");
     }
   }
+
 
   function stopRecording() {
     if (mediaRecorderRef.current && isRecording) {
@@ -256,6 +326,7 @@ export default function App() {
 
     setIsRecording(false);
   }
+
 
   const searchResults = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -319,7 +390,7 @@ export default function App() {
 
     try {
       await navigator.clipboard.writeText(selectedInboxReport.reportPath);
-      setInboxStatus("Chemin du compte-rendu copié.");
+      setInboxStatus("Chemin du document copié.");
     } catch {
       setInboxStatus("Impossible de copier le chemin automatiquement.");
     }
@@ -338,7 +409,7 @@ export default function App() {
       return;
     }
 
-    setInboxStatus("Ouverture du compte-rendu...");
+    setInboxStatus("Ouverture du document...");
     setSelectedInboxReport(null);
     setSelectedInboxContent("");
 
@@ -357,7 +428,7 @@ export default function App() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Erreur pendant l’ouverture du compte-rendu.");
+        throw new Error(result.error || "Erreur pendant l’ouverture du document.");
       }
 
       setSelectedInboxReport({
@@ -375,13 +446,13 @@ export default function App() {
 
   async function saveInboxReport() {
     if (!selectedInboxReport) {
-      setReportSaveStatus("Aucun compte-rendu ouvert.");
-      setInboxStatus("Aucun compte-rendu ouvert.");
+      setReportSaveStatus("Aucun document ouvert.");
+      setInboxStatus("Aucun document ouvert.");
       return;
     }
 
     setReportSaveStatus("Enregistrement en cours...");
-    setInboxStatus("Enregistrement du compte-rendu...");
+    setInboxStatus("Enregistrement du document...");
 
     try {
       const response = await fetch("http://127.0.0.1:8010/api/meetings/save-report", {
@@ -403,8 +474,8 @@ export default function App() {
       }
 
       const time = new Date().toLocaleTimeString();
-      setReportSaveStatus(`Compte-rendu enregistré à ${time}`);
-      setInboxStatus(`Compte-rendu enregistré à ${time}`);
+      setReportSaveStatus(`Document enregistré à ${time}`);
+      setInboxStatus(`Document enregistré à ${time}`);
       loadInbox();
     } catch (error) {
       setReportSaveStatus(`Enregistrement impossible : ${error.message}`);
@@ -479,8 +550,10 @@ export default function App() {
         throw new Error(result.error || "Erreur export réunion.");
       }
 
-      if (!audioBlob) {
-        setMeetingExportStatus(`Réunion exportée : ${result.meetingDirName}`);
+      const currentAudioBlob = typeof audioBlob !== "undefined" ? audioBlob : null;
+
+      if (!currentAudioBlob) {
+        setMeetingExportStatus(`Réunion exportée : ${result.meetingDirName}. Aucun audio attaché.`);
         loadInbox();
         return;
       }
@@ -491,7 +564,7 @@ export default function App() {
         formData.append("meetingDirName", result.meetingDirName);
         formData.append(
           "audio",
-          audioBlob,
+          currentAudioBlob,
           selectedReport.audioFileName || `audio-${selectedReport.date}.webm`
         );
 
@@ -547,7 +620,7 @@ export default function App() {
       <header className="hero">
         <div>
           <p className="eyebrow">Matéo V1</p>
-          <h1>Mémoire projet & comptes-rendus</h1>
+          <h1>Mémoire projet & documents de travail</h1>
           <p>
             Classe tes réunions par projet, garde une trace propre, puis retrouve les décisions,
             règles de calcul, écrans, méthodes et points ouverts.
@@ -561,7 +634,7 @@ export default function App() {
           </div>
           <div>
             <strong>{totalReports}</strong>
-            <span>comptes-rendus</span>
+            <span>documents de travail</span>
           </div>
         </div>
       </header>
@@ -569,7 +642,7 @@ export default function App() {
       <section className="warning">
         <AlertTriangle size={20} />
         <div>
-          <strong>V1 locale</strong>
+          <strong>Matéo local</strong>
           <p>
             Les données sont stockées dans ton navigateur. Utilise le bouton export JSON pour
             sauvegarder régulièrement. La transcription audio viendra en V2.
@@ -589,23 +662,23 @@ export default function App() {
 
       <section className="cockpit">
         <article className="cockpitCard">
-          <strong>Déposer</strong>
-          <p>Enregistrer une réunion, importer un audio, poser une note brute ou un sujet à ne pas perdre.</p>
+          <strong>Mémoire</strong>
+          <p>Garder une trace fiable des réunions, décisions, règles, versions et éléments importants.</p>
         </article>
 
         <article className="cockpitCard">
-          <strong>Traiter</strong>
-          <p>Transformer le brut en compte-rendu, décisions, actions, règles, écrans et points ouverts.</p>
+          <strong>Projets</strong>
+          <p>Créer et organiser les espaces projet pour ne plus tout porter dans la tête.</p>
         </article>
 
         <article className="cockpitCard">
-          <strong>Retrouver</strong>
-          <p>Interroger la mémoire projet sans refaire tout l’historique mental.</p>
+          <strong>Documents de travail</strong>
+          <p>Reprendre, corriger, enregistrer et valider les documents issus des réunions.</p>
         </article>
 
         <article className="cockpitCard">
-          <strong>Suivre</strong>
-          <p>Voir les actions, décisions fragiles, questions ouvertes, blocages et réunions à traiter.</p>
+          <strong>Traçabilité</strong>
+          <p>Retrouver l’historique des actions importantes et sécuriser les modifications.</p>
         </article>
       </section>
 
@@ -660,7 +733,7 @@ export default function App() {
               <div>
                 <div className="inlineTitle">
                   <FileText size={20} />
-                  <h2>Document à valider</h2>
+                  <h2>Document de travail à reprendre</h2>
                 </div>
                 <p>
                   {selectedInboxReport.projectName} — {selectedInboxReport.date} — {selectedInboxReport.title}
@@ -668,7 +741,7 @@ export default function App() {
               </div>
 
               <span className="statusPill">
-                {selectedInboxReport.reportType === "valide" ? "Compte-rendu validé" : "Compte-rendu exporté"}
+                {selectedInboxReport.reportType === "valide" ? "Version validée" : "Document de travail"}
               </span>
             </div>
 
@@ -687,12 +760,12 @@ export default function App() {
 
             <div className="reportPreviewActions">
               <button onClick={saveInboxReport}>
-                Enregistrer les corrections
+                Enregistrer les modifications
               </button>
 
               {selectedInboxReport.status !== "Validé" && (
                 <button onClick={() => validateInboxMeeting(selectedInboxReport)}>
-                  Valider ce compte-rendu
+                  Valider cette version
                 </button>
               )}
             </div>
@@ -755,7 +828,7 @@ export default function App() {
             <div>
               <div className="inlineTitle">
                 <FileText size={20} />
-                <h2>Comptes-rendus</h2>
+                <h2>Documents de travail</h2>
               </div>
               <p>{selectedProject?.name || "Aucun projet sélectionné"}</p>
             </div>
@@ -773,13 +846,13 @@ export default function App() {
                   className={report.id === selectedReport?.id ? "active reportButton" : "reportButton"}
                   onClick={() => setSelectedReportId(report.id)}
                 >
-                  <strong>{report.title || "Compte-rendu sans titre"}</strong>
+                  <strong>{report.title || "Document sans titre"}</strong>
                   <span>{report.date}</span>
                   <small>{report.keywords}</small>
                 </button>
               ))
             ) : (
-              <p className="empty">Aucun compte-rendu pour ce projet.</p>
+              <p className="empty">Aucun document pour ce projet.</p>
             )}
           </div>
         </section>
@@ -788,7 +861,7 @@ export default function App() {
           <div className="panelTitle between">
             <div className="inlineTitle">
               <Save size={20} />
-              <h2>Fiche réunion</h2>
+              <h2>Source de réunion</h2>
             </div>
             {selectedReport && (
               <button className="danger ghost" onClick={() => deleteReport(selectedReport.id)}>
@@ -800,6 +873,10 @@ export default function App() {
 
           {selectedReport ? (
             <div className="form">
+              <div className="activeProjectBanner">
+                Projet actif : <strong>{selectedProject?.name}</strong>
+              </div>
+
               <MeetingMode
                 projectName={selectedProject?.name}
                 reportTitle={selectedReport?.title}
@@ -814,7 +891,7 @@ export default function App() {
                 <div>
                   <strong>Classement local</strong>
                   <p>
-                    Exporte cette réunion dans le dossier du projet, avec compte-rendu Markdown
+                    Exporte cette réunion dans le dossier du projet, avec document Markdown
                     et données structurées.
                   </p>
                 </div>
@@ -823,6 +900,14 @@ export default function App() {
                   <Download size={16} />
                   Exporter vers MATEO-DONNEES
                 </button>
+
+                <p className="audioStateLine">
+                  {audioBlob ? "Audio attaché à cette source de réunion." : "Aucun audio attaché pour l’instant."}
+                </p>
+
+                {audioStatus && (
+                  <p className="backendStatus">{audioStatus}</p>
+                )}
 
                 {meetingExportStatus && (
                   <p className="backendStatus">{meetingExportStatus}</p>
@@ -867,11 +952,57 @@ export default function App() {
 
               <label>
                 Participants
-                <input
-                  value={selectedReport.participants}
-                  onChange={(e) => updateReport("participants", e.target.value)}
-                  placeholder="Noms ou rôles"
-                />
+                <div className="participantsGrid">
+                  {[
+                    ...participantOptions,
+                    ...(
+                      selectedReport.participants
+                        ? selectedReport.participants
+                            .split(",")
+                            .map((item) => item.trim())
+                            .filter(Boolean)
+                            .filter((name) => !participantOptions.includes(name))
+                        : []
+                    )
+                  ].map((name) => {
+                    const selectedParticipants = selectedReport.participants
+                      ? selectedReport.participants.split(",").map((item) => item.trim()).filter(Boolean)
+                      : [];
+
+                    return (
+                      <button
+                        type="button"
+                        key={name}
+                        className={
+                          selectedParticipants.includes(name)
+                            ? "participantChip participantChipActive"
+                            : "participantChip"
+                        }
+                        onClick={() => toggleParticipant(name)}
+                      >
+                        {name}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="addParticipantRow">
+                  <input
+                    value={newParticipantName}
+                    onChange={(event) => setNewParticipantName(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        addParticipantToMeeting();
+                      }
+                    }}
+                    placeholder="Ajouter un participant : client, invité, consultant..."
+                  />
+
+                  <button type="button" onClick={addParticipantToMeeting}>
+                    Ajouter
+                  </button>
+                </div>
               </label>
 
               <label>
@@ -941,7 +1072,7 @@ export default function App() {
               </label>
 
               <label>
-                Notes brutes / transcription à coller
+                Matière brute / transcription / marqueurs
                 <textarea
                   className="bigTextarea"
                   value={selectedReport.rawNotes}
@@ -950,7 +1081,7 @@ export default function App() {
               </label>
             </div>
           ) : (
-            <p className="empty">Crée un compte-rendu pour commencer.</p>
+            <p className="empty">Crée un document pour commencer.</p>
           )}
         </section>
       </section>
@@ -991,7 +1122,7 @@ export default function App() {
                 >
                   <CheckCircle2 size={18} />
                   <div>
-                    <strong>{report.title || "Compte-rendu sans titre"}</strong>
+                    <strong>{report.title || "Document sans titre"}</strong>
                     <p>{project.name} — {report.date}</p>
                     <small>{report.decisions || report.rules || report.rawNotes}</small>
                   </div>
@@ -1011,7 +1142,7 @@ export default function App() {
         </div>
         <p>
           Ajouter une brique transcription audio : import d’un fichier, transcription, puis génération
-          automatique d’un compte-rendu structuré. Pour l’instant, on colle la transcription ou les notes
+          automatique d’un document structuré. Pour l’instant, on colle la transcription ou les notes
           brutes dans la fiche.
         </p>
       </section>
