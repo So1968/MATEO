@@ -1,0 +1,313 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #1f2933;
+  background: #f5f1eb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 14px;
+  padding: 10px 14px;
+  background: #1f2933;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid #dfd6ca;
+  border-radius: 14px;
+  padding: 11px 13px;
+  background: #fffdf9;
+  color: #1f2933;
+  outline: none;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+label {
+  display: grid;
+  gap: 7px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #4b5563;
+}
+
+.app {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 28px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 22px;
+  align-items: stretch;
+  margin-bottom: 18px;
+}
+
+.eyebrow {
+  color: #9a6b3f;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  font-size: clamp(2rem, 4vw, 4rem);
+  margin-bottom: 10px;
+  line-height: 0.95;
+}
+
+h2 {
+  margin-bottom: 0;
+}
+
+.hero p {
+  max-width: 780px;
+  color: #5f6b76;
+  line-height: 1.55;
+}
+
+.heroCard {
+  min-width: 240px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.heroCard div {
+  background: #fffdf9;
+  border: 1px solid #eadfd2;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 18px 40px rgba(66, 45, 24, 0.08);
+}
+
+.heroCard strong {
+  display: block;
+  font-size: 2.4rem;
+}
+
+.heroCard span {
+  color: #64717e;
+  font-weight: 700;
+}
+
+.warning {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 20px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  color: #7c3b00;
+}
+
+.warning p {
+  margin-bottom: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 280px 350px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.panel {
+  background: rgba(255, 253, 249, 0.92);
+  border: 1px solid #eadfd2;
+  border-radius: 26px;
+  padding: 18px;
+  box-shadow: 0 18px 40px rgba(66, 45, 24, 0.08);
+}
+
+.panelTitle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.between {
+  justify-content: space-between;
+}
+
+.inlineTitle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.panelTitle p {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.newProject {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.projectList,
+.reports,
+.results,
+.form {
+  display: grid;
+  gap: 10px;
+}
+
+.projectButton,
+.reportButton,
+.resultCard {
+  background: #f7efe6;
+  color: #1f2933;
+  justify-content: space-between;
+  text-align: left;
+  border: 1px solid transparent;
+}
+
+.projectButton {
+  display: grid;
+  gap: 4px;
+}
+
+.projectButton small,
+.reportButton small,
+.resultCard small {
+  color: #6b7280;
+  font-weight: 600;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.reportButton {
+  display: grid;
+  gap: 5px;
+}
+
+.reportButton span {
+  color: #8b5e34;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.active {
+  background: #1f2933;
+  color: white;
+}
+
+.active small,
+.active span {
+  color: #f6e8d8;
+}
+
+.ghost {
+  background: transparent;
+  color: #7c2d12;
+  padding-left: 0;
+  padding-right: 0;
+  margin-top: 10px;
+}
+
+.danger {
+  color: #9f1239;
+}
+
+.editor {
+  min-height: 600px;
+}
+
+.bigTextarea {
+  min-height: 170px;
+}
+
+.empty {
+  color: #7b8794;
+  padding: 14px;
+  background: #f8f3ed;
+  border-radius: 16px;
+  margin: 0;
+}
+
+.searchPanel,
+.roadmap {
+  margin-top: 18px;
+}
+
+.searchBox {
+  margin-bottom: 14px;
+}
+
+.resultCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 12px;
+  width: 100%;
+}
+
+.resultCard p {
+  margin: 4px 0;
+  color: #8b5e34;
+  font-weight: 800;
+}
+
+.roadmap p {
+  color: #5f6b76;
+  line-height: 1.55;
+}
+
+@media (max-width: 1150px) {
+  .grid,
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .heroCard {
+    min-width: 0;
+  }
+}
