@@ -205,6 +205,135 @@ app.post("/api/projects", (req, res) => {
   }
 });
 
+
+function safeFileName(value) {
+  return slugify(value).slice(0, 80) || "reunion";
+}
+
+function projectSlugFromName(projectName) {
+  return slugify(projectName);
+}
+
+app.post("/api/meetings/export", (req, res) => {
+  try {
+    const {
+      projectName,
+      meetingDate,
+      meetingType,
+      title,
+      participants,
+      context,
+      decisions,
+      rules,
+      screens,
+      openQuestions,
+      actions,
+      risks,
+      keywords,
+      rawNotes
+    } = req.body;
+
+    const projectSlug = projectSlugFromName(projectName);
+
+    if (!projectSlug) {
+      throw new Error("Projet manquant.");
+    }
+
+    const projectDir = path.join(PROJECTS_ROOT, projectSlug);
+    ensureDir(projectDir);
+
+    const meetingsDir = path.join(projectDir, "01_reunions");
+    ensureDir(meetingsDir);
+
+    const date = meetingDate || new Date().toISOString().slice(0, 10);
+    const typeSlug = safeFileName(meetingType || "reunion");
+    const titleSlug = safeFileName(title || "sans_titre");
+    const meetingDirName = `${date}_${typeSlug}_${titleSlug}`;
+    const meetingDir = path.join(meetingsDir, meetingDirName);
+
+    ensureDir(meetingDir);
+    ensureDir(path.join(meetingDir, "pieces_jointes"));
+
+    const markdown = `# Compte-rendu — ${title || "Réunion sans titre"}
+
+## Projet
+
+${projectName || ""}
+
+## Date
+
+${date}
+
+## Type de réunion
+
+${meetingType || ""}
+
+## Participants
+
+${participants || ""}
+
+## Contexte
+
+${context || ""}
+
+## Décisions prises
+
+${decisions || ""}
+
+## Règles / méthodes validées
+
+${rules || ""}
+
+## Écrans / fonctionnalités concernés
+
+${screens || ""}
+
+## Questions ouvertes
+
+${openQuestions || ""}
+
+## Actions à faire
+
+${actions || ""}
+
+## Risques / alertes
+
+${risks || ""}
+
+## Mots-clés
+
+${keywords || ""}
+
+## Notes brutes / transcription / marqueurs
+
+${rawNotes || ""}
+`;
+
+    fs.writeFileSync(
+      path.join(meetingDir, "compte_rendu_exporte.md"),
+      markdown,
+      "utf8"
+    );
+
+    fs.writeFileSync(
+      path.join(meetingDir, "donnees_reunion.json"),
+      JSON.stringify(req.body, null, 2),
+      "utf8"
+    );
+
+    res.status(201).json({
+      status: "ok",
+      meetingDir,
+      meetingDirName
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error.message || "Erreur pendant l’export de la réunion."
+    });
+  }
+});
+
+
 app.listen(PORT, "127.0.0.1", () => {
   console.log(`Matéo backend lancé : http://127.0.0.1:${PORT}`);
   console.log(`Dossier données : ${DATA_ROOT}`);

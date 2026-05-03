@@ -83,6 +83,7 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [newProjectName, setNewProjectName] = useState("");
   const [projectCreationStatus, setProjectCreationStatus] = useState("");
+  const [meetingExportStatus, setMeetingExportStatus] = useState("");
   const [meetingMarkers, setMeetingMarkers] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
@@ -287,6 +288,51 @@ export default function App() {
     return results;
   }, [data, query]);
 
+  async function exportMeetingToDataFolder() {
+    if (!selectedProject || !selectedReport) {
+      setMeetingExportStatus("Aucune réunion sélectionnée.");
+      return;
+    }
+
+    setMeetingExportStatus("Export vers MATEO-DONNEES en cours...");
+
+    try {
+      const response = await fetch("http://127.0.0.1:8010/api/meetings/export", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          projectName: selectedProject.name,
+          meetingDate: selectedReport.date,
+          meetingType: selectedReport.meetingType || "Réunion",
+          title: selectedReport.title,
+          participants: selectedReport.participants,
+          context: selectedReport.context,
+          decisions: selectedReport.decisions,
+          rules: selectedReport.rules,
+          screens: selectedReport.screens,
+          openQuestions: selectedReport.openQuestions,
+          actions: selectedReport.actions,
+          risks: selectedReport.risks,
+          keywords: selectedReport.keywords,
+          rawNotes: selectedReport.rawNotes
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Backend local non disponible.");
+      }
+
+      const result = await response.json();
+      setMeetingExportStatus(`Réunion exportée : ${result.meetingDirName}`);
+    } catch (error) {
+      setMeetingExportStatus(
+        "Export impossible. Vérifie que le backend local est lancé avec npm run backend."
+      );
+    }
+  }
+
   function exportData() {
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json"
@@ -474,6 +520,25 @@ export default function App() {
                 onAddMarker={addMeetingMarker}
                 markers={meetingMarkers}
               />
+
+              <section className="exportMeetingBox">
+                <div>
+                  <strong>Classement local</strong>
+                  <p>
+                    Exporte cette réunion dans le dossier du projet, avec compte-rendu Markdown
+                    et données structurées.
+                  </p>
+                </div>
+
+                <button onClick={exportMeetingToDataFolder}>
+                  <Download size={16} />
+                  Exporter vers MATEO-DONNEES
+                </button>
+
+                {meetingExportStatus && (
+                  <p className="backendStatus">{meetingExportStatus}</p>
+                )}
+              </section>
               <label>
                 Date
                 <input
