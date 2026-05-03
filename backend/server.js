@@ -555,6 +555,47 @@ app.post("/api/meetings/read-report", (req, res) => {
 });
 
 
+
+app.post("/api/meetings/save-report", (req, res) => {
+  try {
+    const { projectSlug, meetingDirName, content } = req.body;
+
+    if (!projectSlug || !meetingDirName) {
+      throw new Error("Projet ou réunion manquant.");
+    }
+
+    const safeProjectSlug = String(projectSlug).replace(/[\/\\]/g, "");
+    const safeMeetingDirName = String(meetingDirName).replace(/[\/\\]/g, "");
+
+    const meetingDir = path.join(
+      PROJECTS_ROOT,
+      safeProjectSlug,
+      "01_reunions",
+      safeMeetingDirName
+    );
+
+    ensureDir(meetingDir);
+
+    const exportedPath = path.join(meetingDir, "compte_rendu_exporte.md");
+
+    fs.writeFileSync(
+      exportedPath,
+      String(content || ""),
+      "utf8"
+    );
+
+    res.json({
+      status: "ok",
+      savedPath: exportedPath
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error.message || "Erreur pendant l’enregistrement du compte-rendu."
+    });
+  }
+});
+
+
 app.listen(PORT, "127.0.0.1", () => {
   console.log(`Matéo backend lancé : http://127.0.0.1:${PORT}`);
   console.log(`Dossier données : ${DATA_ROOT}`);

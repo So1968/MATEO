@@ -358,6 +358,41 @@ export default function App() {
   }
 
 
+  async function saveInboxReport() {
+    if (!selectedInboxReport) {
+      setInboxStatus("Aucun compte-rendu ouvert.");
+      return;
+    }
+
+    setInboxStatus("Enregistrement du compte-rendu...");
+
+    try {
+      const response = await fetch("http://127.0.0.1:8010/api/meetings/save-report", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          projectSlug: selectedInboxReport.projectSlug,
+          meetingDirName: selectedInboxReport.meetingDirName,
+          content: selectedInboxContent
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Erreur pendant l’enregistrement.");
+      }
+
+      setInboxStatus("Compte-rendu enregistré dans MATEO-DONNEES.");
+      alert("Compte-rendu enregistré dans MATEO-DONNEES.");
+      loadInbox();
+    } catch (error) {
+      setInboxStatus(`Enregistrement impossible : ${error.message}`);
+    }
+  }
+
   async function validateInboxMeeting(item) {
     setInboxStatus("Validation de la réunion en cours...");
 
@@ -622,14 +657,20 @@ export default function App() {
             <textarea
               className="reportPreviewText"
               value={selectedInboxContent}
-              readOnly
+              onChange={(event) => setSelectedInboxContent(event.target.value)}
             />
 
-            {selectedInboxReport.status !== "Validé" && (
-              <button onClick={() => validateInboxMeeting(selectedInboxReport)}>
-                Valider ce compte-rendu
+            <div className="reportPreviewActions">
+              <button onClick={saveInboxReport}>
+                Enregistrer les corrections
               </button>
-            )}
+
+              {selectedInboxReport.status !== "Validé" && (
+                <button onClick={() => validateInboxMeeting(selectedInboxReport)}>
+                  Valider ce compte-rendu
+                </button>
+              )}
+            </div>
           </section>
         )}
       </section>

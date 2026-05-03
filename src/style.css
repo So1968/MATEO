@@ -862,3 +862,9 @@ h3 {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+.reportPreviewActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
