@@ -641,6 +641,98 @@ function createFileVersion(filePath, reason = "version") {
 }
 
 
+
+function walkFiles(dirPath, files = []) {
+  if (!fs.existsSync(dirPath)) return files;
+
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(dirPath, entry.name);
+
+    if (entry.isDirectory()) {
+      walkFiles(fullPath, files);
+    } else if (
+      entry.name.endsWith(".md") ||
+      entry.name.endsWith(".json") ||
+      entry.name.endsWith(".txt")
+    ) {
+      files.push(fullPath);
+    }
+  }
+
+  return files;
+}
+
+function extractSnippet(content, query) {
+  const lower = content.toLowerCase();
+  const q = query.toLowerCase();
+  const index = lower.indexOf(q);
+
+  if (index === -1) return content.slice(0, 260);
+
+  const start = Math.max(0, index - 120);
+  const end = Math.min(content.length, index + q.length + 160);
+
+  return content.slice(start, end).replace(/\n+/g, " ");
+}
+
+app.get("/api/search", (req, res) => {
+  try {
+    const query = String(req.query.q || "").trim();
+    const projectSlug = String(req.query.projectSlug || "").trim();
+
+    if (!query) {
+      res.json({ results: [] });
+      return;
+    }
+
+    const roots = [];
+
+    if (projectSlug) {
+      roots.push(path.join(PROJECTS_ROOT, projectSlug));
+    } else {
+      roots.push(PROJECTS_ROOT);
+    }
+
+    const results = [];
+
+    for (const root of roots) {
+      const files = walkFiles(root);
+
+      for (const filePath of files) {
+        const content = fs.readFileSync(filePath, "utf8");
+
+        if (content.toLowerCase().includes(query.toLowerCase())) {
+          const relativePath = path.relative(PROJECTS_ROOT, filePath);
+          const parts = relativePath.split(path.sep);
+          const foundProjectSlug = parts[0] || "";
+
+          results.push({
+            projectSlug: foundProjectSlug,
+            filePath,
+            relativePath,
+            fileName: path.basename(filePath),
+            snippet: extractSnippet(content, query)
+          });
+        }
+      }
+    }
+
+    res.json({
+      query,
+      projectSlug,
+      count: results.length,
+      results: results.slice(0, 50)
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message || "Erreur pendant la recherche."
+    });
+  }
+});
+
+
 app.listen(PORT, "127.0.0.1", () => {
   console.log(`Matéo backend lancé : http://127.0.0.1:${PORT}`);
   console.log(`Dossier données : ${DATA_ROOT}`);

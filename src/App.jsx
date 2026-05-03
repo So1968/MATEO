@@ -652,49 +652,6 @@ export default function App() {
         </div>
       </header>
 
-      <section className="warning">
-        <AlertTriangle size={20} />
-        <div>
-          <strong>Matéo local</strong>
-          <p>
-            Les données sont stockées dans ton navigateur. Utilise le bouton export JSON pour
-            sauvegarder régulièrement. La transcription audio viendra en V2.
-          </p>
-        </div>
-      </section>
-
-      <section className="warning">
-        <AlertTriangle size={20} />
-        <div>
-          <strong>Matéo garde la mémoire pour reposer le cerveau.</strong>
-          <p>
-            Tu restes présente dans l’échange. Matéo capte, classe, structure et prépare la mémoire projet.
-          </p>
-        </div>
-      </section>
-
-      <section className="cockpit">
-        <article className="cockpitCard">
-          <strong>Mémoire</strong>
-          <p>Garder une trace fiable des réunions, décisions, règles, versions et éléments importants.</p>
-        </article>
-
-        <article className="cockpitCard">
-          <strong>Projets</strong>
-          <p>Créer et organiser les espaces projet pour ne plus tout porter dans la tête.</p>
-        </article>
-
-        <article className="cockpitCard">
-          <strong>Documents de travail</strong>
-          <p>Reprendre, corriger, enregistrer et valider les documents issus des réunions.</p>
-        </article>
-
-        <article className="cockpitCard">
-          <strong>Traçabilité</strong>
-          <p>Retrouver l’historique des actions importantes et sécuriser les modifications.</p>
-        </article>
-      </section>
-
       <section className="panel inboxPanel">
         <div className="panelTitle between">
           <div>
