@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   Search,
   Plus,
@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   CheckCircle2
 } from "lucide-react";
+import MeetingMode from "./components/MeetingMode.jsx";
 import "./style.css";
 
 const STORAGE_KEY = "mateo_v1_data";
@@ -26,6 +27,7 @@ const initialData = {
           id: crypto.randomUUID(),
           date: new Date().toISOString().slice(0, 10),
           title: "Réunion de cadrage",
+          meetingType: "Cadrage",
           participants: "Sofia, équipe projet",
           context: "Première réunion de cadrage du projet.",
           decisions: "Créer une mémoire projet structurée par comptes-rendus.",
@@ -60,6 +62,7 @@ function emptyReport() {
     id: crypto.randomUUID(),
     date: new Date().toISOString().slice(0, 10),
     title: "",
+    meetingType: "Cadrage",
     participants: "",
     context: "",
     decisions: "",
@@ -79,6 +82,10 @@ export default function App() {
   const [selectedReportId, setSelectedReportId] = useState(data.projects[0]?.reports[0]?.id || null);
   const [query, setQuery] = useState("");
   const [newProjectName, setNewProjectName] = useState("");
+  const [meetingMarkers, setMeetingMarkers] = useState([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const chunksRef = useRef([]);
 
   const selectedProject = data.projects.find((p) => p.id === selectedProjectId) || data.projects[0];
   const selectedReport =
@@ -175,6 +182,51 @@ export default function App() {
     updateData(nextData);
   }
 
+  function addMeetingMarker(marker) {
+    setMeetingMarkers((current) => [marker, ...current]);
+
+    if (selectedReport) {
+      const existing = selectedReport.rawNotes?.trim() || "";
+      const markerLine = `[MARQUEUR ${marker.timeLabel}] ${marker.label}`;
+      const nextNotes = existing ? `${existing}\n${markerLine}` : markerLine;
+      updateReport("rawNotes", nextNotes);
+    }
+  }
+
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      chunksRef.current = [];
+
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+      };
+
+      recorder.start();
+      setMeetingMarkers([]);
+      setIsRecording(true);
+    } catch (error) {
+      alert("Impossible d’accéder au micro. Vérifie l’autorisation du navigateur.");
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+    }
+
+    setIsRecording(false);
+  }
+
   const searchResults = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
@@ -187,6 +239,7 @@ export default function App() {
           project.name,
           report.date,
           report.title,
+          report.meetingType,
           report.participants,
           report.context,
           report.decisions,
@@ -409,6 +462,25 @@ export default function App() {
                   onChange={(e) => updateReport("title", e.target.value)}
                   placeholder="Ex : Atelier règles de calcul"
                 />
+              </label>
+
+              <label>
+                Type de réunion
+                <select
+                  value={selectedReport.meetingType || "Cadrage"}
+                  onChange={(e) => updateReport("meetingType", e.target.value)}
+                >
+                  <option>Cadrage</option>
+                  <option>Règle de calcul</option>
+                  <option>Écran / parcours utilisateur</option>
+                  <option>Données / imports / interfaces</option>
+                  <option>Méthode / arbitrage</option>
+                  <option>Point projet</option>
+                  <option>Décision</option>
+                  <option>Suivi / avancement</option>
+                  <option>Blocage</option>
+                  <option>Validation métier</option>
+                </select>
               </label>
 
               <label>
