@@ -86,6 +86,8 @@ export default function App() {
   const [meetingExportStatus, setMeetingExportStatus] = useState("");
   const [inboxItems, setInboxItems] = useState([]);
   const [inboxStatus, setInboxStatus] = useState("");
+  const [selectedInboxReport, setSelectedInboxReport] = useState(null);
+  const [selectedInboxContent, setSelectedInboxContent] = useState("");
   const [meetingMarkers, setMeetingMarkers] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
@@ -308,6 +310,69 @@ export default function App() {
     }
   }
 
+  async function openInboxReport(item) {
+    setInboxStatus("Ouverture du compte-rendu...");
+    setSelectedInboxReport(null);
+    setSelectedInboxContent("");
+
+    try {
+      const response = await fetch("http://127.0.0.1:8010/api/meetings/read-report", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          projectSlug: item.projectSlug,
+          meetingDirName: item.meetingDirName
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Erreur pendant l’ouverture du compte-rendu.");
+      }
+
+      setSelectedInboxReport({
+        ...item,
+        reportType: result.reportType,
+        reportPath: result.reportPath
+      });
+      setSelectedInboxContent(result.content || "");
+      setInboxStatus("");
+    } catch (error) {
+      setInboxStatus(`Ouverture impossible : ${error.message}`);
+    }
+  }
+
+  async function validateInboxMeeting(item) {
+    setInboxStatus("Validation de la réunion en cours...");
+
+    try {
+      const response = await fetch("http://127.0.0.1:8010/api/meetings/validate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          projectSlug: item.projectSlug,
+          meetingDirName: item.meetingDirName
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Erreur pendant la validation.");
+      }
+
+      setInboxStatus("Réunion marquée comme validée.");
+      loadInbox();
+    } catch (error) {
+      setInboxStatus(`Validation impossible : ${error.message}`);
+    }
+  }
+
   async function exportMeetingToDataFolder() {
     if (!selectedProject || !selectedReport) {
       setMeetingExportStatus("Aucune réunion sélectionnée.");
@@ -498,17 +563,61 @@ export default function App() {
             {inboxItems.slice(0, 8).map((item) => (
               <article key={`${item.projectSlug}-${item.meetingDirName}`} className="inboxItem">
                 <div>
-                  <strong>{item.title || "Réunion sans titre"}</strong>
+                  <button className="inboxTitleButton" onClick={() => openInboxReport(item)}>
+                    {item.title || "Réunion sans titre"}
+                  </button>
                   <p>{item.projectName} — {item.date} — {item.meetingType}</p>
                   <small>{item.meetingDirName}</small>
                 </div>
 
-                <span className="statusPill">{item.status}</span>
+                <div className="inboxActions">
+                  <span className="statusPill">{item.status}</span>
+
+                  {item.status !== "Validé" && (
+                    <button className="smallButton" onClick={() => validateInboxMeeting(item)}>
+                      Valider
+                    </button>
+                  )}
+                </div>
               </article>
             ))}
           </div>
         ) : (
           <p className="empty">Aucune réunion à traiter pour l’instant.</p>
+        )}
+
+        {selectedInboxReport && (
+          <section className="reportPreview">
+            <div className="panelTitle between">
+              <div>
+                <div className="inlineTitle">
+                  <FileText size={20} />
+                  <h2>Document à valider</h2>
+                </div>
+                <p>
+                  {selectedInboxReport.projectName} — {selectedInboxReport.date} — {selectedInboxReport.title}
+                </p>
+              </div>
+
+              <span className="statusPill">
+                {selectedInboxReport.reportType === "valide" ? "Compte-rendu validé" : "Compte-rendu exporté"}
+              </span>
+            </div>
+
+            <p className="filePath">{selectedInboxReport.reportPath}</p>
+
+            <textarea
+              className="reportPreviewText"
+              value={selectedInboxContent}
+              readOnly
+            />
+
+            {selectedInboxReport.status !== "Validé" && (
+              <button onClick={() => validateInboxMeeting(selectedInboxReport)}>
+                Valider ce compte-rendu
+              </button>
+            )}
+          </section>
         )}
       </section>
 

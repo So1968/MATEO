@@ -788,3 +788,77 @@ h3 {
   font-size: 0.8rem;
   font-weight: 800;
 }
+
+.inboxActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.smallButton {
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: var(--sapphire);
+  color: white;
+}
+
+.secondarySmallButton {
+  background: var(--sapphire-soft);
+  color: var(--sapphire);
+  border: 1px solid var(--sapphire-border);
+}
+
+.secondarySmallButton:hover {
+  background: #dce9ff;
+}
+
+.reportPreview {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--sapphire-border);
+  background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+  border-radius: 22px;
+  padding: 16px;
+}
+
+.filePath {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--sapphire-soft);
+  color: var(--sapphire);
+  font-size: 0.82rem;
+  word-break: break-all;
+}
+
+.reportPreviewText {
+  min-height: 360px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.inboxTitleButton {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 800;
+  justify-content: flex-start;
+  text-align: left;
+  box-shadow: none;
+}
+
+.inboxTitleButton:hover {
+  background: transparent;
+  color: var(--sapphire);
+  transform: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

@@ -459,6 +459,102 @@ app.get("/api/inbox", (req, res) => {
 });
 
 
+
+app.post("/api/meetings/validate", (req, res) => {
+  try {
+    const { projectSlug, meetingDirName } = req.body;
+
+    if (!projectSlug || !meetingDirName) {
+      throw new Error("Projet ou réunion manquant.");
+    }
+
+    const safeProjectSlug = String(projectSlug).replace(/[\/\\]/g, "");
+    const safeMeetingDirName = String(meetingDirName).replace(/[\/\\]/g, "");
+
+    const meetingDir = path.join(
+      PROJECTS_ROOT,
+      safeProjectSlug,
+      "01_reunions",
+      safeMeetingDirName
+    );
+
+    const exportedPath = path.join(meetingDir, "compte_rendu_exporte.md");
+    const validatedPath = path.join(meetingDir, "compte_rendu_valide.md");
+
+    if (!fs.existsSync(exportedPath)) {
+      throw new Error("Compte-rendu exporté introuvable.");
+    }
+
+    const content = fs.readFileSync(exportedPath, "utf8");
+
+    fs.writeFileSync(
+      validatedPath,
+      content + "\n\n---\n\nValidé dans Matéo le " + new Date().toISOString() + "\n",
+      "utf8"
+    );
+
+    res.status(201).json({
+      status: "ok",
+      validatedPath
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error.message || "Erreur pendant la validation de la réunion."
+    });
+  }
+});
+
+
+
+app.post("/api/meetings/read-report", (req, res) => {
+  try {
+    const { projectSlug, meetingDirName } = req.body;
+
+    if (!projectSlug || !meetingDirName) {
+      throw new Error("Projet ou réunion manquant.");
+    }
+
+    const safeProjectSlug = String(projectSlug).replace(/[\/\\]/g, "");
+    const safeMeetingDirName = String(meetingDirName).replace(/[\/\\]/g, "");
+
+    const meetingDir = path.join(
+      PROJECTS_ROOT,
+      safeProjectSlug,
+      "01_reunions",
+      safeMeetingDirName
+    );
+
+    const validatedPath = path.join(meetingDir, "compte_rendu_valide.md");
+    const exportedPath = path.join(meetingDir, "compte_rendu_exporte.md");
+
+    let reportPath = exportedPath;
+    let reportType = "exporte";
+
+    if (fs.existsSync(validatedPath)) {
+      reportPath = validatedPath;
+      reportType = "valide";
+    }
+
+    if (!fs.existsSync(reportPath)) {
+      throw new Error("Aucun compte-rendu trouvé pour cette réunion.");
+    }
+
+    const content = fs.readFileSync(reportPath, "utf8");
+
+    res.json({
+      status: "ok",
+      reportType,
+      reportPath,
+      content
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error.message || "Erreur pendant la lecture du compte-rendu."
+    });
+  }
+});
+
+
 app.listen(PORT, "127.0.0.1", () => {
   console.log(`Matéo backend lancé : http://127.0.0.1:${PORT}`);
   console.log(`Dossier données : ${DATA_ROOT}`);
