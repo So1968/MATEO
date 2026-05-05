@@ -1593,3 +1593,47 @@ h3 {
     width: 14px;
   }
 }
+
+.sectionTitleButton {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: none;
+  text-align: left;
+}
+
+.sectionTitleButton:hover {
+  background: transparent;
+  color: var(--sapphire);
+  transform: none;
+}
+
+.sectionTitleButton span {
+  font-size: 1.15rem;
+  font-weight: 850;
+}
+
+
+.collapsibleContent {
+  display: grid;
+  gap: 12px;
+}
+
+.refreshButton {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 7px 10px;
+  font-size: 0.82rem;
+  border-radius: 999px;
+}
+
+.refreshButton:hover {
+  background: var(--sapphire-soft);
+  color: var(--sapphire);
+  transform: none;
+}

@@ -43,6 +43,7 @@ const initialData = {
           date: new Date().toISOString().slice(0, 10),
           title: "Réunion de cadrage",
           meetingType: "Cadrage",
+          meetingTypeOther: "",
           participants: "Sofia, équipe projet",
           context: "Première réunion de cadrage du projet.",
           decisions: "Créer une mémoire projet structurée par documents de travail.",
@@ -78,6 +79,7 @@ function emptyReport(projectName = "projet") {
     date: new Date().toISOString().slice(0, 10),
     title: buildDefaultMeetingTitle(projectName),
     meetingType: "Cadrage",
+    meetingTypeOther: "",
     participants: "",
     context: "",
     decisions: "",
@@ -102,6 +104,7 @@ export default function App() {
   const [meetingExportStatus, setMeetingExportStatus] = useState("");
   const [inboxItems, setInboxItems] = useState([]);
   const [inboxStatus, setInboxStatus] = useState("");
+  const [isInboxOpen, setIsInboxOpen] = useState(false);
   const [selectedInboxReport, setSelectedInboxReport] = useState(null);
   const [selectedInboxContent, setSelectedInboxContent] = useState("");
   const [reportSaveStatus, setReportSaveStatus] = useState("");
@@ -341,6 +344,7 @@ export default function App() {
           report.date,
           report.title,
           report.meetingType,
+          report.meetingTypeOther,
           report.participants,
           report.context,
           report.decisions,
@@ -529,7 +533,10 @@ export default function App() {
         body: JSON.stringify({
           projectName: selectedProject.name,
           meetingDate: selectedReport.date,
-          meetingType: selectedReport.meetingType || "Réunion",
+          meetingType:
+            selectedReport.meetingType === "Autre"
+              ? selectedReport.meetingTypeOther || "Autre"
+              : selectedReport.meetingType || "Réunion",
           title: selectedReport.title || "sans titre",
           participants: selectedReport.participants || "",
           context: selectedReport.context || "",
@@ -654,20 +661,23 @@ export default function App() {
 
       <section className="panel inboxPanel">
         <div className="panelTitle between">
-          <div>
-            <div className="inlineTitle">
-              <FileText size={20} />
-              <h2>À traiter</h2>
-            </div>
-            <p>Les réunions déposées dans MATEO-DONNEES qui attendent une reprise.</p>
-          </div>
+          <button
+            type="button"
+            className="sectionTitleButton"
+            onClick={() => setIsInboxOpen((open) => !open)}
+          >
+            <FileText size={20} />
+            <span>À traiter</span>
+          </button>
 
-          <button onClick={loadInbox}>
-            Rafraîchir
+          <button className="refreshButton" onClick={loadInbox}>
+            Actualiser
           </button>
         </div>
 
-        {inboxStatus && <p className="backendStatus">{inboxStatus}</p>}
+        {isInboxOpen && (
+          <div className="collapsibleContent">
+            {inboxStatus && <p className="backendStatus">{inboxStatus}</p>}
 
         {inboxItems.length ? (
           <div className="inboxList">
@@ -745,6 +755,9 @@ export default function App() {
             )}
           </section>
         )}
+          </div>
+        )}
+
       </section>
 
       <section className="grid">
@@ -917,7 +930,16 @@ export default function App() {
                   <option>Suivi / avancement</option>
                   <option>Blocage</option>
                   <option>Validation métier</option>
+                  <option>Autre</option>
                 </select>
+
+                {selectedReport.meetingType === "Autre" && (
+                  <input
+                    value={selectedReport.meetingTypeOther || ""}
+                    onChange={(e) => updateReport("meetingTypeOther", e.target.value)}
+                    placeholder="Préciser le type de réunion..."
+                  />
+                )}
               </label>
 
               <label>
