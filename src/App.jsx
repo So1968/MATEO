@@ -627,7 +627,7 @@ export default function App() {
       <header className="hero">
         <div>
           <p className="eyebrow">Matéo V1</p>
-          <h1>Carnet de bord</h1>
+          <h1>Log Pose</h1>
 
         <div className="heroSignatureRow">
           <div className="onePieceMotto">
@@ -667,7 +667,7 @@ export default function App() {
             onClick={() => setIsInboxOpen((open) => !open)}
           >
             <FileText size={20} />
-            <span>À traiter</span>
+            <span>À reprendre</span>
           </button>
 
           <button className="refreshButton" onClick={loadInbox}>
@@ -811,13 +811,13 @@ export default function App() {
             <div>
               <div className="inlineTitle">
                 <FileText size={20} />
-                <h2>Documents de travail</h2>
+                <h2>Documents</h2>
               </div>
               <p>{selectedProject?.name || "Aucun projet sélectionné"}</p>
             </div>
             <button onClick={addReport} disabled={!selectedProject}>
               <Plus size={16} />
-              Nouveau CR
+              Nouvelle réunion
             </button>
           </div>
 
@@ -844,7 +844,7 @@ export default function App() {
           <div className="panelTitle between">
             <div className="inlineTitle">
               <Save size={20} />
-              <h2>Source de réunion</h2>
+              <h2>Mode réunion</h2>
             </div>
             {selectedReport && (
               <button className="danger ghost" onClick={() => deleteReport(selectedReport.id)}>
