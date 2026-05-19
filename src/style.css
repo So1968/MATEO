@@ -704,6 +704,154 @@ h2 {
   margin-top: 8px;
 }
 
+/* Grande Ligne — route principale visible dans l'interface */
+.navigationDeck {
+  margin-bottom: 16px;
+  border-color: rgba(216, 168, 73, 0.66);
+  background:
+    radial-gradient(circle at 8% 30%, rgba(216, 168, 73, 0.24), transparent 22%),
+    linear-gradient(135deg, rgba(255, 248, 230, 0.98), rgba(233, 244, 248, 0.93));
+}
+
+.navigationDeck .panelTitle::after {
+  content: "Grande Ligne — route principale du projet";
+  display: inline-flex;
+  margin-left: 12px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--ocean-950), var(--ocean-700));
+  color: #fff6db;
+  border: 1px solid rgba(216, 168, 73, 0.55);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.navigationGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(140px, 1fr));
+  gap: 14px;
+  padding: 20px 4px 4px;
+}
+
+.navigationGrid::before {
+  content: "";
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 48px;
+  height: 7px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, transparent, rgba(216, 168, 73, 0.92), rgba(22, 75, 115, 0.75), rgba(216, 168, 73, 0.92), transparent);
+  box-shadow: 0 8px 20px rgba(6, 24, 45, 0.15);
+  z-index: -1;
+}
+
+.navigationBlock {
+  position: relative;
+  min-height: 168px;
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 10px;
+  align-content: start;
+  padding: 16px;
+  border-radius: 24px 24px 18px 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 248, 230, 0.86));
+  border: 1px solid rgba(8, 35, 65, 0.14);
+  box-shadow: 0 16px 34px rgba(6, 24, 45, 0.08);
+  overflow: hidden;
+}
+
+.navigationBlock::before {
+  content: "";
+  position: absolute;
+  left: 20px;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(216, 168, 73, 0.68), transparent);
+}
+
+.navigationBlock:nth-child(2) {
+  border-color: rgba(216, 168, 73, 0.82);
+  background:
+    radial-gradient(circle at top right, rgba(216, 168, 73, 0.30), transparent 30%),
+    linear-gradient(135deg, rgba(255, 246, 219, 0.98), rgba(255, 255, 255, 0.92));
+}
+
+.navigationBlock:nth-child(10) .navSymbol {
+  background: rgba(61, 139, 114, 0.14);
+  color: #2b775f;
+}
+
+.navigationBlock:nth-child(12) .navSymbol {
+  background: rgba(22, 75, 115, 0.16);
+  color: var(--ocean-900);
+}
+
+.navSymbol {
+  position: relative;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  background: rgba(216, 168, 73, 0.18);
+  border: 1px solid rgba(216, 168, 73, 0.42);
+  font-size: 1.35rem;
+}
+
+.navigationBlock strong {
+  display: block;
+  color: var(--ocean-950);
+  font-weight: 950;
+  margin-bottom: 2px;
+}
+
+.navigationBlock small {
+  display: block;
+  color: var(--gold-dark);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.66rem;
+  margin-bottom: 8px;
+}
+
+.navigationBlock p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.38;
+  font-size: 0.86rem;
+}
+
+.navigationBlock:nth-child(10) .navSymbol::after {
+  content: "Décision";
+  position: absolute;
+  left: 50px;
+  top: 8px;
+  font-size: 0.62rem;
+  color: #2b775f;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.navigationBlock:nth-child(12) .navSymbol::after {
+  content: "Boussole";
+  position: absolute;
+  left: 50px;
+  top: 8px;
+  font-size: 0.62rem;
+  color: var(--ocean-900);
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
 @media (max-width: 1260px) {
   .app {
     width: min(1180px, calc(100vw - 36px));
@@ -713,6 +861,10 @@ h2 {
   .hero,
   .logPoseGrid {
     grid-template-columns: 1fr;
+  }
+
+  .navigationGrid {
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
   }
 
   .sidebar {
@@ -737,8 +889,13 @@ h2 {
   }
 
   .heroCard,
-  .logPoseGrid {
+  .logPoseGrid,
+  .navigationGrid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .navigationDeck .panelTitle::after {
+    display: none;
   }
 
   .addParticipantRow,
