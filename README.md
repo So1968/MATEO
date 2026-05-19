@@ -1,17 +1,24 @@
-# Matéo / Vogue Merry
+# Vogue Merry
 
-Matéo et Vogue Merry sont associés dans ce dépôt.
+## Statut du dépôt
 
-- **Matéo** désigne le moteur fonctionnel : mémoire projet, réunions, sources audio, documents de travail, versions validées, recherche et traces.
-- **Vogue Merry** désigne l’univers d’interface et la métaphore de navigation : pont du navire, îles/projets, escales/réunions, traces audio, journal de bord, coffre, équipage, manœuvres, caps validés, longue-vue et Log Pose.
+Ce dépôt est le dépôt applicatif actuel de **Vogue Merry**.
 
-La règle de continuité est simple : **Matéo porte la mécanique de travail, Vogue Merry porte l’univers et l’expérience utilisateur.**
+Ancien nom du prototype technique : **Matéo**.
 
-## Statut Git
+Le prototype Matéo devient le socle technique de Vogue Merry. Il n’est plus traité comme un projet séparé.
 
-Le dépôt GitHub accessible et actif est : **So1968/MATEO**.
+Règle de fusion :
 
-Aucun dépôt séparé nommé **VOGUE-MERRY** n’apparaît dans les dépôts GitHub accessibles à ce stade. La continuité Vogue Merry doit donc être rattachée ici, dans le dépôt **MATEO**, sauf création ultérieure d’un dépôt séparé.
+> On ne maintient pas deux produits. On transforme le prototype Matéo en produit Vogue Merry.
+
+## Produit
+
+**Vogue Merry** est un outil de mémoire projet inspiré d’un univers de navigation maritime et de manga d’aventure.
+
+Il sert à transformer les réunions, audios, notes, transcriptions, documents et décisions dispersés en mémoire projet navigable.
+
+Objectif : retrouver rapidement le projet, la réunion, la décision, le document, l’action à faire et le prochain cap.
 
 ## Logique fonctionnelle à préserver
 
@@ -33,20 +40,51 @@ Organisation cible :
    - **Longue-vue** : recherche dans la mémoire du projet.
    - **Log Pose** : synthèse du cap, prochaine direction, éléments importants à retrouver.
 
-## Vocabulaire Matéo
+## Vocabulaire technique hérité de Matéo
 
-Pour éviter la confusion entre les différents niveaux de travail, Matéo distingue :
+À conserver comme vocabulaire fonctionnel interne :
 
 - **Source de réunion** : informations de base, audio, marqueurs, matière brute, transcription.
 - **Document de travail** : version modifiable issue de la réunion.
 - **Version validée** : version figée qui sert de référence.
 - **Versions précédentes** : sauvegardes automatiques permettant de revenir en arrière en cas d’erreur.
 
-L’objectif est de ne pas multiplier les mots autour du compte-rendu, mais de clarifier le cycle :
-source → travail → validé → historique.
+Cycle : source → travail → validé → historique.
 
 ## Règle de développement
 
-Toute évolution graphique Vogue Merry doit conserver le fonctionnement Matéo : projets, réunions, sources, documents de travail, validation, historique, recherche, export local et continuité de la mémoire projet.
+Toute évolution graphique Vogue Merry doit conserver le moteur fonctionnel existant : projets, réunions, sources, documents de travail, validation, historique, recherche, export local et continuité de la mémoire projet.
 
-Autrement dit : **on ne remplace pas Matéo par Vogue Merry ; on habille Matéo avec Vogue Merry.**
+Autrement dit :
+
+> On garde le moteur. On transforme l’expérience.
+
+## Lien avec Azoth Studio
+
+Dans **Azoth Studio**, Vogue Merry est le produit.
+
+Dossier produit associé :
+
+`02_PRODUITS/VOGUE_MERRY`
+
+Le dépôt actuel reste **So1968/MATEO** pendant la transition.
+
+Renommage possible plus tard : **So1968/MATEO** → **So1968/VOGUE-MERRY**, uniquement après vérification que rien ne casse.
+
+## Lancement local
+
+```powershell
+cd C:\DEV\MATEO
+Get-Location
+dir
+npm run dev
+```
+
+Pour lancer aussi le backend local :
+
+```powershell
+cd C:\DEV\MATEO
+Get-Location
+dir
+npm run dev:all
+```
