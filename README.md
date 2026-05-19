@@ -2,15 +2,9 @@
 
 ## Statut du dépôt
 
-Ce dépôt est le dépôt applicatif actuel de **Vogue Merry**.
+Ce dépôt est le dépôt applicatif de **Vogue Merry**.
 
-Ancien nom du prototype technique : **Matéo**.
-
-Le prototype Matéo devient le socle technique de Vogue Merry. Il n’est plus traité comme un projet séparé.
-
-Règle de fusion :
-
-> On ne maintient pas deux produits. On transforme le prototype Matéo en produit Vogue Merry.
+Vogue Merry est le produit unique. Les anciens noms ou libellés techniques doivent être progressivement remplacés par le vocabulaire Vogue Merry.
 
 ## Produit
 
@@ -18,7 +12,7 @@ Règle de fusion :
 
 Il sert à transformer les réunions, audios, notes, transcriptions, documents et décisions dispersés en mémoire projet navigable.
 
-Objectif : retrouver rapidement le projet, la réunion, la décision, le document, l’action à faire et le prochain cap.
+Objectif : retrouver rapidement le projet, l’escale, la décision, le document, l’action à faire et le prochain cap.
 
 ## Logique fonctionnelle à préserver
 
@@ -26,26 +20,23 @@ L’outil ne doit pas devenir seulement une page décorative. L’univers mariti
 
 Organisation cible :
 
-1. Une vue globale appelée **Pont du navire**.
-2. Une entrée **Mes îles**, où chaque île correspond à un projet.
-3. Dans chaque île/projet, les modes fonctionnels suivants :
-   - **Carte de l’île** : vue générale du projet.
-   - **Escales** : réunions.
-   - **Traces audio** : transcriptions et sources audio.
-   - **Journal de bord** : comptes-rendus, documents de travail et synthèses.
-   - **Coffre** : documents liés au projet.
-   - **Équipage** : personnes et rôles.
-   - **Manœuvres** : actions à faire.
-   - **Caps validés** : décisions.
-   - **Longue-vue** : recherche dans la mémoire du projet.
-   - **Log Pose** : synthèse du cap, prochaine direction, éléments importants à retrouver.
+1. **Pont du navire** : vue globale.
+2. **Mes îles** : projets.
+3. **Carte de l’île** : vue générale d’un projet.
+4. **Escales** : réunions et points projet.
+5. **Traces audio** : transcriptions et sources audio.
+6. **Journal de bord** : comptes rendus, documents de travail et synthèses.
+7. **Coffre** : documents liés au projet.
+8. **Équipage** : personnes et rôles.
+9. **Manœuvres** : actions à faire.
+10. **Caps validés** : décisions.
+11. **Longue-vue** : recherche dans la mémoire du projet.
+12. **Log Pose** : synthèse du cap, prochaine direction, éléments importants à retrouver.
 
-## Vocabulaire technique hérité de Matéo
+## Vocabulaire fonctionnel
 
-À conserver comme vocabulaire fonctionnel interne :
-
-- **Source de réunion** : informations de base, audio, marqueurs, matière brute, transcription.
-- **Document de travail** : version modifiable issue de la réunion.
+- **Source d’escale** : informations de base, audio, marqueurs, matière brute, transcription.
+- **Document de travail** : version modifiable issue d’une escale.
 - **Version validée** : version figée qui sert de référence.
 - **Versions précédentes** : sauvegardes automatiques permettant de revenir en arrière en cas d’erreur.
 
@@ -53,9 +44,7 @@ Cycle : source → travail → validé → historique.
 
 ## Règle de développement
 
-Toute évolution graphique Vogue Merry doit conserver le moteur fonctionnel existant : projets, réunions, sources, documents de travail, validation, historique, recherche, export local et continuité de la mémoire projet.
-
-Autrement dit :
+Toute évolution graphique Vogue Merry doit conserver le moteur fonctionnel existant : projets, escales, sources, documents de travail, validation, historique, recherche, export local et continuité de la mémoire projet.
 
 > On garde le moteur. On transforme l’expérience.
 
@@ -63,28 +52,4 @@ Autrement dit :
 
 Dans **Azoth Studio**, Vogue Merry est le produit.
 
-Dossier produit associé :
-
-`02_PRODUITS/VOGUE_MERRY`
-
-Le dépôt actuel reste **So1968/MATEO** pendant la transition.
-
-Renommage possible plus tard : **So1968/MATEO** → **So1968/VOGUE-MERRY**, uniquement après vérification que rien ne casse.
-
-## Lancement local
-
-```powershell
-cd C:\DEV\MATEO
-Get-Location
-dir
-npm run dev
-```
-
-Pour lancer aussi le backend local :
-
-```powershell
-cd C:\DEV\MATEO
-Get-Location
-dir
-npm run dev:all
-```
+Dossier produit associé : `02_PRODUITS/VOGUE_MERRY`.
