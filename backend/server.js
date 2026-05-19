@@ -9,7 +9,18 @@ const app = express();
 const PORT = 8010;
 
 const HOME = os.homedir();
-const DATA_ROOT = path.join(HOME, "MATEO-DONNEES");
+const LEGACY_DATA_ROOT = path.join(HOME, "MATEO-DONNEES");
+const VOGUE_MERRY_DATA_ROOT = path.join(HOME, "VOGUE-MERRY-DONNEES");
+
+function prepareDataRoot() {
+  if (!fs.existsSync(VOGUE_MERRY_DATA_ROOT) && fs.existsSync(LEGACY_DATA_ROOT)) {
+    fs.cpSync(LEGACY_DATA_ROOT, VOGUE_MERRY_DATA_ROOT, { recursive: true });
+  }
+
+  return VOGUE_MERRY_DATA_ROOT;
+}
+
+const DATA_ROOT = prepareDataRoot();
 const PROJECTS_ROOT = path.join(DATA_ROOT, "01_PROJETS");
 
 app.use(cors());
@@ -48,16 +59,17 @@ function createProjectStructure(projectName) {
   ensureDir(baseDir);
 
   const folders = [
-    "00_vue_ensemble",
-    "01_reunions",
-    "02_decisions",
-    "03_actions",
-    "04_regles_calcul_methodes",
+    "00_carte_ile",
+    "01_escales_reunions",
+    "02_caps_valides_decisions",
+    "03_manoeuvres_actions",
+    "04_regles_methodes",
     "05_ecrans_parcours",
     "06_donnees_imports_interfaces",
-    "07_points_ouverts_blocages",
-    "08_documents_sources",
-    "09_exports_livrables"
+    "07_questions_blocages",
+    "08_coffre_documents_sources",
+    "09_exports_livrables",
+    "10_log_pose"
   ];
 
   for (const folder of folders) {
@@ -66,27 +78,28 @@ function createProjectStructure(projectName) {
 
   writeFileIfMissing(
     path.join(baseDir, "README_PROJET.md"),
-`# Projet — ${projectName}
+`# Île / projet — ${projectName}
 
-Ce dossier contient la mémoire du projet.
+Ce dossier contient la mémoire navigable du projet dans Vogue Merry.
 
 Structure :
-- 00_vue_ensemble : reprise rapide du fil
-- 01_reunions : audios, transcriptions, comptes-rendus
-- 02_decisions : décisions consolidées
-- 03_actions : plan d'actions
-- 04_regles_calcul_methodes : règles EPM, méthodes, arbitrages
+- 00_carte_ile : reprise rapide du fil et vue générale
+- 01_escales_reunions : audios, transcriptions, comptes-rendus
+- 02_caps_valides_decisions : décisions consolidées
+- 03_manoeuvres_actions : plan d'actions
+- 04_regles_methodes : règles, méthodes et arbitrages
 - 05_ecrans_parcours : écrans et parcours utilisateur
 - 06_donnees_imports_interfaces : sources, imports, interfaces, mappings
-- 07_points_ouverts_blocages : questions ouvertes et blocages
-- 08_documents_sources : documents d'origine
+- 07_questions_blocages : questions ouvertes et blocages
+- 08_coffre_documents_sources : documents d'origine, pièces et preuves
 - 09_exports_livrables : livrables générés
+- 10_log_pose : synthèse du cap et prochaine direction
 `
   );
 
   writeFileIfMissing(
-    path.join(baseDir, "00_vue_ensemble", "vue_ensemble.md"),
-`# Vue d'ensemble — ${projectName}
+    path.join(baseDir, "00_carte_ile", "carte_ile.md"),
+`# Carte de l’île — ${projectName}
 
 ## Objectif du projet
 
@@ -94,34 +107,34 @@ Structure :
 
 ## Périmètre
 
-## Acteurs clés
+## Équipage / acteurs clés
 
 ## État actuel
 
-## Dernière décision importante
+## Dernier cap validé
 
-## Actions en cours
+## Manœuvres en cours
 
 ## Questions ouvertes
 
 ## Points de vigilance
 
-## Prochaine étape
+## Prochaine direction
 `
   );
 
   writeFileIfMissing(
-    path.join(baseDir, "02_decisions", "decisions_consolidees.md"),
-`# Décisions consolidées — ${projectName}
+    path.join(baseDir, "02_caps_valides_decisions", "caps_valides.md"),
+`# Caps validés / décisions — ${projectName}
 
-| Date | Décision | Statut | Source | Impact |
+| Date | Cap validé / décision | Statut | Source | Impact |
 |---|---|---|---|---|
 `
   );
 
   writeFileIfMissing(
-    path.join(baseDir, "03_actions", "plan_actions.md"),
-`# Plan d'actions — ${projectName}
+    path.join(baseDir, "03_manoeuvres_actions", "manoeuvres_actions.md"),
+`# Manœuvres / actions — ${projectName}
 
 | Action | Responsable | Échéance | Statut | Source |
 |---|---|---|---|---|
@@ -129,8 +142,8 @@ Structure :
   );
 
   writeFileIfMissing(
-    path.join(baseDir, "04_regles_calcul_methodes", "regles_consolidees.md"),
-`# Règles / méthodes consolidées — ${projectName}
+    path.join(baseDir, "04_regles_methodes", "regles_methodes.md"),
+`# Règles / méthodes — ${projectName}
 
 | Règle / méthode | Statut | Source | Points ouverts |
 |---|---|---|---|
@@ -138,7 +151,7 @@ Structure :
   );
 
   writeFileIfMissing(
-    path.join(baseDir, "05_ecrans_parcours", "ecrans_consolides.md"),
+    path.join(baseDir, "05_ecrans_parcours", "ecrans_parcours.md"),
 `# Écrans / parcours — ${projectName}
 
 | Écran / parcours | Objectif | Règles associées | Points ouverts |
@@ -156,11 +169,29 @@ Structure :
   );
 
   writeFileIfMissing(
-    path.join(baseDir, "07_points_ouverts_blocages", "points_ouverts.md"),
-`# Points ouverts / blocages — ${projectName}
+    path.join(baseDir, "07_questions_blocages", "questions_blocages.md"),
+`# Questions ouvertes / blocages — ${projectName}
 
 | Date | Sujet | Statut | Responsable | Source |
 |---|---|---|---|---|
+`
+  );
+
+  writeFileIfMissing(
+    path.join(baseDir, "10_log_pose", "log_pose.md"),
+`# Log Pose — ${projectName}
+
+## Ce qu’il faut retenir
+
+## Dernier cap validé
+
+## Manœuvres prioritaires
+
+## Questions ouvertes
+
+## Documents à retrouver
+
+## Prochaine direction utile
 `
   );
 
@@ -174,8 +205,9 @@ Structure :
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
-    service: "mateo-local-backend",
-    dataRoot: DATA_ROOT
+    service: "vogue-merry-local-backend",
+    dataRoot: DATA_ROOT,
+    legacyDataRoot: fs.existsSync(LEGACY_DATA_ROOT) ? LEGACY_DATA_ROOT : null
   });
 });
 
@@ -244,7 +276,7 @@ app.post("/api/meetings/export", (req, res) => {
     const projectDir = path.join(PROJECTS_ROOT, projectSlug);
     ensureDir(projectDir);
 
-    const meetingsDir = path.join(projectDir, "01_reunions");
+    const meetingsDir = path.join(projectDir, "01_escales_reunions");
     ensureDir(meetingsDir);
 
     const date = meetingDate || new Date().toISOString().slice(0, 10);
@@ -256,9 +288,9 @@ app.post("/api/meetings/export", (req, res) => {
     ensureDir(meetingDir);
     ensureDir(path.join(meetingDir, "pieces_jointes"));
 
-    const markdown = `# Compte-rendu — ${title || "Réunion sans titre"}
+    const markdown = `# Journal de bord — ${title || "Réunion sans titre"}
 
-## Projet
+## Île / projet
 
 ${projectName || ""}
 
@@ -266,11 +298,11 @@ ${projectName || ""}
 
 ${date}
 
-## Type de réunion
+## Type d’escale
 
 ${meetingType || ""}
 
-## Participants
+## Équipage / participants
 
 ${participants || ""}
 
@@ -278,7 +310,7 @@ ${participants || ""}
 
 ${context || ""}
 
-## Décisions prises
+## Caps validés / décisions prises
 
 ${decisions || ""}
 
@@ -294,7 +326,7 @@ ${screens || ""}
 
 ${openQuestions || ""}
 
-## Actions à faire
+## Manœuvres / actions à faire
 
 ${actions || ""}
 
@@ -306,19 +338,19 @@ ${risks || ""}
 
 ${keywords || ""}
 
-## Notes brutes / transcription / marqueurs
+## Traces audio / notes brutes / transcription / marqueurs
 
 ${rawNotes || ""}
 `;
 
     fs.writeFileSync(
-      path.join(meetingDir, "compte_rendu_exporte.md"),
+      path.join(meetingDir, "journal_de_bord_exporte.md"),
       markdown,
       "utf8"
     );
 
     fs.writeFileSync(
-      path.join(meetingDir, "donnees_reunion.json"),
+      path.join(meetingDir, "donnees_escale.json"),
       JSON.stringify(req.body, null, 2),
       "utf8"
     );
@@ -358,7 +390,7 @@ app.post("/api/meetings/export-audio", upload.single("audio"), (req, res) => {
     const meetingDir = path.join(
       PROJECTS_ROOT,
       projectSlug,
-      "01_reunions",
+      "01_escales_reunions",
       safeMeetingDirName
     );
 
@@ -391,6 +423,32 @@ function readJsonIfExists(filePath) {
   }
 }
 
+function readMeetingData(meetingDir) {
+  return (
+    readJsonIfExists(path.join(meetingDir, "donnees_escale.json")) ||
+    readJsonIfExists(path.join(meetingDir, "donnees_reunion.json"))
+  );
+}
+
+function findMeetingDir(projectSlug, meetingDirName) {
+  const newPath = path.join(PROJECTS_ROOT, projectSlug, "01_escales_reunions", meetingDirName);
+  if (fs.existsSync(newPath)) return newPath;
+
+  const legacyPath = path.join(PROJECTS_ROOT, projectSlug, "01_reunions", meetingDirName);
+  if (fs.existsSync(legacyPath)) return legacyPath;
+
+  return newPath;
+}
+
+function findReportPaths(meetingDir) {
+  return {
+    validatedPath: path.join(meetingDir, "journal_de_bord_valide.md"),
+    exportedPath: path.join(meetingDir, "journal_de_bord_exporte.md"),
+    legacyValidatedPath: path.join(meetingDir, "compte_rendu_valide.md"),
+    legacyExportedPath: path.join(meetingDir, "compte_rendu_exporte.md")
+  };
+}
+
 app.get("/api/inbox", (req, res) => {
   try {
     ensureDir(PROJECTS_ROOT);
@@ -403,48 +461,58 @@ app.get("/api/inbox", (req, res) => {
 
     for (const project of projects) {
       const projectDir = path.join(PROJECTS_ROOT, project.name);
-      const meetingsDir = path.join(projectDir, "01_reunions");
+      const candidateMeetingDirs = [
+        path.join(projectDir, "01_escales_reunions"),
+        path.join(projectDir, "01_reunions")
+      ];
 
-      if (!fs.existsSync(meetingsDir)) continue;
+      for (const meetingsDir of candidateMeetingDirs) {
+        if (!fs.existsSync(meetingsDir)) continue;
 
-      const meetings = fs
-        .readdirSync(meetingsDir, { withFileTypes: true })
-        .filter((entry) => entry.isDirectory());
+        const meetings = fs
+          .readdirSync(meetingsDir, { withFileTypes: true })
+          .filter((entry) => entry.isDirectory());
 
-      for (const meeting of meetings) {
-        const meetingDir = path.join(meetingsDir, meeting.name);
-        const data = readJsonIfExists(path.join(meetingDir, "donnees_reunion.json"));
+        for (const meeting of meetings) {
+          const meetingDir = path.join(meetingsDir, meeting.name);
+          const data = readMeetingData(meetingDir);
+          const reportPaths = findReportPaths(meetingDir);
 
-        const hasAudio = fs.existsSync(path.join(meetingDir, "audio_original.webm"));
-        const hasReport = fs.existsSync(path.join(meetingDir, "compte_rendu_exporte.md"));
-        const hasValidatedReport = fs.existsSync(path.join(meetingDir, "compte_rendu_valide.md"));
-        const hasRawNotes = Boolean(data?.rawNotes && String(data.rawNotes).trim());
+          const hasAudio = fs.existsSync(path.join(meetingDir, "audio_original.webm"));
+          const hasReport =
+            fs.existsSync(reportPaths.exportedPath) ||
+            fs.existsSync(reportPaths.legacyExportedPath);
+          const hasValidatedReport =
+            fs.existsSync(reportPaths.validatedPath) ||
+            fs.existsSync(reportPaths.legacyValidatedPath);
+          const hasRawNotes = Boolean(data?.rawNotes && String(data.rawNotes).trim());
 
-        let status = "À traiter";
-        if (hasValidatedReport) {
-          status = "Validé";
-        } else if (hasReport && hasRawNotes) {
-          status = "Compte-rendu à valider";
-        } else if (hasAudio && !hasRawNotes) {
-          status = "Audio à transcrire";
-        } else if (hasReport) {
-          status = "Exporté à compléter";
+          let status = "À traiter";
+          if (hasValidatedReport) {
+            status = "Validé";
+          } else if (hasReport && hasRawNotes) {
+            status = "Journal de bord à valider";
+          } else if (hasAudio && !hasRawNotes) {
+            status = "Audio à transcrire";
+          } else if (hasReport) {
+            status = "Exporté à compléter";
+          }
+
+          items.push({
+            projectSlug: project.name,
+            projectName: data?.projectName || project.name.replaceAll("_", " "),
+            meetingDirName: meeting.name,
+            title: data?.title || meeting.name,
+            date: data?.meetingDate || meeting.name.slice(0, 10),
+            meetingType: data?.meetingType || "",
+            status,
+            hasAudio,
+            hasReport,
+            hasValidatedReport,
+            hasRawNotes,
+            path: meetingDir
+          });
         }
-
-        items.push({
-          projectSlug: project.name,
-          projectName: data?.projectName || project.name.replaceAll("_", " "),
-          meetingDirName: meeting.name,
-          title: data?.title || meeting.name,
-          date: data?.meetingDate || meeting.name.slice(0, 10),
-          meetingType: data?.meetingType || "",
-          status,
-          hasAudio,
-          hasReport,
-          hasValidatedReport,
-          hasRawNotes,
-          path: meetingDir
-        });
       }
     }
 
@@ -471,27 +539,26 @@ app.post("/api/meetings/validate", (req, res) => {
     const safeProjectSlug = String(projectSlug).replace(/[\/\\]/g, "");
     const safeMeetingDirName = String(meetingDirName).replace(/[\/\\]/g, "");
 
-    const meetingDir = path.join(
-      PROJECTS_ROOT,
-      safeProjectSlug,
-      "01_reunions",
-      safeMeetingDirName
-    );
+    const meetingDir = findMeetingDir(safeProjectSlug, safeMeetingDirName);
+    const reportPaths = findReportPaths(meetingDir);
 
-    const exportedPath = path.join(meetingDir, "compte_rendu_exporte.md");
-    const validatedPath = path.join(meetingDir, "compte_rendu_valide.md");
+    const sourcePath = fs.existsSync(reportPaths.exportedPath)
+      ? reportPaths.exportedPath
+      : reportPaths.legacyExportedPath;
 
-    if (!fs.existsSync(exportedPath)) {
-      throw new Error("Compte-rendu exporté introuvable.");
+    const validatedPath = reportPaths.validatedPath;
+
+    if (!fs.existsSync(sourcePath)) {
+      throw new Error("Journal de bord exporté introuvable.");
     }
 
-    const content = fs.readFileSync(exportedPath, "utf8");
+    const content = fs.readFileSync(sourcePath, "utf8");
 
     createFileVersion(validatedPath, "avant_validation");
 
     fs.writeFileSync(
       validatedPath,
-      content + "\n\n---\n\nValidé dans Matéo le " + new Date().toISOString() + "\n",
+      content + "\n\n---\n\nValidé dans Vogue Merry le " + new Date().toISOString() + "\n",
       "utf8"
     );
 
@@ -519,26 +586,25 @@ app.post("/api/meetings/read-report", (req, res) => {
     const safeProjectSlug = String(projectSlug).replace(/[\/\\]/g, "");
     const safeMeetingDirName = String(meetingDirName).replace(/[\/\\]/g, "");
 
-    const meetingDir = path.join(
-      PROJECTS_ROOT,
-      safeProjectSlug,
-      "01_reunions",
-      safeMeetingDirName
-    );
+    const meetingDir = findMeetingDir(safeProjectSlug, safeMeetingDirName);
+    const reportPaths = findReportPaths(meetingDir);
 
-    const validatedPath = path.join(meetingDir, "compte_rendu_valide.md");
-    const exportedPath = path.join(meetingDir, "compte_rendu_exporte.md");
-
-    let reportPath = exportedPath;
+    let reportPath = reportPaths.exportedPath;
     let reportType = "exporte";
 
-    if (fs.existsSync(validatedPath)) {
-      reportPath = validatedPath;
+    if (fs.existsSync(reportPaths.validatedPath)) {
+      reportPath = reportPaths.validatedPath;
       reportType = "valide";
+    } else if (fs.existsSync(reportPaths.legacyValidatedPath)) {
+      reportPath = reportPaths.legacyValidatedPath;
+      reportType = "valide";
+    } else if (fs.existsSync(reportPaths.legacyExportedPath)) {
+      reportPath = reportPaths.legacyExportedPath;
+      reportType = "exporte";
     }
 
     if (!fs.existsSync(reportPath)) {
-      throw new Error("Aucun compte-rendu trouvé pour cette réunion.");
+      throw new Error("Aucun journal de bord trouvé pour cette réunion.");
     }
 
     const content = fs.readFileSync(reportPath, "utf8");
@@ -551,7 +617,7 @@ app.post("/api/meetings/read-report", (req, res) => {
     });
   } catch (error) {
     res.status(400).json({
-      error: error.message || "Erreur pendant la lecture du compte-rendu."
+      error: error.message || "Erreur pendant la lecture du journal de bord."
     });
   }
 });
@@ -569,16 +635,11 @@ app.post("/api/meetings/save-report", (req, res) => {
     const safeProjectSlug = String(projectSlug).replace(/[\/\\]/g, "");
     const safeMeetingDirName = String(meetingDirName).replace(/[\/\\]/g, "");
 
-    const meetingDir = path.join(
-      PROJECTS_ROOT,
-      safeProjectSlug,
-      "01_reunions",
-      safeMeetingDirName
-    );
+    const meetingDir = findMeetingDir(safeProjectSlug, safeMeetingDirName);
 
     ensureDir(meetingDir);
 
-    const exportedPath = path.join(meetingDir, "compte_rendu_exporte.md");
+    const exportedPath = path.join(meetingDir, "journal_de_bord_exporte.md");
 
     createFileVersion(exportedPath, "avant_sauvegarde");
 
@@ -594,7 +655,7 @@ app.post("/api/meetings/save-report", (req, res) => {
     });
   } catch (error) {
     res.status(400).json({
-      error: error.message || "Erreur pendant l’enregistrement du compte-rendu."
+      error: error.message || "Erreur pendant l’enregistrement du journal de bord."
     });
   }
 });
@@ -734,6 +795,9 @@ app.get("/api/search", (req, res) => {
 
 
 app.listen(PORT, "127.0.0.1", () => {
-  console.log(`Matéo backend lancé : http://127.0.0.1:${PORT}`);
+  console.log(`Vogue Merry backend lancé : http://127.0.0.1:${PORT}`);
   console.log(`Dossier données : ${DATA_ROOT}`);
+  if (fs.existsSync(LEGACY_DATA_ROOT)) {
+    console.log(`Ancien dossier Matéo conservé comme source/backup : ${LEGACY_DATA_ROOT}`);
+  }
 });
