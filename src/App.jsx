@@ -22,6 +22,81 @@ const participantOptions = [
   "Référent métier"
 ];
 
+const navigationBlocks = [
+  {
+    symbol: "⛵",
+    title: "Pont du navire",
+    subtitle: "Vue globale",
+    text: "Voir les îles actives, les alertes, les escales récentes et le cap à reprendre."
+  },
+  {
+    symbol: "🏝️",
+    title: "Mes îles",
+    subtitle: "Projets",
+    text: "Entrer dans un projet sans mélanger les sujets, les personnes, les documents et les décisions."
+  },
+  {
+    symbol: "🗺️",
+    title: "Carte de l’île",
+    subtitle: "Vue projet",
+    text: "Comprendre l’état du projet, ses repères, son contexte et ses prochaines étapes."
+  },
+  {
+    symbol: "⚓",
+    title: "Escales",
+    subtitle: "Réunions",
+    text: "Créer, retrouver et suivre les réunions ou points projet."
+  },
+  {
+    symbol: "🎙️",
+    title: "Traces audio",
+    subtitle: "Sources brutes",
+    text: "Garder les audios, transcriptions et marqueurs reliés au bon projet."
+  },
+  {
+    symbol: "📖",
+    title: "Journal de bord",
+    subtitle: "Comptes rendus",
+    text: "Transformer la matière brute en mémoire écrite propre, modifiable puis validée."
+  },
+  {
+    symbol: "🧰",
+    title: "Coffre",
+    subtitle: "Documents",
+    text: "Ranger les fichiers utiles, preuves, pièces, annexes et références."
+  },
+  {
+    symbol: "👥",
+    title: "Équipage",
+    subtitle: "Personnes et rôles",
+    text: "Savoir qui intervient, qui décide, qui doit faire quoi et qui est concerné."
+  },
+  {
+    symbol: "🪢",
+    title: "Manœuvres",
+    subtitle: "Actions",
+    text: "Transformer les échanges en tâches suivies, responsables, échéances et statuts."
+  },
+  {
+    symbol: "🧭",
+    title: "Caps validés",
+    subtitle: "Décisions",
+    text: "Retrouver ce qui a été arbitré, quand, par qui, dans quel contexte."
+  },
+  {
+    symbol: "🔭",
+    title: "Longue-vue",
+    subtitle: "Recherche",
+    text: "Retrouver une information, une décision, un mot, une personne ou un document."
+  },
+  {
+    symbol: "🌀",
+    title: "Log Pose",
+    subtitle: "Prochaine direction",
+    text: "Synthétiser ce qui compte, ce qui bloque, ce qui est décidé et la suite utile."
+  }
+];
+
 function today() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -122,6 +197,7 @@ export default function App() {
     0
   );
 
+  const latestReport = selectedProject?.reports?.[0];
   const logPose = {
     cap: shortText(selectedReport?.decisions, "Aucun cap validé pour l’instant."),
     manoeuvre: shortText(selectedReport?.actions, "Aucune manœuvre prioritaire saisie."),
@@ -333,7 +409,7 @@ export default function App() {
           <h1>Pont du navire</h1>
           <div className="heroSignatureRow">
             <div className="onePieceMotto">
-              <span>Garder le cap, protéger la mémoire, avancer avec son équipage.</span>
+              <span>Une mémoire de projet qui navigue : îles, escales, coffre, équipage, caps et Log Pose.</span>
             </div>
             <div className="strawHatSeal" aria-hidden="true">
               <div className="hatTop"></div>
@@ -342,18 +418,56 @@ export default function App() {
             </div>
           </div>
           <p>
-            Navigue entre tes îles-projets, transforme les escales en journal de bord,
-            retrouve les caps validés et garde toujours la prochaine direction sous les yeux.
+            Monte sur le pont, repère les îles actives, ouvre la carte du projet,
+            transforme les escales en journal de bord et retrouve la prochaine direction.
           </p>
         </div>
 
         <div className="heroCard">
           <div><strong>{data.projects.length}</strong><span>îles / projets</span></div>
-          <div><strong>{totalReports}</strong><span>journaux de bord</span></div>
+          <div><strong>{totalReports}</strong><span>escales consignées</span></div>
           <div><strong>{reportsWithActions}</strong><span>manœuvres</span></div>
           <div><strong>{pointsToWatch}</strong><span>points à surveiller</span></div>
         </div>
       </header>
+
+      <section className="panel navigationDeck">
+        <div className="panelTitle between">
+          <div>
+            <div className="inlineTitle"><FolderKanban size={20} /><h2>Carte de navigation Vogue Merry</h2></div>
+            <p>Les 12 espaces métier du produit, visibles pour ne jamais réduire l’outil à une simple décoration.</p>
+          </div>
+          <span className="statusPill">Architecture complète</span>
+        </div>
+        <div className="navigationGrid">
+          {navigationBlocks.map((block) => (
+            <article className="navigationBlock" key={block.title}>
+              <span className="navSymbol">{block.symbol}</span>
+              <div>
+                <strong>{block.title}</strong>
+                <small>{block.subtitle}</small>
+                <p>{block.text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="panel islandMapPanel">
+        <div className="panelTitle between">
+          <div>
+            <div className="inlineTitle"><FileText size={20} /><h2>Carte de l’île — {selectedProject?.name || "Aucune île"}</h2></div>
+            <p>Vue synthétique du projet actif avant d’entrer dans les escales.</p>
+          </div>
+          <span className="statusPill">Projet actif</span>
+        </div>
+        <div className="islandMapGrid">
+          <article><small>Dernière escale</small><strong>{latestReport?.title || "Aucune escale"}</strong><p>{latestReport?.date || "Créer une première escale."}</p></article>
+          <article><small>Dernier cap</small><p>{shortText(latestReport?.decisions, "Aucune décision consolidée.")}</p></article>
+          <article><small>Manœuvres</small><p>{shortText(latestReport?.actions, "Aucune action ouverte.")}</p></article>
+          <article><small>Questions / risques</small><p>{shortText(latestReport?.openQuestions || latestReport?.risks, "Aucun point bloquant signalé.")}</p></article>
+        </div>
+      </section>
 
       <section className="panel logPosePanel">
         <div className="panelTitle between">
