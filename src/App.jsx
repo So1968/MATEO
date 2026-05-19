@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import MeetingMode from "./components/MeetingMode.jsx";
 import "./style.css";
 
 const spaces = [
@@ -19,12 +20,7 @@ const views = {
   pont: {
     title: "Pont du navire",
     intro: "Vue globale du projet actif. On voit vite quoi reprendre, ce qui bloque et où aller.",
-    cards: [
-      ["Île active", "Exemple — Première île"],
-      ["Dernière escale", "Escale de cadrage"],
-      ["Dernier cap", "Créer une mémoire projet navigable"],
-      ["À faire ensuite", "Structurer les modules sans entasser"]
-    ]
+    cards: [["Île active", "Exemple — Première île"], ["Dernière escale", "Escale de cadrage"], ["Dernier cap", "Créer une mémoire projet navigable"], ["À faire ensuite", "Structurer les modules sans entasser"]]
   },
   iles: {
     title: "Mes îles",
@@ -38,8 +34,8 @@ const views = {
   },
   escales: {
     title: "Escales",
-    intro: "Les escales regroupent réunions, points projet, notes, décisions et matière brute.",
-    cards: [["Escale", "Escale de cadrage"], ["Date", "19/05/2026"], ["Équipage", "Sofia, équipe projet"], ["Export", "VOGUE-MERRY-DONNEES"]]
+    intro: "Les escales regroupent réunions, points projet, notes, décisions et matière brute. Le mode réunion sert à enregistrer, poser des marqueurs et préparer le journal de bord.",
+    cards: [["Escale", "Escale de cadrage"], ["Date", "19/05/2026"], ["Équipage", "Sofia, équipe projet"], ["Mode réunion", "Actif dans cette vue"]]
   },
   audio: {
     title: "Traces audio",
@@ -80,30 +76,25 @@ const views = {
 
 export default function App() {
   const [active, setActive] = useState("pont");
+  const [isRecording, setIsRecording] = useState(false);
+  const [markers, setMarkers] = useState([]);
   const view = useMemo(() => views[active] || views.pont, [active]);
+
+  function handleAddMarker(marker) {
+    setMarkers((current) => [marker, ...current]);
+  }
 
   return (
     <main className="vogueLayout">
       <header className="topLine">
         <strong>Grande Ligne</strong>
-        {[
-          "Pont",
-          "Île",
-          "Carte",
-          "Escale",
-          "Journal",
-          "Caps",
-          "Manœuvres",
-          "🧭 Log Pose"
-        ].map((step) => <span key={step}>{step}</span>)}
+        {["Pont", "Île", "Carte", "Escale", "Journal", "Caps", "Manœuvres", "🧭 Log Pose"].map((step) => <span key={step}>{step}</span>)}
       </header>
 
       <aside className="leftNav">
         <h1>Vogue Merry</h1>
         {spaces.map(([id, icon, label]) => (
-          <button key={id} className={active === id ? "navActive" : ""} onClick={() => setActive(id)}>
-            {icon} {label}
-          </button>
+          <button key={id} className={active === id ? "navActive" : ""} onClick={() => setActive(id)}>{icon} {label}</button>
         ))}
       </aside>
 
@@ -112,10 +103,20 @@ export default function App() {
         <h2>{view.title}</h2>
         <p>{view.intro}</p>
         <div className="commandGrid">
-          {view.cards.map(([label, value]) => (
-            <article key={label}><small>{label}</small><strong>{value}</strong></article>
-          ))}
+          {view.cards.map(([label, value]) => <article key={label}><small>{label}</small><strong>{value}</strong></article>)}
         </div>
+
+        {active === "escales" && (
+          <MeetingMode
+            projectName="Exemple — Première île"
+            reportTitle="Escale de cadrage"
+            isRecording={isRecording}
+            onStartRecording={() => setIsRecording(true)}
+            onStopRecording={() => setIsRecording(false)}
+            onAddMarker={handleAddMarker}
+            markers={markers}
+          />
+        )}
       </section>
 
       <aside className="rightLogPose">
