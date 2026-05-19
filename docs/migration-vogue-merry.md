@@ -1,19 +1,17 @@
-# Migration du prototype Matéo vers Vogue Merry
+# Migration interne Vogue Merry
 
 ## Décision
 
 **Vogue Merry** est le produit unique.
 
-**Matéo** est l’ancien nom du prototype technique et le socle applicatif actuel.
-
-Ce dépôt reste nommé **So1968/MATEO** pendant la transition, pour éviter de casser les liens, habitudes ou chemins locaux.
+Les anciens noms et libellés doivent disparaître des écrans, des documents de travail et du vocabulaire produit.
 
 ## Règle
 
 On ne maintient pas deux produits.
-On transforme le prototype Matéo en produit Vogue Merry.
+On travaille uniquement sur **Vogue Merry**.
 
-## Ce qui peut être renommé sans risque
+## Ce qui doit porter le nom Vogue Merry
 
 - Les titres visibles à l’écran.
 - Le titre navigateur.
@@ -21,16 +19,18 @@ On transforme le prototype Matéo en produit Vogue Merry.
 - Les textes d’aide utilisateur.
 - Les exemples de projet.
 - Les libellés de navigation.
+- Le nom du package npm.
+- Les chemins de lancement local.
+- Les dossiers de données nouvellement créés.
 
-## Ce qui ne doit pas être renommé brutalement
+## Point de vigilance technique
 
-- Les clés de stockage local déjà utilisées.
-- Les noms de scripts npm.
-- Les chemins backend/local déjà attendus par le code.
-- Les dossiers de données existants si l’utilisateur a déjà commencé à travailler dessus.
-- Le nom technique du paquet npm, tant que le renommage complet n’est pas décidé.
+Certaines clés de stockage local peuvent rester temporairement inchangées uniquement si elles protègent des données déjà présentes dans le navigateur.
 
-## Blocs Vogue Merry à intégrer progressivement dans l’interface
+Ces clés ne doivent pas être affichées à l’utilisateur.
+Elles devront être migrées plus tard avec une vraie procédure de reprise des données.
+
+## Blocs Vogue Merry à intégrer dans l’interface
 
 1. **Pont du navire** : vue globale.
 2. **Mes îles** : projets.
@@ -47,27 +47,13 @@ On transforme le prototype Matéo en produit Vogue Merry.
 
 ## Priorité de migration interface
 
-1. Remplacer les mentions visibles de Matéo par Vogue Merry.
-2. Garder Matéo comme mention historique : “ancien prototype technique”.
-3. Réorganiser l’accueil en Pont du navire.
-4. Renommer Projets en Mes îles.
-5. Renommer Documents/Réunions selon les blocs Vogue Merry.
-6. Ajouter un vrai Log Pose visible comme synthèse finale.
+1. Supprimer les anciens libellés visibles.
+2. Réorganiser l’accueil en Pont du navire.
+3. Renommer Projets en Mes îles.
+4. Renommer Documents/Réunions selon les blocs Vogue Merry.
+5. Ajouter un vrai Log Pose visible comme synthèse finale.
+6. Tester le dossier local `VOGUE-MERRY-DONNEES`.
 
 ## Vérification locale
 
-```powershell
-cd C:\DEV\MATEO
-Get-Location
-dir
-npm run dev
-```
-
-Pour lancer aussi le backend local :
-
-```powershell
-cd C:\DEV\MATEO
-Get-Location
-dir
-npm run dev:all
-```
+Voir le README du dépôt pour les commandes de lancement complètes.
