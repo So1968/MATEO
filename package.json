@@ -2,7 +2,7 @@
   "name": "mateo",
   "version": "0.1.0",
   "private": true,
-  "description": "Matéo — mémoire projet, comptes-rendus, recherche et traces de réunions.",
+  "description": "Vogue Merry — mémoire projet, comptes-rendus, recherche et traces de réunions. Ancien prototype technique : Matéo.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
