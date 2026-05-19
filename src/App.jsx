@@ -36,7 +36,7 @@ const initialData = {
     {
       id: crypto.randomUUID(),
       name: "Exemple — Projet EPM",
-      description: "Projet exemple pour tester Matéo.",
+      description: "Projet exemple pour tester Vogue Merry.",
       reports: [
         {
           id: crypto.randomUUID(),
@@ -50,7 +50,7 @@ const initialData = {
           rules: "Chaque réunion doit produire une trace exploitable.",
           screens: "Tableau de bord, recherche, fiche document.",
           openQuestions: "Quel outil de transcription audio choisir ?",
-          actions: "Tester Matéo sur une vraie réunion.",
+          actions: "Tester Vogue Merry sur une vraie réunion.",
           risks: "Perte d'information si les documents de travail ne sont pas rangés.",
           keywords: "EPM, cadrage, règle de calcul, écran, méthode",
           rawNotes: "Notes brutes ou transcription à coller ici."
@@ -149,7 +149,7 @@ export default function App() {
       folderMessage = `Dossier créé dans MATEO-DONNEES : ${result.project.slug}`;
     } catch (error) {
       folderMessage =
-        "Projet créé dans Matéo, mais le dossier local n’a pas pu être créé. Vérifie que le backend est lancé.";
+        "Projet créé dans Vogue Merry, mais le dossier local n’a pas pu être créé. Vérifie que le backend est lancé.";
     }
 
     const project = {
@@ -611,7 +611,7 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `mateo-export-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `vogue-merry-export-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -626,7 +626,7 @@ export default function App() {
     <main className="app">
       <header className="hero">
         <div>
-          <p className="eyebrow">Matéo V1</p>
+          <p className="eyebrow">Vogue Merry</p>
           <h1>Log Pose</h1>
 
         <div className="heroSignatureRow">
@@ -642,19 +642,19 @@ export default function App() {
         </div>
         
           <p>
-            Classe tes réunions par projet, garde une trace propre, puis retrouve les décisions,
-            règles de calcul, écrans, méthodes et points ouverts.
+            Navigue entre tes îles-projets, garde une trace propre des escales,
+            puis retrouve les décisions, documents, actions, méthodes et points ouverts.
           </p>
         </div>
 
         <div className="heroCard">
           <div>
             <strong>{data.projects.length}</strong>
-            <span>projets</span>
+            <span>îles / projets</span>
           </div>
           <div>
             <strong>{totalReports}</strong>
-            <span>documents de travail</span>
+            <span>journaux de bord</span>
           </div>
         </div>
       </header>
@@ -764,14 +764,14 @@ export default function App() {
         <aside className="panel sidebar">
           <div className="panelTitle">
             <FolderKanban size={20} />
-            <h2>Projets</h2>
+            <h2>Mes îles</h2>
           </div>
 
           <div className="newProject">
             <input
               value={newProjectName}
               onChange={(e) => setNewProjectName(e.target.value)}
-              placeholder="Nouveau projet..."
+              placeholder="Nouvelle île / projet..."
             />
             <button onClick={addProject}>
               <Plus size={16} />
@@ -793,7 +793,7 @@ export default function App() {
                 }}
               >
                 <span>{project.name}</span>
-                <small>{project.reports.length} CR</small>
+                <small>{project.reports.length} escales</small>
               </button>
             ))}
           </div>
@@ -801,7 +801,7 @@ export default function App() {
           {selectedProject && (
             <button className="danger ghost" onClick={() => deleteProject(selectedProject.id)}>
               <Trash2 size={16} />
-              Supprimer le projet sélectionné
+              Supprimer l’île / projet sélectionné
             </button>
           )}
         </aside>
@@ -811,13 +811,13 @@ export default function App() {
             <div>
               <div className="inlineTitle">
                 <FileText size={20} />
-                <h2>Documents</h2>
+                <h2>Journal de bord</h2>
               </div>
-              <p>{selectedProject?.name || "Aucun projet sélectionné"}</p>
+              <p>{selectedProject?.name || "Aucune île sélectionnée"}</p>
             </div>
             <button onClick={addReport} disabled={!selectedProject}>
               <Plus size={16} />
-              Nouvelle réunion
+              Nouvelle escale
             </button>
           </div>
 
@@ -835,7 +835,7 @@ export default function App() {
                 </button>
               ))
             ) : (
-              <p className="empty">Aucun document pour ce projet.</p>
+              <p className="empty">Aucun document de bord pour cette île.</p>
             )}
           </div>
         </section>
@@ -844,7 +844,7 @@ export default function App() {
           <div className="panelTitle between">
             <div className="inlineTitle">
               <Save size={20} />
-              <h2>Mode réunion</h2>
+              <h2>Escale / réunion</h2>
             </div>
             {selectedReport && (
               <button className="danger ghost" onClick={() => deleteReport(selectedReport.id)}>
@@ -857,7 +857,7 @@ export default function App() {
           {selectedReport ? (
             <div className="form">
               <div className="activeProjectBanner">
-                Projet actif : <strong>{selectedProject?.name}</strong>
+                Île active : <strong>{selectedProject?.name}</strong>
               </div>
 
               <MeetingMode
@@ -874,7 +874,7 @@ export default function App() {
                 <div>
                   <strong>Classement local</strong>
                   <p>
-                    Exporte cette réunion dans le dossier du projet, avec document Markdown
+                    Exporte cette escale dans le dossier du projet, avec document Markdown
                     et données structurées.
                   </p>
                 </div>
@@ -906,7 +906,7 @@ export default function App() {
               </label>
 
               <label>
-                Titre de la réunion
+                Titre de l’escale / réunion
                 <input
                   value={selectedReport.title}
                   onChange={(e) => updateReport("title", e.target.value)}
@@ -915,7 +915,7 @@ export default function App() {
               </label>
 
               <label>
-                Type de réunion
+                Type d’escale
                 <select
                   value={selectedReport.meetingType || "Cadrage"}
                   onChange={(e) => updateReport("meetingType", e.target.value)}
@@ -937,13 +937,13 @@ export default function App() {
                   <input
                     value={selectedReport.meetingTypeOther || ""}
                     onChange={(e) => updateReport("meetingTypeOther", e.target.value)}
-                    placeholder="Préciser le type de réunion..."
+                    placeholder="Préciser le type d’escale..."
                   />
                 )}
               </label>
 
               <label>
-                Participants
+                Équipage / participants
                 <div className="participantsGrid">
                   {[
                     ...participantOptions,
@@ -1006,7 +1006,7 @@ export default function App() {
               </label>
 
               <label>
-                Décisions prises
+                Caps validés / décisions prises
                 <textarea
                   value={selectedReport.decisions}
                   onChange={(e) => updateReport("decisions", e.target.value)}
@@ -1039,7 +1039,7 @@ export default function App() {
               </label>
 
               <label>
-                Actions à faire
+                Manœuvres / actions à faire
                 <textarea
                   value={selectedReport.actions}
                   onChange={(e) => updateReport("actions", e.target.value)}
@@ -1073,7 +1073,7 @@ export default function App() {
               </label>
             </div>
           ) : (
-            <p className="empty">Crée un document pour commencer.</p>
+            <p className="empty">Crée une escale pour commencer.</p>
           )}
         </section>
       </section>
@@ -1082,7 +1082,7 @@ export default function App() {
         <div className="panelTitle between">
           <div className="inlineTitle">
             <Search size={20} />
-            <h2>Recherche dans la mémoire projet</h2>
+            <h2>Longue-vue — recherche dans la mémoire projet</h2>
           </div>
 
           <button onClick={exportData}>
@@ -1130,7 +1130,7 @@ export default function App() {
       <section className="panel roadmap">
         <div className="inlineTitle">
           <Mic size={20} />
-          <h2>Prochaine étape Matéo V2</h2>
+          <h2>Prochaine étape Vogue Merry</h2>
         </div>
         <p>
           Ajouter une brique transcription audio : import d’un fichier, transcription, puis génération
