@@ -2,6 +2,8 @@ import React, { useMemo, useRef, useState } from "react";
 import MeetingMode from "./components/MeetingMode.jsx";
 import "./style.css";
 
+const API_BASE = "http://127.0.0.1:8010";
+
 const spaces = [
   ["pont", "🗺️", "Carte de l’archipel"],
   ["water", "🏗️", "Water Seven"],
@@ -50,7 +52,7 @@ function analyseDocument(file) {
   })).sort((a, b) => b.score - a.score)[0];
 
   const project = score.score > 0 ? score.name : "À confirmer";
-  const isAudio = ["mp3", "wav", "m4a", "ogg"].includes(ext);
+  const isAudio = ["mp3", "wav", "m4a", "ogg", "webm"].includes(ext);
   const isImage = ["png", "jpg", "jpeg", "webp"].includes(ext);
   const isMeeting = /cr|reunion|réunion|compte.?rendu|escale/.test(text);
   const isDecision = /decision|décision|valide|validé|arbitrage|accord/.test(text);
@@ -127,21 +129,49 @@ const views = {
 function WaterSeven() {
   const fileInputRef = useRef(null);
   const [droppedFile, setDroppedFile] = useState(null);
+  const [serverDeposit, setServerDeposit] = useState(null);
+  const [uploadStatus, setUploadStatus] = useState("idle");
+  const [uploadError, setUploadError] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState(sampleFiles[0]);
-  const activeDocument = droppedFile || fileName;
-  const analysis = useMemo(() => analyseDocument(activeDocument), [activeDocument]);
+  const activeDocument = serverDeposit?.analysis || droppedFile || fileName;
+  const localAnalysis = useMemo(() => analyseDocument(activeDocument), [activeDocument]);
+  const analysis = serverDeposit?.analysis || localAnalysis;
+
+  async function sendToWaterSeven(file) {
+    const formData = new FormData();
+    formData.append("document", file);
+    setUploadStatus("uploading");
+    setUploadError("");
+    setServerDeposit(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/api/water-seven/deposit`, {
+        method: "POST",
+        body: formData
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Dépôt impossible dans Water Seven.");
+      setServerDeposit(data.deposit);
+      setUploadStatus("success");
+    } catch (error) {
+      setUploadStatus("error");
+      setUploadError(error.message || "Backend indisponible.");
+    }
+  }
 
   function handleFiles(files) {
     const [file] = Array.from(files || []);
-    if (file) setDroppedFile(file);
+    if (!file) return;
+    setDroppedFile(file);
+    sendToWaterSeven(file);
   }
 
   return (
     <>
       <p className="eyebrow">Port d’entrée intelligent</p>
       <h2>Water Seven</h2>
-      <p>Mateo prend un document, le glisse ici, et Vogue Merry propose immédiatement où le ranger.</p>
+      <p>Mateo prend un document, le glisse ici, et Vogue Merry l’envoie au port réel avant de proposer où le ranger.</p>
 
       <div
         onDragEnter={(event) => { event.preventDefault(); setIsDragging(true); }}
@@ -160,18 +190,14 @@ function WaterSeven() {
           cursor: "pointer"
         }}
       >
-        <input
-          ref={fileInputRef}
-          type="file"
-          onChange={(event) => handleFiles(event.target.files)}
-          style={{ display: "none" }}
-        />
+        <input ref={fileInputRef} type="file" onChange={(event) => handleFiles(event.target.files)} style={{ display: "none" }} />
         <div style={{ fontSize: "3rem", marginBottom: 10 }}>📦</div>
-        <strong style={{ display: "block", fontSize: "1.45rem", color: "#06182d" }}>
-          Glisse le document ici
-        </strong>
+        <strong style={{ display: "block", fontSize: "1.45rem", color: "#06182d" }}>Glisse le document ici</strong>
         <p style={{ margin: "8px 0 0" }}>PDF, image, audio, note, compte-rendu, lien exporté… Water Seven l’accueille.</p>
         {droppedFile && <p><b>Document reçu :</b> {droppedFile.name} · {analysis.size}</p>}
+        {uploadStatus === "uploading" && <p><b>Water Seven :</b> dépôt réel en cours...</p>}
+        {uploadStatus === "success" && <p><b>Water Seven :</b> fichier sauvegardé, fil d’origine créé.</p>}
+        {uploadStatus === "error" && <p><b>Water Seven :</b> {uploadError}</p>}
       </div>
 
       {!droppedFile && (
@@ -208,14 +234,14 @@ function WaterSeven() {
           <p>{analysis.reason}. Extension détectée : {analysis.extension}. Dépôt reçu dans Water Seven.</p>
         </article>
         <article>
-          <small>Action proposée</small>
-          <strong>Valider ou corriger</strong>
-          <p>Si le cap est clair, Vogue Merry range. Si le brouillard est là, il demande à Mateo.</p>
+          <small>Dépôt réel</small>
+          <strong>{serverDeposit?.id || "En attente"}</strong>
+          <p>{serverDeposit?.filePath || "Le fichier sera sauvegardé dans VOGUE-MERRY-DONNEES / 00_WATER_SEVEN_PORT_ENTREE."}</p>
         </article>
         <article>
           <small>Boutons V1</small>
           <strong>Valider · Corriger · Mettre à quai</strong>
-          <p>Le glisser-déposer est prêt côté interface. La prochaine étape sera de lire le vrai contenu du fichier côté backend.</p>
+          <p>Prochaine étape : déplacer automatiquement vers le bon Coffre après validation.</p>
         </article>
       </div>
     </>
@@ -277,9 +303,9 @@ export default function App() {
         <h2>🧭 Log Pose</h2>
         <small>Boussole de Mateo</small>
         <article><strong>Cap validé</strong><p>Vogue Merry = pilotage projet + cerveau documentaire.</p></article>
-        <article><strong>Water Seven</strong><p>Mateo glisse un document. Vogue Merry comprend, propose et classe.</p></article>
+        <article><strong>Water Seven</strong><p>Mateo glisse un document. Vogue Merry le sauvegarde, comprend, propose et classe.</p></article>
         <article><strong>Règle</strong><p>Si le cap est clair, il range. Si le brouillard est là, il demande.</p></article>
-        <article><strong>Prochaine direction</strong><p>Lire le contenu réel du fichier côté backend.</p></article>
+        <article><strong>Prochaine direction</strong><p>Déplacer automatiquement vers le bon Coffre après validation.</p></article>
       </aside>
     </main>
   );
