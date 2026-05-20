@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import MeetingMode from "./components/MeetingMode.jsx";
 import "./style.css";
 
@@ -40,7 +40,8 @@ function detectDate(text) {
   return result ? result[0].replaceAll("_", " ") : "À confirmer";
 }
 
-function analyseDocument(name) {
+function analyseDocument(file) {
+  const name = typeof file === "string" ? file : file?.name || "document_sans_nom";
   const text = name.toLowerCase();
   const ext = text.includes(".") ? text.split(".").pop() : "inconnu";
   const score = projects.map((project) => ({
@@ -54,7 +55,7 @@ function analyseDocument(name) {
   const isMeeting = /cr|reunion|réunion|compte.?rendu|escale/.test(text);
   const isDecision = /decision|décision|valide|validé|arbitrage|accord/.test(text);
   const isAction = /action|todo|relance|a-faire|faire|envoyer|prevoir|prévoir/.test(text);
-  const isDoc = /pdf|doc|contrat|facture|scan|api|documentation|lien/.test(text);
+  const isDoc = /pdf|doc|docx|txt|md|contrat|facture|scan|api|documentation|lien/.test(text);
 
   let category = "Épaves à trier";
   let target = "Water Seven";
@@ -96,6 +97,7 @@ function analyseDocument(name) {
 
   return {
     fileName: name,
+    size: typeof file === "string" ? "Simulation" : `${Math.max(1, Math.round((file?.size || 0) / 1024))} Ko`,
     extension: ext,
     project,
     category,
@@ -108,82 +110,74 @@ function analyseDocument(name) {
 }
 
 const views = {
-  pont: {
-    title: "Carte de l’archipel",
-    intro: "Vue globale des projets de Mateo : urgences, récifs, prochaines manœuvres et pièces à ranger.",
-    cards: [["Cap prioritaire", "BPM interne"], ["Récif", "Portail client : décision UX attendue"], ["Water Seven", "5 éléments à trier"], ["Prochaine manœuvre", "Valider le classement intelligent"]]
-  },
-  iles: {
-    title: "Mes îles",
-    intro: "Chaque île est un projet. On voit son statut, sa dernière activité et sa prochaine manœuvre.",
-    cards: [["En mer", "BPM interne"], ["À remettre au cap", "Transcription IA"], ["Pris dans les récifs", "Portail client"], ["À l’ancre", "Veille outils"]]
-  },
-  carte: {
-    title: "Carte de l’île",
-    intro: "Résumé de reprise du projet actif : cap actuel, dernière décision, prochaine action et documents utiles.",
-    cards: [["Cap actuel", "Créer un outil de navigation projet"], ["Dernière décision", "Water Seven doit comprendre avant de ranger"], ["Prochaine manœuvre", "Tester le dépôt intelligent"], ["Point de vigilance", "Ne pas faire un simple décor"]]
-  },
-  audio: {
-    title: "Traces audio",
-    intro: "Audios, transcriptions, marqueurs et résumés issus des échanges.",
-    cards: [["Audio", "À importer"], ["Transcription", "À générer"], ["Marqueurs", "À poser pendant l’escale"], ["Lien", "Relié au journal"]]
-  },
-  journal: {
-    title: "Journal de bord",
-    intro: "Mémoire écrite : comptes-rendus, synthèses, notes longues et historique du projet.",
-    cards: [["Parchemins", "Comptes-rendus"], ["Synthèses", "Reprises rapides"], ["Source", "Escale liée"], ["Version", "À valider"]]
-  },
-  coffre: {
-    title: "Coffre",
-    intro: "Le Coffre garde les pièces : documents, liens, images, versions, archives et pièces précieuses.",
-    cards: [["Butin récent", "Derniers fichiers"], ["Épaves à trier", "Non classés"], ["Cartes officielles", "Versions validées"], ["Paquetage", "Dossier complet"]]
-  },
-  equipage: {
-    title: "Équipage",
-    intro: "Personnes, rôles, responsabilités et contacts liés à chaque île.",
-    cards: [["Mateo", "Capitaine"], ["Équipe", "Contributeurs"], ["Métier", "Validation"], ["Référent", "Appui contenu"]]
-  },
-  manoeuvres: {
-    title: "Manœuvres",
-    intro: "Actions à faire, responsables, échéances, priorité et statut.",
-    cards: [["À manœuvrer", "Classer les dépôts"], ["En navigation", "Prototype Water Seven"], ["En attente de vent", "Lecture contenu PDF"], ["Terminée", "Vision produit"]]
-  },
-  caps: {
-    title: "Caps validés",
-    intro: "Décisions prises, arbitrages, validations et points actés.",
-    cards: [["Décision", "Vogue Merry = pilotage + cerveau documentaire"], ["Règle", "Si cap clair, il range"], ["Brouillard", "Il demande à Mateo"], ["Origine", "Conversation de cadrage"]]
-  },
-  longuevue: {
-    title: "Longue-vue",
-    intro: "Recherche dans la mémoire : documents, réunions, décisions, actions, personnes et dates.",
-    cards: [["Recherche", "Décision, action, document"], ["Filtre", "Projet / type"], ["Résultat", "Avec contexte"], ["Ouverture", "Retour à la source"]]
-  },
-  phare: {
-    title: "Phare",
-    intro: "Rappels doux : actions sans échéance, documents non classés, réunions à préparer, projets sans mouvement.",
-    cards: [["Signal", "Document sans date"], ["Signal", "Action sans responsable"], ["Signal", "Projet sans activité"], ["Signal", "Réunion sans CR"]]
-  },
-  logpose: {
-    title: "Log Pose",
-    intro: "Synthèse du cap : où en est le projet, ce qui compte, la prochaine action et les points à ne pas oublier.",
-    cards: [["Cap", "Water Seven intelligent"], ["Prochaine action", "Brancher le dépôt réel"], ["Vigilance", "Qualité avant classement"], ["Mémoire", "Fil d’origine"]]
-  }
+  pont: { title: "Carte de l’archipel", intro: "Vue globale des projets de Mateo : urgences, récifs, prochaines manœuvres et pièces à ranger.", cards: [["Cap prioritaire", "BPM interne"], ["Récif", "Portail client : décision UX attendue"], ["Water Seven", "Glisser-déposer actif"], ["Prochaine manœuvre", "Valider le classement intelligent"]] },
+  iles: { title: "Mes îles", intro: "Chaque île est un projet. On voit son statut, sa dernière activité et sa prochaine manœuvre.", cards: [["En mer", "BPM interne"], ["À remettre au cap", "Transcription IA"], ["Pris dans les récifs", "Portail client"], ["À l’ancre", "Veille outils"]] },
+  carte: { title: "Carte de l’île", intro: "Résumé de reprise du projet actif : cap actuel, dernière décision, prochaine action et documents utiles.", cards: [["Cap actuel", "Créer un outil de navigation projet"], ["Dernière décision", "Water Seven doit comprendre avant de ranger"], ["Prochaine manœuvre", "Tester le dépôt intelligent"], ["Point de vigilance", "Ne pas faire un simple décor"]] },
+  audio: { title: "Traces audio", intro: "Audios, transcriptions, marqueurs et résumés issus des échanges.", cards: [["Audio", "À importer"], ["Transcription", "À générer"], ["Marqueurs", "À poser pendant l’escale"], ["Lien", "Relié au journal"]] },
+  journal: { title: "Journal de bord", intro: "Mémoire écrite : comptes-rendus, synthèses, notes longues et historique du projet.", cards: [["Parchemins", "Comptes-rendus"], ["Synthèses", "Reprises rapides"], ["Source", "Escale liée"], ["Version", "À valider"]] },
+  coffre: { title: "Coffre", intro: "Le Coffre garde les pièces : documents, liens, images, versions, archives et pièces précieuses.", cards: [["Butin récent", "Derniers fichiers"], ["Épaves à trier", "Non classés"], ["Cartes officielles", "Versions validées"], ["Paquetage", "Dossier complet"]] },
+  equipage: { title: "Équipage", intro: "Personnes, rôles, responsabilités et contacts liés à chaque île.", cards: [["Mateo", "Capitaine"], ["Équipe", "Contributeurs"], ["Métier", "Validation"], ["Référent", "Appui contenu"]] },
+  manoeuvres: { title: "Manœuvres", intro: "Actions à faire, responsables, échéances, priorité et statut.", cards: [["À manœuvrer", "Classer les dépôts"], ["En navigation", "Prototype Water Seven"], ["En attente de vent", "Lecture contenu PDF"], ["Terminée", "Vision produit"]] },
+  caps: { title: "Caps validés", intro: "Décisions prises, arbitrages, validations et points actés.", cards: [["Décision", "Vogue Merry = pilotage + cerveau documentaire"], ["Règle", "Si cap clair, il range"], ["Brouillard", "Il demande à Mateo"], ["Origine", "Conversation de cadrage"]] },
+  longuevue: { title: "Longue-vue", intro: "Recherche dans la mémoire : documents, réunions, décisions, actions, personnes et dates.", cards: [["Recherche", "Décision, action, document"], ["Filtre", "Projet / type"], ["Résultat", "Avec contexte"], ["Ouverture", "Retour à la source"]] },
+  phare: { title: "Phare", intro: "Rappels doux : actions sans échéance, documents non classés, réunions à préparer, projets sans mouvement.", cards: [["Signal", "Document sans date"], ["Signal", "Action sans responsable"], ["Signal", "Projet sans activité"], ["Signal", "Réunion sans CR"]] },
+  logpose: { title: "Log Pose", intro: "Synthèse du cap : où en est le projet, ce qui compte, la prochaine action et les points à ne pas oublier.", cards: [["Cap", "Water Seven intelligent"], ["Prochaine action", "Lire le contenu réel"], ["Vigilance", "Qualité avant classement"], ["Mémoire", "Fil d’origine"]] }
 };
 
 function WaterSeven() {
+  const fileInputRef = useRef(null);
+  const [droppedFile, setDroppedFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState(sampleFiles[0]);
-  const analysis = useMemo(() => analyseDocument(fileName), [fileName]);
+  const activeDocument = droppedFile || fileName;
+  const analysis = useMemo(() => analyseDocument(activeDocument), [activeDocument]);
+
+  function handleFiles(files) {
+    const [file] = Array.from(files || []);
+    if (file) setDroppedFile(file);
+  }
 
   return (
     <>
       <p className="eyebrow">Port d’entrée intelligent</p>
       <h2>Water Seven</h2>
-      <p>Mateo dépose. Vogue Merry reconnaît, propose le rangement, signale le brouillard et garde le fil d’origine.</p>
+      <p>Mateo prend un document, le glisse ici, et Vogue Merry propose immédiatement où le ranger.</p>
 
-      <div className="commandGrid">
-        <article>
-          <small>Document déposé</small>
-          <strong>Tester l’analyse</strong>
+      <div
+        onDragEnter={(event) => { event.preventDefault(); setIsDragging(true); }}
+        onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={(event) => { event.preventDefault(); setIsDragging(false); handleFiles(event.dataTransfer.files); }}
+        onClick={() => fileInputRef.current?.click()}
+        style={{
+          margin: "22px 0",
+          padding: "34px",
+          borderRadius: 28,
+          border: isDragging ? "3px solid #d8a849" : "2px dashed rgba(216,168,73,.78)",
+          background: isDragging ? "rgba(216,168,73,.20)" : "linear-gradient(180deg,rgba(255,255,255,.86),rgba(255,248,230,.72))",
+          textAlign: "center",
+          boxShadow: "0 14px 36px rgba(6,24,45,.08)",
+          cursor: "pointer"
+        }}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          onChange={(event) => handleFiles(event.target.files)}
+          style={{ display: "none" }}
+        />
+        <div style={{ fontSize: "3rem", marginBottom: 10 }}>📦</div>
+        <strong style={{ display: "block", fontSize: "1.45rem", color: "#06182d" }}>
+          Glisse le document ici
+        </strong>
+        <p style={{ margin: "8px 0 0" }}>PDF, image, audio, note, compte-rendu, lien exporté… Water Seven l’accueille.</p>
+        {droppedFile && <p><b>Document reçu :</b> {droppedFile.name} · {analysis.size}</p>}
+      </div>
+
+      {!droppedFile && (
+        <article style={{ marginBottom: 18 }}>
+          <small>Mode essai sans fichier</small>
+          <strong>Tu peux aussi tester avec un nom de document</strong>
           <input
             value={fileName}
             onChange={(event) => setFileName(event.target.value)}
@@ -191,6 +185,10 @@ function WaterSeven() {
           />
           <p>Exemples : {sampleFiles.join(" · ")}</p>
         </article>
+      )}
+
+      <div className="commandGrid">
+        <article><small>Document</small><strong>{analysis.fileName}</strong></article>
         <article><small>Île probable</small><strong>{analysis.project}</strong></article>
         <article><small>Type détecté</small><strong>{analysis.category}</strong></article>
         <article><small>Date détectée</small><strong>{analysis.date}</strong></article>
@@ -207,7 +205,7 @@ function WaterSeven() {
         <article>
           <small>Fil d’origine</small>
           <strong>Pourquoi ce classement ?</strong>
-          <p>{analysis.reason}. Extension détectée : {analysis.extension}. Dépôt simulé par Mateo dans Water Seven.</p>
+          <p>{analysis.reason}. Extension détectée : {analysis.extension}. Dépôt reçu dans Water Seven.</p>
         </article>
         <article>
           <small>Action proposée</small>
@@ -217,7 +215,7 @@ function WaterSeven() {
         <article>
           <small>Boutons V1</small>
           <strong>Valider · Corriger · Mettre à quai</strong>
-          <p>La prochaine étape sera de brancher un vrai glisser-déposer de fichiers.</p>
+          <p>Le glisser-déposer est prêt côté interface. La prochaine étape sera de lire le vrai contenu du fichier côté backend.</p>
         </article>
       </div>
     </>
@@ -279,9 +277,9 @@ export default function App() {
         <h2>🧭 Log Pose</h2>
         <small>Boussole de Mateo</small>
         <article><strong>Cap validé</strong><p>Vogue Merry = pilotage projet + cerveau documentaire.</p></article>
-        <article><strong>Water Seven</strong><p>Mateo dépose. Vogue Merry comprend, propose et classe.</p></article>
+        <article><strong>Water Seven</strong><p>Mateo glisse un document. Vogue Merry comprend, propose et classe.</p></article>
         <article><strong>Règle</strong><p>Si le cap est clair, il range. Si le brouillard est là, il demande.</p></article>
-        <article><strong>Prochaine direction</strong><p>Brancher le dépôt réel de fichiers.</p></article>
+        <article><strong>Prochaine direction</strong><p>Lire le contenu réel du fichier côté backend.</p></article>
       </aside>
     </main>
   );
