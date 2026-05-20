@@ -11,6 +11,7 @@ const PORT = 8010;
 const HOME = os.homedir();
 const DATA_ROOT = path.join(HOME, "VOGUE-MERRY-DONNEES");
 const PROJECTS_ROOT = path.join(DATA_ROOT, "01_PROJETS");
+const WATER_SEVEN_ROOT = path.join(DATA_ROOT, "00_WATER_SEVEN_PORT_ENTREE");
 
 app.use(cors());
 app.use(express.json());
@@ -55,6 +56,98 @@ function createFileVersion(filePath, reason = "version") {
   const versionPath = path.join(versionsDir, `${timestampForFile()}_${parsed.name}_${reason}${parsed.ext}`);
   fs.copyFileSync(filePath, versionPath);
   return versionPath;
+}
+
+const WATER_SEVEN_PROJECTS = [
+  { name: "BPM interne", keys: ["bpm", "process", "workflow", "architecture", "api"] },
+  { name: "Transcription IA", keys: ["audio", "transcription", "whisper", "compte rendu", "reunion", "réunion"] },
+  { name: "Portail client", keys: ["client", "ux", "portail", "interface", "maquette"] },
+  { name: "Veille outils", keys: ["veille", "outil", "comparatif", "benchmark"] }
+];
+
+function detectDate(text) {
+  const datePattern = /(\d{1,2})[-_\s]?(janvier|fevrier|février|mars|avril|mai|juin|juillet|aout|août|septembre|octobre|novembre|decembre|décembre|\d{1,2})/i;
+  const result = String(text || "").match(datePattern);
+  return result ? result[0].replaceAll("_", " ") : "À confirmer";
+}
+
+function readTextPreview(file) {
+  const extension = path.extname(file.originalname || "").toLowerCase();
+  const textExtensions = new Set([".txt", ".md", ".csv", ".json"]);
+  if (!textExtensions.has(extension)) return "";
+  return file.buffer.toString("utf8").slice(0, 6000);
+}
+
+function analyseWaterSevenDocument(file) {
+  const originalName = file?.originalname || "document_sans_nom";
+  const contentPreview = readTextPreview(file);
+  const text = `${originalName}\n${contentPreview}`.toLowerCase();
+  const ext = path.extname(originalName).replace(".", "").toLowerCase() || "inconnu";
+
+  const score = WATER_SEVEN_PROJECTS.map((project) => ({
+    name: project.name,
+    score: project.keys.reduce((total, key) => total + (text.includes(key) ? 1 : 0), 0)
+  })).sort((a, b) => b.score - a.score)[0];
+
+  const project = score.score > 0 ? score.name : "À confirmer";
+  const isAudio = ["mp3", "wav", "m4a", "ogg", "webm"].includes(ext);
+  const isImage = ["png", "jpg", "jpeg", "webp"].includes(ext);
+  const isMeeting = /cr|reunion|réunion|compte.?rendu|escale|ordre du jour|participants/.test(text);
+  const isDecision = /decision|décision|valide|validé|arbitrage|accord|acté|acte/.test(text);
+  const isAction = /action|todo|relance|a-faire|à faire|faire|envoyer|prevoir|prévoir|responsable|échéance|echeance/.test(text);
+  const isDoc = /pdf|doc|docx|txt|md|contrat|facture|scan|api|documentation|lien/.test(text);
+
+  let category = "Épaves à trier";
+  let target = "Water Seven";
+  let reason = "Type ou projet encore flou";
+
+  if (isAudio) {
+    category = "Trace audio";
+    target = "Traces audio";
+    reason = "extension audio détectée";
+  } else if (isDecision) {
+    category = "Cap validé";
+    target = "Caps validés";
+    reason = "mot-clé de décision détecté";
+  } else if (isMeeting) {
+    category = "Compte-rendu / réunion";
+    target = "Journal de bord + Escales";
+    reason = "mot-clé réunion ou compte-rendu détecté";
+  } else if (isAction) {
+    category = "Manœuvre";
+    target = "Manœuvres";
+    reason = "mot-clé action détecté";
+  } else if (isImage) {
+    category = "Image / capture";
+    target = "Coffre";
+    reason = "extension image détectée";
+  } else if (isDoc) {
+    category = "Document";
+    target = "Coffre";
+    reason = "document ou lien détecté";
+  }
+
+  const warnings = [];
+  if (project === "À confirmer") warnings.push("Île/projet incertain");
+  if (detectDate(text) === "À confirmer") warnings.push("Date absente ou illisible");
+  if (category === "Épaves à trier") warnings.push("Type de pièce à confirmer");
+  if (isAction && !/mateo|sofia|client|equipe|équipe|responsable/.test(text)) warnings.push("Action possible sans responsable détecté");
+
+  const confidence = warnings.length === 0 ? "🧭 Cap clair" : warnings.length <= 2 ? "🌫️ Brouillard" : "⚠️ Récif";
+
+  return {
+    fileName: originalName,
+    extension: ext,
+    size: `${Math.max(1, Math.round((file?.size || 0) / 1024))} Ko`,
+    project,
+    category,
+    target,
+    date: detectDate(text),
+    reason,
+    confidence,
+    warnings,
+    preview: contentPreview ? contentPreview.slice(0, 800) : "Lecture du contenu prévue en étape suivante pour ce type de fichier."
+  };
 }
 
 function createProjectStructure(projectName) {
@@ -168,6 +261,37 @@ app.get("/api/health", (req, res) => {
     service: "vogue-merry-local-backend",
     dataRoot: DATA_ROOT
   });
+});
+
+app.post("/api/water-seven/deposit", upload.single("document"), (req, res) => {
+  try {
+    if (!req.file) throw new Error("Aucun document reçu dans Water Seven.");
+
+    ensureDir(WATER_SEVEN_ROOT);
+    const depositId = timestampForFile();
+    const depositDir = path.join(WATER_SEVEN_ROOT, depositId);
+    ensureDir(depositDir);
+
+    const safeOriginalName = safeSegment(req.file.originalname || "document");
+    const filePath = path.join(depositDir, safeOriginalName);
+    fs.writeFileSync(filePath, req.file.buffer);
+
+    const analysis = analyseWaterSevenDocument(req.file);
+    const metadata = {
+      id: depositId,
+      depositedAt: new Date().toISOString(),
+      source: "Water Seven",
+      originalName: req.file.originalname,
+      filePath,
+      analysis
+    };
+
+    fs.writeFileSync(path.join(depositDir, "fil_origine.json"), JSON.stringify(metadata, null, 2), "utf8");
+
+    res.status(201).json({ status: "ok", deposit: metadata });
+  } catch (error) {
+    res.status(400).json({ error: error.message || "Erreur pendant le dépôt dans Water Seven." });
+  }
 });
 
 app.get("/api/projects", (req, res) => {
