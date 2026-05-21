@@ -66,6 +66,23 @@ function DashboardPanel({ title, badge, children, className = "" }) {
   );
 }
 
+function ShipAtmosphere() {
+  return (
+    <div className="shipAtmosphere" aria-hidden="true">
+      <div className="sunDisk" />
+      <div className="cloud cloudOne" />
+      <div className="cloud cloudTwo" />
+      <div className="mast mastLeft" />
+      <div className="mast mastRight" />
+      <div className="sail sailLeft" />
+      <div className="sail sailRight" />
+      <div className="rope ropeOne" />
+      <div className="rope ropeTwo" />
+      <div className="deckRail" />
+    </div>
+  );
+}
+
 function LighthouseAlert({ urgentCount }) {
   return (
     <div className={`lighthouseScene ${urgentCount ? "lighthouseOn" : ""}`} aria-label="Phare des urgences">
@@ -90,7 +107,7 @@ function MateoIntro({ onStart }) {
       </div>
       <p>Vogue Merry</p>
       <h2>Mateo, reprends la barre.</h2>
-      <span>Tu arrives face au navire. Dès que tu actives le pont, Mateo passe en mode capitaine : deux mains sur la barre, chapeau de paille visible, cap droit devant.</span>
+      <span>Le pont t’attend. Un clic, et le capitaine pose les deux mains sur la barre : phare, îles, coffre et prochaines manœuvres s’alignent.</span>
       <button onClick={onStart}>Prendre la barre</button>
     </section>
   );
@@ -99,6 +116,7 @@ function MateoIntro({ onStart }) {
 function CaptainMateo({ started }) {
   return (
     <div className={`captainMateo ${started ? "started" : "waiting"}`} aria-label="Mateo capitaine">
+      <div className="captainAura" />
       <div className="captainHat" />
       <div className="captainHead"><span className="hair" /><span className="eye left" /><span className="eye right" /><span className="smile" /><span className="beard" /></div>
       <div className="captainBody"><span className="shirt" /><span className="sash" /><span className="ep left" /><span className="ep right" /></div>
@@ -182,6 +200,7 @@ export default function App() {
     <main className={`vogueMerryApp ${started ? "appStarted" : "appIntro"}`}>
       <div className="skyGlow" />
       <div className="oceanHorizon"><Waves size={110} /></div>
+      <ShipAtmosphere />
       <LighthouseAlert urgentCount={urgentCount} />
       <SideNavigation active={active} onChange={setActive} onStart={start} />
       <section className="commandDeck" onClick={start}>
