@@ -79,6 +79,18 @@ function ShipAtmosphere() {
       <div className="rope ropeOne" />
       <div className="rope ropeTwo" />
       <div className="deckRail" />
+      <div className="bowCurve" />
+    </div>
+  );
+}
+
+function DeckInstruments({ started }) {
+  return (
+    <div className={`deckInstruments ${started ? "instrumentsReady" : ""}`} aria-hidden="true">
+      <div className="instrumentCard compassCard"><Compass size={30} /><strong>Cap</strong><span>Nord-Est</span></div>
+      <div className="instrumentCard windCard"><Waves size={30} /><strong>Vent</strong><span>18 nœuds</span></div>
+      <div className="instrumentCard logCard"><BookOpen size={30} /><strong>Journal</strong><span>4 traces</span></div>
+      <div className="brassDial"><span /><span /><span /></div>
     </div>
   );
 }
@@ -210,6 +222,7 @@ export default function App() {
         <WaterSevenDock onStart={start} />
         <BottomDeck />
       </section>
+      <DeckInstruments started={started} />
       <CaptainMateo started={started} />
       {!started && <MateoIntro onStart={start} />}
       <div className="deckFloor" />
