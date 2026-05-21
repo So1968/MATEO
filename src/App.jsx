@@ -153,6 +153,7 @@ function IslandMap() {
       <div className="seaTexture" />
       {projects.map((project) => (
         <button key={project.name} className={`islandPin island-${project.status} ${project.size}`} style={{ left: `${project.x}%`, top: `${project.y}%` }}>
+          <span className={`islandBeacon beacon-${project.status}`} aria-hidden="true"><span /></span>
           <span className="islandLand"><i /></span><strong>{project.name}</strong><em>{project.label}</em>
         </button>
       ))}
