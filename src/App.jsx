@@ -134,9 +134,11 @@ function WaterSeven() {
   const [uploadError, setUploadError] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState(sampleFiles[0]);
+  const [showDetails, setShowDetails] = useState(false);
   const activeDocument = serverDeposit?.analysis || droppedFile || fileName;
   const localAnalysis = useMemo(() => analyseDocument(activeDocument), [activeDocument]);
   const analysis = serverDeposit?.analysis || localAnalysis;
+  const hasDocument = Boolean(droppedFile || serverDeposit);
 
   async function sendToWaterSeven(file) {
     const formData = new FormData();
@@ -146,10 +148,7 @@ function WaterSeven() {
     setServerDeposit(null);
 
     try {
-      const response = await fetch(`${API_BASE}/api/water-seven/deposit`, {
-        method: "POST",
-        body: formData
-      });
+      const response = await fetch(`${API_BASE}/api/water-seven/deposit`, { method: "POST", body: formData });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Dépôt impossible dans Water Seven.");
       setServerDeposit(data.deposit);
@@ -168,83 +167,69 @@ function WaterSeven() {
   }
 
   return (
-    <>
-      <p className="eyebrow">Port d’entrée intelligent</p>
-      <h2>Water Seven</h2>
-      <p>Mateo prend un document, le glisse ici, et Vogue Merry l’envoie au port réel avant de proposer où le ranger.</p>
+    <section className="waterScene">
+      <div className="waterHero">
+        <p className="eyebrow">Water Seven — Port d’entrée</p>
+        <h2>Dépose. Vogue Merry trie.</h2>
+        <p>Un quai simple pour accueillir les pièces. Mateo glisse un document, le bateau propose le bon cap.</p>
+      </div>
 
       <div
+        className={`dropHarbor ${isDragging ? "dropHarborActive" : ""}`}
         onDragEnter={(event) => { event.preventDefault(); setIsDragging(true); }}
         onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={(event) => { event.preventDefault(); setIsDragging(false); handleFiles(event.dataTransfer.files); }}
         onClick={() => fileInputRef.current?.click()}
-        style={{
-          margin: "22px 0",
-          padding: "34px",
-          borderRadius: 28,
-          border: isDragging ? "3px solid #d8a849" : "2px dashed rgba(216,168,73,.78)",
-          background: isDragging ? "rgba(216,168,73,.20)" : "linear-gradient(180deg,rgba(255,255,255,.86),rgba(255,248,230,.72))",
-          textAlign: "center",
-          boxShadow: "0 14px 36px rgba(6,24,45,.08)",
-          cursor: "pointer"
-        }}
       >
         <input ref={fileInputRef} type="file" onChange={(event) => handleFiles(event.target.files)} style={{ display: "none" }} />
-        <div style={{ fontSize: "3rem", marginBottom: 10 }}>📦</div>
-        <strong style={{ display: "block", fontSize: "1.45rem", color: "#06182d" }}>Glisse le document ici</strong>
-        <p style={{ margin: "8px 0 0" }}>PDF, image, audio, note, compte-rendu, lien exporté… Water Seven l’accueille.</p>
-        {droppedFile && <p><b>Document reçu :</b> {droppedFile.name} · {analysis.size}</p>}
-        {uploadStatus === "uploading" && <p><b>Water Seven :</b> dépôt réel en cours...</p>}
-        {uploadStatus === "success" && <p><b>Water Seven :</b> fichier sauvegardé, fil d’origine créé.</p>}
-        {uploadStatus === "error" && <p><b>Water Seven :</b> {uploadError}</p>}
+        <div className="dockIcon">📦</div>
+        <strong>{hasDocument ? "Document reçu sur le quai" : "Glisse le document ici"}</strong>
+        <span>{hasDocument ? analysis.fileName : "PDF, image, audio, note, compte-rendu ou lien exporté"}</span>
+        {uploadStatus === "uploading" && <em>Water Seven range la caisse sur le quai...</em>}
+        {uploadStatus === "success" && <em>Fichier sauvegardé. Fil d’origine créé.</em>}
+        {uploadStatus === "error" && <em>{uploadError}</em>}
       </div>
 
-      {!droppedFile && (
-        <article style={{ marginBottom: 18 }}>
-          <small>Mode essai sans fichier</small>
-          <strong>Tu peux aussi tester avec un nom de document</strong>
-          <input
-            value={fileName}
-            onChange={(event) => setFileName(event.target.value)}
-            style={{ width: "100%", marginTop: 14, padding: 12, borderRadius: 14, border: "1px solid rgba(216,168,73,.42)" }}
-          />
-          <p>Exemples : {sampleFiles.join(" · ")}</p>
-        </article>
+      {hasDocument ? (
+        <div className="simpleProposal">
+          <div>
+            <small>Île probable</small>
+            <strong>{analysis.project}</strong>
+          </div>
+          <div>
+            <small>Rangement</small>
+            <strong>{analysis.target}</strong>
+          </div>
+          <div>
+            <small>Confiance</small>
+            <strong>{analysis.confidence}</strong>
+          </div>
+          <button>Valider le rangement</button>
+          <button className="secondaryButton">Corriger</button>
+          <button className="secondaryButton">Mettre à quai</button>
+        </div>
+      ) : (
+        <div className="quietTestBox">
+          <small>Mode essai, en attendant un fichier réel</small>
+          <input value={fileName} onChange={(event) => setFileName(event.target.value)} />
+          <span>{sampleFiles.slice(0, 3).join(" · ")}</span>
+        </div>
       )}
 
-      <div className="commandGrid">
-        <article><small>Document</small><strong>{analysis.fileName}</strong></article>
-        <article><small>Île probable</small><strong>{analysis.project}</strong></article>
-        <article><small>Type détecté</small><strong>{analysis.category}</strong></article>
-        <article><small>Date détectée</small><strong>{analysis.date}</strong></article>
-        <article><small>Rangement conseillé</small><strong>{analysis.target}</strong></article>
-        <article><small>Niveau de confiance</small><strong>{analysis.confidence}</strong></article>
-      </div>
+      <button className="detailsToggle" onClick={() => setShowDetails((value) => !value)}>
+        {showDetails ? "Masquer les détails" : "Voir les détails de la vigie"}
+      </button>
 
-      <div className="commandGrid">
-        <article>
-          <small>Vigie qualité</small>
-          <strong>{analysis.warnings.length ? "À vérifier avant rangement" : "Document exploitable"}</strong>
-          <p>{analysis.warnings.length ? analysis.warnings.join(" · ") : "Aucun signal bloquant détecté."}</p>
-        </article>
-        <article>
-          <small>Fil d’origine</small>
-          <strong>Pourquoi ce classement ?</strong>
-          <p>{analysis.reason}. Extension détectée : {analysis.extension}. Dépôt reçu dans Water Seven.</p>
-        </article>
-        <article>
-          <small>Dépôt réel</small>
-          <strong>{serverDeposit?.id || "En attente"}</strong>
-          <p>{serverDeposit?.filePath || "Le fichier sera sauvegardé dans VOGUE-MERRY-DONNEES / 00_WATER_SEVEN_PORT_ENTREE."}</p>
-        </article>
-        <article>
-          <small>Boutons V1</small>
-          <strong>Valider · Corriger · Mettre à quai</strong>
-          <p>Prochaine étape : déplacer automatiquement vers le bon Coffre après validation.</p>
-        </article>
-      </div>
-    </>
+      {showDetails && (
+        <div className="detailsDeck">
+          <article><small>Type détecté</small><strong>{analysis.category}</strong></article>
+          <article><small>Date détectée</small><strong>{analysis.date}</strong></article>
+          <article><small>Vigie qualité</small><strong>{analysis.warnings.length ? "À vérifier" : "OK"}</strong><p>{analysis.warnings.length ? analysis.warnings.join(" · ") : "Aucun signal bloquant."}</p></article>
+          <article><small>Fil d’origine</small><strong>{serverDeposit?.id || "En attente"}</strong><p>{analysis.reason}. {serverDeposit?.filePath || "Le chemin apparaîtra après dépôt réel."}</p></article>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -303,7 +288,7 @@ export default function App() {
         <h2>🧭 Log Pose</h2>
         <small>Boussole de Mateo</small>
         <article><strong>Cap validé</strong><p>Vogue Merry = pilotage projet + cerveau documentaire.</p></article>
-        <article><strong>Water Seven</strong><p>Mateo glisse un document. Vogue Merry le sauvegarde, comprend, propose et classe.</p></article>
+        <article><strong>Water Seven</strong><p>Un quai simple : Mateo glisse, Vogue Merry propose.</p></article>
         <article><strong>Règle</strong><p>Si le cap est clair, il range. Si le brouillard est là, il demande.</p></article>
         <article><strong>Prochaine direction</strong><p>Déplacer automatiquement vers le bon Coffre après validation.</p></article>
       </aside>
