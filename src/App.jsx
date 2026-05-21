@@ -35,12 +35,12 @@ const menu = [
 ];
 
 const projects = [
-  { name: "Branding Nébuleuse", status: "urgent", label: "Urgent", x: 16, y: 31, size: "medium" },
-  { name: "Application Hélios", status: "urgent", label: "Urgent", x: 47, y: 25, size: "large" },
-  { name: "Site Lumina", status: "watch", label: "À surveiller", x: 78, y: 39, size: "small" },
-  { name: "Campagne Océane", status: "ok", label: "OK", x: 25, y: 69, size: "medium" },
-  { name: "Refonte Atlas", status: "progress", label: "En cours", x: 55, y: 72, size: "large volcano" },
-  { name: "Com’ Vogue Claire", status: "ok", label: "OK", x: 83, y: 68, size: "medium" }
+  { name: "Branding Nébuleuse", status: "urgent", label: "Urgent", x: 16, y: 31, size: "medium", mood: "port" },
+  { name: "Application Hélios", status: "urgent", label: "Urgent", x: 47, y: 25, size: "large", mood: "observatory" },
+  { name: "Site Lumina", status: "watch", label: "À surveiller", x: 78, y: 39, size: "small", mood: "cliff" },
+  { name: "Campagne Océane", status: "ok", label: "OK", x: 25, y: 69, size: "medium", mood: "lagoon" },
+  { name: "Refonte Atlas", status: "progress", label: "En cours", x: 55, y: 72, size: "large volcano", mood: "forge" },
+  { name: "Com’ Vogue Claire", status: "ok", label: "OK", x: 83, y: 68, size: "medium", mood: "village" }
 ];
 
 const sectionCopy = {
@@ -152,7 +152,7 @@ function IslandMap() {
       </svg>
       <div className="seaTexture" />
       {projects.map((project) => (
-        <button key={project.name} className={`islandPin island-${project.status} ${project.size}`} style={{ left: `${project.x}%`, top: `${project.y}%` }}>
+        <button key={project.name} className={`islandPin island-${project.status} island-${project.mood} ${project.size}`} style={{ left: `${project.x}%`, top: `${project.y}%` }}>
           <span className={`islandBeacon beacon-${project.status}`} aria-hidden="true"><span /></span>
           <span className="islandLand"><i /></span><strong>{project.name}</strong><em>{project.label}</em>
         </button>
