@@ -1,297 +1,200 @@
-import React, { useMemo, useRef, useState } from "react";
-import MeetingMode from "./components/MeetingMode.jsx";
+import React, { useMemo, useState } from "react";
+import {
+  Anchor,
+  AlertTriangle,
+  Bell,
+  BookOpen,
+  CalendarDays,
+  CheckCircle2,
+  ClipboardList,
+  Compass,
+  FileText,
+  FolderOpen,
+  Mail,
+  Map,
+  Sailboat,
+  Search,
+  Settings,
+  ShipWheel,
+  Telescope,
+  Upload,
+  Waves
+} from "lucide-react";
 import "./style.css";
 
-const API_BASE = "http://127.0.0.1:8010";
-
-const spaces = [
-  ["pont", "🗺️", "Carte de l’archipel"],
-  ["water", "🏗️", "Water Seven"],
-  ["iles", "🏝️", "Mes îles"],
-  ["carte", "🌋", "Carte de l’île"],
-  ["escales", "⚓", "Escales"],
-  ["audio", "🎙️", "Traces audio"],
-  ["journal", "📖", "Journal de bord"],
-  ["coffre", "🧰", "Coffre"],
-  ["equipage", "👥", "Équipage"],
-  ["manoeuvres", "🪢", "Manœuvres"],
-  ["caps", "✅", "Caps validés"],
-  ["longuevue", "🔭", "Longue-vue"],
-  ["phare", "🗼", "Phare"],
-  ["logpose", "🧭", "Log Pose"]
+const menu = [
+  { id: "pont", label: "Pont du navire", icon: ShipWheel },
+  { id: "iles", label: "Mes îles", icon: Map },
+  { id: "escales", label: "Escales", icon: Anchor },
+  { id: "coffre", label: "Coffre", icon: FolderOpen },
+  { id: "journal", label: "Journal de bord", icon: BookOpen },
+  { id: "longuevue", label: "Longue-vue", icon: Telescope },
+  { id: "manoeuvres", label: "Manœuvres", icon: Sailboat },
+  { id: "caps", label: "Caps validés", icon: Compass }
 ];
 
 const projects = [
-  { name: "BPM interne", keys: ["bpm", "process", "workflow", "architecture", "api"] },
-  { name: "Transcription IA", keys: ["audio", "transcription", "whisper", "compte rendu", "reunion"] },
-  { name: "Portail client", keys: ["client", "ux", "portail", "interface", "maquette"] },
-  { name: "Veille outils", keys: ["veille", "outil", "comparatif", "benchmark"] }
+  { name: "Branding Nébuleuse", status: "urgent", label: "Urgent", x: 16, y: 31, size: "medium" },
+  { name: "Application Hélios", status: "urgent", label: "Urgent", x: 47, y: 25, size: "large" },
+  { name: "Site Lumina", status: "watch", label: "À surveiller", x: 78, y: 39, size: "small" },
+  { name: "Campagne Océane", status: "ok", label: "OK", x: 25, y: 69, size: "medium" },
+  { name: "Refonte Atlas", status: "progress", label: "En cours", x: 55, y: 72, size: "large volcano" },
+  { name: "Com’ Vogue Claire", status: "ok", label: "OK", x: 83, y: 68, size: "medium" }
 ];
 
-const sampleFiles = [
-  "CR_reunion_BPM_architecture_22mai.pdf",
-  "audio_point_transcription_ia.m4a",
-  "decision_budget_bpm.md",
-  "capture_portail_client_ux.png",
-  "lien_doc_api_documentaire.txt"
-];
-
-function detectDate(text) {
-  const datePattern = /(\d{1,2})[-_\s]?(janvier|fevrier|février|mars|avril|mai|juin|juillet|aout|août|septembre|octobre|novembre|decembre|décembre|\d{1,2})/i;
-  const result = text.match(datePattern);
-  return result ? result[0].replaceAll("_", " ") : "À confirmer";
-}
-
-function analyseDocument(file) {
-  const name = typeof file === "string" ? file : file?.name || "document_sans_nom";
-  const text = name.toLowerCase();
-  const ext = text.includes(".") ? text.split(".").pop() : "inconnu";
-  const score = projects.map((project) => ({
-    name: project.name,
-    score: project.keys.reduce((total, key) => total + (text.includes(key) ? 1 : 0), 0)
-  })).sort((a, b) => b.score - a.score)[0];
-
-  const project = score.score > 0 ? score.name : "À confirmer";
-  const isAudio = ["mp3", "wav", "m4a", "ogg", "webm"].includes(ext);
-  const isImage = ["png", "jpg", "jpeg", "webp"].includes(ext);
-  const isMeeting = /cr|reunion|réunion|compte.?rendu|escale/.test(text);
-  const isDecision = /decision|décision|valide|validé|arbitrage|accord/.test(text);
-  const isAction = /action|todo|relance|a-faire|faire|envoyer|prevoir|prévoir/.test(text);
-  const isDoc = /pdf|doc|docx|txt|md|contrat|facture|scan|api|documentation|lien/.test(text);
-
-  let category = "Épaves à trier";
-  let target = "Water Seven";
-  let reason = "Type ou projet encore flou";
-
-  if (isAudio) {
-    category = "Trace audio";
-    target = "Traces audio";
-    reason = "extension audio détectée";
-  } else if (isDecision) {
-    category = "Cap validé";
-    target = "Caps validés";
-    reason = "mot-clé de décision détecté";
-  } else if (isMeeting) {
-    category = "Compte-rendu / réunion";
-    target = "Journal de bord + Escales";
-    reason = "mot-clé réunion ou CR détecté";
-  } else if (isAction) {
-    category = "Manœuvre";
-    target = "Manœuvres";
-    reason = "mot-clé action détecté";
-  } else if (isImage) {
-    category = "Image / capture";
-    target = "Coffre";
-    reason = "extension image détectée";
-  } else if (isDoc) {
-    category = "Document";
-    target = "Coffre";
-    reason = "document ou lien détecté";
-  }
-
-  const warnings = [];
-  if (project === "À confirmer") warnings.push("Île/projet incertain");
-  if (detectDate(text) === "À confirmer") warnings.push("Date absente ou illisible");
-  if (category === "Épaves à trier") warnings.push("Type de pièce à confirmer");
-  if (isAction && !/mateo|sofia|client|equipe|équipe/.test(text)) warnings.push("Action possible sans responsable détecté");
-
-  const confidence = warnings.length === 0 ? "🧭 Cap clair" : warnings.length <= 2 ? "🌫️ Brouillard" : "⚠️ Récif";
-
-  return {
-    fileName: name,
-    size: typeof file === "string" ? "Simulation" : `${Math.max(1, Math.round((file?.size || 0) / 1024))} Ko`,
-    extension: ext,
-    project,
-    category,
-    target,
-    date: detectDate(text),
-    reason,
-    confidence,
-    warnings
-  };
-}
-
-const views = {
-  pont: { title: "Carte de l’archipel", intro: "Vue globale des projets de Mateo : urgences, récifs, prochaines manœuvres et pièces à ranger.", cards: [["Cap prioritaire", "BPM interne"], ["Récif", "Portail client : décision UX attendue"], ["Water Seven", "Glisser-déposer actif"], ["Prochaine manœuvre", "Valider le classement intelligent"]] },
-  iles: { title: "Mes îles", intro: "Chaque île est un projet. On voit son statut, sa dernière activité et sa prochaine manœuvre.", cards: [["En mer", "BPM interne"], ["À remettre au cap", "Transcription IA"], ["Pris dans les récifs", "Portail client"], ["À l’ancre", "Veille outils"]] },
-  carte: { title: "Carte de l’île", intro: "Résumé de reprise du projet actif : cap actuel, dernière décision, prochaine action et documents utiles.", cards: [["Cap actuel", "Créer un outil de navigation projet"], ["Dernière décision", "Water Seven doit comprendre avant de ranger"], ["Prochaine manœuvre", "Tester le dépôt intelligent"], ["Point de vigilance", "Ne pas faire un simple décor"]] },
-  audio: { title: "Traces audio", intro: "Audios, transcriptions, marqueurs et résumés issus des échanges.", cards: [["Audio", "À importer"], ["Transcription", "À générer"], ["Marqueurs", "À poser pendant l’escale"], ["Lien", "Relié au journal"]] },
-  journal: { title: "Journal de bord", intro: "Mémoire écrite : comptes-rendus, synthèses, notes longues et historique du projet.", cards: [["Parchemins", "Comptes-rendus"], ["Synthèses", "Reprises rapides"], ["Source", "Escale liée"], ["Version", "À valider"]] },
-  coffre: { title: "Coffre", intro: "Le Coffre garde les pièces : documents, liens, images, versions, archives et pièces précieuses.", cards: [["Butin récent", "Derniers fichiers"], ["Épaves à trier", "Non classés"], ["Cartes officielles", "Versions validées"], ["Paquetage", "Dossier complet"]] },
-  equipage: { title: "Équipage", intro: "Personnes, rôles, responsabilités et contacts liés à chaque île.", cards: [["Mateo", "Capitaine"], ["Équipe", "Contributeurs"], ["Métier", "Validation"], ["Référent", "Appui contenu"]] },
-  manoeuvres: { title: "Manœuvres", intro: "Actions à faire, responsables, échéances, priorité et statut.", cards: [["À manœuvrer", "Classer les dépôts"], ["En navigation", "Prototype Water Seven"], ["En attente de vent", "Lecture contenu PDF"], ["Terminée", "Vision produit"]] },
-  caps: { title: "Caps validés", intro: "Décisions prises, arbitrages, validations et points actés.", cards: [["Décision", "Vogue Merry = pilotage + cerveau documentaire"], ["Règle", "Si cap clair, il range"], ["Brouillard", "Il demande à Mateo"], ["Origine", "Conversation de cadrage"]] },
-  longuevue: { title: "Longue-vue", intro: "Recherche dans la mémoire : documents, réunions, décisions, actions, personnes et dates.", cards: [["Recherche", "Décision, action, document"], ["Filtre", "Projet / type"], ["Résultat", "Avec contexte"], ["Ouverture", "Retour à la source"]] },
-  phare: { title: "Phare", intro: "Rappels doux : actions sans échéance, documents non classés, réunions à préparer, projets sans mouvement.", cards: [["Signal", "Document sans date"], ["Signal", "Action sans responsable"], ["Signal", "Projet sans activité"], ["Signal", "Réunion sans CR"]] },
-  logpose: { title: "Log Pose", intro: "Synthèse du cap : où en est le projet, ce qui compte, la prochaine action et les points à ne pas oublier.", cards: [["Cap", "Water Seven intelligent"], ["Prochaine action", "Lire le contenu réel"], ["Vigilance", "Qualité avant classement"], ["Mémoire", "Fil d’origine"]] }
+const sectionCopy = {
+  pont: "Le poste de commandement : voir les îles, les urgences, la prochaine action et les documents à reprendre.",
+  iles: "Chaque projet devient une île avec son état, son cap et ses signaux de priorité.",
+  escales: "Les réunions deviennent des escales : date, ordre du jour, décisions et compte-rendu.",
+  coffre: "Le coffre range les documents, images, preuves, liens, versions et pièces utiles.",
+  journal: "Le journal de bord conserve les comptes-rendus, les synthèses et la mémoire longue.",
+  longuevue: "La longue-vue retrouve une information dans les projets, les documents et les décisions.",
+  manoeuvres: "Les manœuvres regroupent les tâches, responsables, échéances et relances.",
+  caps: "Les caps validés conservent les arbitrages et décisions déjà actées."
 };
 
-function WaterSeven() {
-  const fileInputRef = useRef(null);
-  const [droppedFile, setDroppedFile] = useState(null);
-  const [serverDeposit, setServerDeposit] = useState(null);
-  const [uploadStatus, setUploadStatus] = useState("idle");
-  const [uploadError, setUploadError] = useState("");
-  const [isDragging, setIsDragging] = useState(false);
-  const [fileName, setFileName] = useState(sampleFiles[0]);
-  const [showDetails, setShowDetails] = useState(false);
-  const activeDocument = serverDeposit?.analysis || droppedFile || fileName;
-  const localAnalysis = useMemo(() => analyseDocument(activeDocument), [activeDocument]);
-  const analysis = serverDeposit?.analysis || localAnalysis;
-  const hasDocument = Boolean(droppedFile || serverDeposit);
+const recentDocuments = ["Brief Projet Hélios.pdf", "Maquette_Accueil.fig", "Charte_Marque_01.docx", "Moodboard_Océane.jpg"];
+const decisions = ["Axe créatif Atlas — validé", "Palette couleurs — validée", "Arborescence — validée"];
+const activities = ["Mateo a ajouté une note", "Mateo cartographe a tracé un cap", "Mateo a validé une décision", "Mateo a rangé 3 documents"];
 
-  async function sendToWaterSeven(file) {
-    const formData = new FormData();
-    formData.append("document", file);
-    setUploadStatus("uploading");
-    setUploadError("");
-    setServerDeposit(null);
-
-    try {
-      const response = await fetch(`${API_BASE}/api/water-seven/deposit`, { method: "POST", body: formData });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Dépôt impossible dans Water Seven.");
-      setServerDeposit(data.deposit);
-      setUploadStatus("success");
-    } catch (error) {
-      setUploadStatus("error");
-      setUploadError(error.message || "Backend indisponible.");
-    }
-  }
-
-  function handleFiles(files) {
-    const [file] = Array.from(files || []);
-    if (!file) return;
-    setDroppedFile(file);
-    sendToWaterSeven(file);
-  }
-
+function DashboardPanel({ title, badge, children, className = "" }) {
   return (
-    <section className="waterScene">
-      <div className="waterHero">
-        <p className="eyebrow">Water Seven — Port d’entrée</p>
-        <h2>Dépose. Vogue Merry trie.</h2>
-        <p>Un quai simple pour accueillir les pièces. Mateo glisse un document, le bateau propose le bon cap.</p>
-      </div>
-
-      <div
-        className={`dropHarbor ${isDragging ? "dropHarborActive" : ""}`}
-        onDragEnter={(event) => { event.preventDefault(); setIsDragging(true); }}
-        onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={(event) => { event.preventDefault(); setIsDragging(false); handleFiles(event.dataTransfer.files); }}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <input ref={fileInputRef} type="file" onChange={(event) => handleFiles(event.target.files)} style={{ display: "none" }} />
-        <div className="dockIcon">📦</div>
-        <strong>{hasDocument ? "Document reçu sur le quai" : "Glisse le document ici"}</strong>
-        <span>{hasDocument ? analysis.fileName : "PDF, image, audio, note, compte-rendu ou lien exporté"}</span>
-        {uploadStatus === "uploading" && <em>Water Seven range la caisse sur le quai...</em>}
-        {uploadStatus === "success" && <em>Fichier sauvegardé. Fil d’origine créé.</em>}
-        {uploadStatus === "error" && <em>{uploadError}</em>}
-      </div>
-
-      {hasDocument ? (
-        <div className="simpleProposal">
-          <div>
-            <small>Île probable</small>
-            <strong>{analysis.project}</strong>
-          </div>
-          <div>
-            <small>Rangement</small>
-            <strong>{analysis.target}</strong>
-          </div>
-          <div>
-            <small>Confiance</small>
-            <strong>{analysis.confidence}</strong>
-          </div>
-          <button>Valider le rangement</button>
-          <button className="secondaryButton">Corriger</button>
-          <button className="secondaryButton">Mettre à quai</button>
-        </div>
-      ) : (
-        <div className="quietTestBox">
-          <small>Mode essai, en attendant un fichier réel</small>
-          <input value={fileName} onChange={(event) => setFileName(event.target.value)} />
-          <span>{sampleFiles.slice(0, 3).join(" · ")}</span>
-        </div>
-      )}
-
-      <button className="detailsToggle" onClick={() => setShowDetails((value) => !value)}>
-        {showDetails ? "Masquer les détails" : "Voir les détails de la vigie"}
-      </button>
-
-      {showDetails && (
-        <div className="detailsDeck">
-          <article><small>Type détecté</small><strong>{analysis.category}</strong></article>
-          <article><small>Date détectée</small><strong>{analysis.date}</strong></article>
-          <article><small>Vigie qualité</small><strong>{analysis.warnings.length ? "À vérifier" : "OK"}</strong><p>{analysis.warnings.length ? analysis.warnings.join(" · ") : "Aucun signal bloquant."}</p></article>
-          <article><small>Fil d’origine</small><strong>{serverDeposit?.id || "En attente"}</strong><p>{analysis.reason}. {serverDeposit?.filePath || "Le chemin apparaîtra après dépôt réel."}</p></article>
-        </div>
-      )}
+    <section className={`dashboardPanel ${className}`}>
+      <header className="panelTitle"><span>{title}</span>{badge ? <strong>{badge}</strong> : null}</header>
+      <div className="panelBody">{children}</div>
     </section>
   );
 }
 
-export default function App() {
-  const [active, setActive] = useState("water");
-  const [isRecording, setIsRecording] = useState(false);
-  const [markers, setMarkers] = useState([]);
-  const view = useMemo(() => views[active] || views.pont, [active]);
+function LighthouseAlert({ urgentCount }) {
+  return (
+    <div className={`lighthouseScene ${urgentCount ? "lighthouseOn" : ""}`} aria-label="Phare des urgences">
+      <div className="lightBeam one" />
+      <div className="lightBeam two" />
+      <div className="lighthouseGlow" />
+      <div className="lighthouseTop" />
+      <div className="lighthouseBody"><span /><span /><span /></div>
+      <div className="lighthouseRock" />
+    </div>
+  );
+}
 
-  function handleAddMarker(marker) {
-    setMarkers((current) => [marker, ...current]);
-  }
+function MateoIntro({ onStart }) {
+  return (
+    <section className="mateoIntro">
+      <div className="introCompass"><Compass size={42} /></div>
+      <div className="introPortrait">
+        <div className="portraitHat" />
+        <div className="portraitHead"><span className="portraitHair" /><span className="portraitEye l" /><span className="portraitEye r" /><span className="portraitSmile" /><span className="portraitBeard" /></div>
+        <div className="portraitShoulders" />
+      </div>
+      <p>Vogue Merry</p>
+      <h2>Mateo, reprends la barre.</h2>
+      <span>Tu arrives face au navire. Dès que tu actives le pont, Mateo passe en mode capitaine : deux mains sur la barre, chapeau de paille visible, cap droit devant.</span>
+      <button onClick={onStart}>Prendre la barre</button>
+    </section>
+  );
+}
+
+function CaptainMateo({ started }) {
+  return (
+    <div className={`captainMateo ${started ? "started" : "waiting"}`} aria-label="Mateo capitaine">
+      <div className="captainHat" />
+      <div className="captainHead"><span className="hair" /><span className="eye left" /><span className="eye right" /><span className="smile" /><span className="beard" /></div>
+      <div className="captainBody"><span className="shirt" /><span className="sash" /><span className="ep left" /><span className="ep right" /></div>
+      <div className="arm leftArm" />
+      <div className="arm rightArm" />
+      <div className="helm"><span className="ring" /><span className="center"><Compass size={28} /></span><span className="spoke s1" /><span className="spoke s2" /><span className="spoke s3" /><span className="spoke s4" /></div>
+    </div>
+  );
+}
+
+function IslandMap() {
+  return (
+    <section className="mapFrame">
+      <div className="mapHeader">Carte des îles-projets</div>
+      <svg className="routeLayer" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M160 190 C280 120 380 150 470 142 S690 125 770 205" />
+        <path d="M240 382 C370 315 450 390 548 392 S730 326 835 380" />
+        <path d="M470 142 C512 230 540 312 548 392" />
+        <path d="M160 190 C155 280 198 337 240 382" />
+      </svg>
+      <div className="seaTexture" />
+      {projects.map((project) => (
+        <button key={project.name} className={`islandPin island-${project.status} ${project.size}`} style={{ left: `${project.x}%`, top: `${project.y}%` }}>
+          <span className="islandLand"><i /></span><strong>{project.name}</strong><em>{project.label}</em>
+        </button>
+      ))}
+      <div className="compassRose"><Compass size={62} /></div>
+      <aside className="mapLegend"><b>État des projets</b><span className="dot-urgent">Urgent</span><span className="dot-progress">En cours</span><span className="dot-watch">À surveiller</span><span className="dot-ok">En bonne voie</span></aside>
+    </section>
+  );
+}
+
+function SideNavigation({ active, onChange, onStart }) {
+  return (
+    <aside className="sideNavigation">
+      <div className="brandMark"><Compass /><h1>Vogue Merry</h1></div>
+      <nav>{menu.map(({ id, label, icon: Icon }) => <button key={id} className={active === id ? "active" : ""} onClick={() => { onStart(); onChange(id); }}><Icon size={21} /><span>{label}</span></button>)}</nav>
+      <div className="crewNote"><strong>Cap clair.</strong><p>Le phare s’allume quand il y a urgence.</p></div>
+    </aside>
+  );
+}
+
+function TopBar() {
+  return <header className="topBar"><div className="quoteScroll">“Chaque projet est une île. Chaque décision, un nouveau cap.”</div><div className="profileDock"><div className="avatarMateo">M</div><div><strong>Capitaine de projet</strong><span>Équipage Vogue Merry</span></div><Bell size={19} /><Mail size={19} /><Settings size={19} /></div></header>;
+}
+
+function RightCommand({ urgentCount, onStart }) {
+  return (
+    <aside className="rightCommand">
+      <DashboardPanel title="Prochaine escale"><div className="harborThumb" /><h3>Havre des Idées</h3><p>Réunion de lancement</p><small><CalendarDays size={15} /> 24 mai 2024 · 10:00</small></DashboardPanel>
+      <DashboardPanel title="Prochaine action"><div className="actionLine"><ClipboardList /><div><h3>Valider la maquette</h3><p>Page Accueil · Site Lumina</p></div></div><small>Échéance : 27 mai 2024</small><button className="primaryButton" onClick={onStart}>Ouvrir la tâche →</button></DashboardPanel>
+      <DashboardPanel title="Alertes & urgences" badge={urgentCount} className="urgentPanel"><div className="beaconNotice"><AlertTriangle size={18} /> Phare allumé</div><p>2 tâches en retard</p><p>1 validation en attente</p><button className="dangerButton" onClick={onStart}>Voir les urgences →</button></DashboardPanel>
+    </aside>
+  );
+}
+
+function BottomDeck() {
+  return (
+    <section className="bottomDeck">
+      <DashboardPanel title="Moral de l’équipage"><div className="morale"><span>♥</span><strong>92%</strong></div><p>Excellent cap !</p></DashboardPanel>
+      <DashboardPanel title="Documents récents" badge="5"><ul>{recentDocuments.map((doc) => <li key={doc}><FileText size={15} />{doc}</li>)}</ul></DashboardPanel>
+      <DashboardPanel title="Décisions validées"><ul>{decisions.map((decision) => <li key={decision}><CheckCircle2 size={15} />{decision}</li>)}</ul></DashboardPanel>
+      <DashboardPanel title="Caps validés" badge="12"><h3>Bravo, Capitaine !</h3><p>Tous les caps sont à jour.</p><div className="anchors">⚓ ⚓ ⚓ ⚓ ⚓</div></DashboardPanel>
+      <DashboardPanel title="Activité"><ul>{activities.map((a) => <li key={a}>{a}</li>)}</ul></DashboardPanel>
+    </section>
+  );
+}
+
+function WaterSevenDock({ onStart }) {
+  return <div className="waterSevenDock"><Upload size={24} /><div><strong>Water Seven</strong><p>Déposer un document, une image ou une trace audio pour proposer un rangement.</p></div><button className="primaryButton" onClick={onStart}>Ouvrir le quai</button></div>;
+}
+
+export default function App() {
+  const [active, setActive] = useState("pont");
+  const [started, setStarted] = useState(false);
+  const urgentCount = useMemo(() => projects.filter((p) => p.status === "urgent").length + 1, []);
+  const activeLabel = menu.find((item) => item.id === active)?.label || "Pont du navire";
+  const start = () => setStarted(true);
 
   return (
-    <main className="vogueLayout">
-      <header className="topLine">
-        <strong>Vogue Merry</strong>
-        {["Carte de l’archipel", "Water Seven", "Coffre", "Longue-vue", "Phare", "🧭 Log Pose"].map((step) => <span key={step}>{step}</span>)}
-      </header>
-
-      <aside className="leftNav">
-        <h1>Vogue Merry</h1>
-        {spaces.map(([id, icon, label]) => (
-          <button key={id} className={active === id ? "navActive" : ""} onClick={() => setActive(id)}>{icon} {label}</button>
-        ))}
-      </aside>
-
-      <section className="workspace">
-        {active === "water" ? (
-          <WaterSeven />
-        ) : (
-          <>
-            <p className="eyebrow">Poste de navigation métier</p>
-            <h2>{view.title}</h2>
-            <p>{view.intro}</p>
-            <div className="commandGrid">
-              {view.cards.map(([label, value]) => <article key={label}><small>{label}</small><strong>{value}</strong></article>)}
-            </div>
-          </>
-        )}
-
-        {active === "escales" && (
-          <MeetingMode
-            projectName="BPM interne"
-            reportTitle="Escale de cadrage"
-            isRecording={isRecording}
-            onStartRecording={() => setIsRecording(true)}
-            onStopRecording={() => setIsRecording(false)}
-            onAddMarker={handleAddMarker}
-            markers={markers}
-          />
-        )}
+    <main className={`vogueMerryApp ${started ? "appStarted" : "appIntro"}`}>
+      <div className="skyGlow" />
+      <div className="oceanHorizon"><Waves size={110} /></div>
+      <LighthouseAlert urgentCount={urgentCount} />
+      <SideNavigation active={active} onChange={setActive} onStart={start} />
+      <section className="commandDeck" onClick={start}>
+        <TopBar />
+        <div className="sectionIntro"><p>Poste actif · {activeLabel}</p><h2>{activeLabel}</h2><span>{sectionCopy[active]}</span></div>
+        <div className="mainGrid"><IslandMap /><RightCommand urgentCount={urgentCount} onStart={start} /></div>
+        <WaterSevenDock onStart={start} />
+        <BottomDeck />
       </section>
-
-      <aside className="rightLogPose">
-        <h2>🧭 Log Pose</h2>
-        <small>Boussole de Mateo</small>
-        <article><strong>Cap validé</strong><p>Vogue Merry = pilotage projet + cerveau documentaire.</p></article>
-        <article><strong>Water Seven</strong><p>Un quai simple : Mateo glisse, Vogue Merry propose.</p></article>
-        <article><strong>Règle</strong><p>Si le cap est clair, il range. Si le brouillard est là, il demande.</p></article>
-        <article><strong>Prochaine direction</strong><p>Déplacer automatiquement vers le bon Coffre après validation.</p></article>
-      </aside>
+      <CaptainMateo started={started} />
+      {!started && <MateoIntro onStart={start} />}
+      <div className="deckFloor" />
+      <Search className="hiddenSearchIcon" />
     </main>
   );
 }
