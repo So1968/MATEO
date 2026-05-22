@@ -1,0 +1,21 @@
+/* DA2 — deuxième directeur artistique : moins gadget, plus premium */
+.islandPin{--beacon-color:#f0c84b;--beacon-glow:rgba(240,200,75,.44)}
+.island-urgent{--beacon-color:#d93636;--beacon-glow:rgba(217,54,54,.62)}
+.island-watch{--beacon-color:#f0c84b;--beacon-glow:rgba(240,200,75,.5)}
+.island-progress{--beacon-color:#d98939;--beacon-glow:rgba(217,137,57,.45)}
+.island-ok{--beacon-color:#56b877;--beacon-glow:rgba(86,184,119,.34)}
+
+.islandBeacon{top:-8px;width:34px;height:43px;opacity:.96}
+.islandBeacon:before{left:12px;width:10px;height:27px;border-radius:7px 7px 2px 2px;background:linear-gradient(180deg,#f4ead3 0 34%,#d5ccb9 35% 62%,#8b632f 63%);box-shadow:0 6px 10px rgba(0,0,0,.26)}
+.islandBeacon:after{left:6px;top:8px;width:22px;height:14px;border-radius:9px 9px 4px 4px;background:linear-gradient(180deg,#3a180b,#1c0904);border:2px solid rgba(255,224,138,.68);box-shadow:0 5px 8px rgba(0,0,0,.22)}
+.islandBeacon span{left:12px;top:11px;width:10px;height:7px;border-radius:999px;background:var(--beacon-color);box-shadow:0 0 9px var(--beacon-glow)}
+.islandBeacon span:after{left:8px;top:1px;width:30px;height:6px;background:linear-gradient(90deg,var(--beacon-glow),transparent);opacity:.42;filter:blur(1px)}
+.beacon-urgent span{animation:beaconSoftPulse 2.8s infinite}.beacon-watch span{animation:beaconSoftPulse 3.8s infinite}
+
+.islandLand{background:radial-gradient(circle at 43% 22%,#e7f4a4 0 13%,#73b957 14% 42%,#2f6d43 43% 70%,#2c2415 71%);box-shadow:0 0 0 7px rgba(255,255,255,.14),0 20px 34px rgba(0,0,0,.42),inset -10px -15px 18px rgba(0,0,0,.3),inset 10px 9px 14px rgba(255,255,255,.18)}
+.islandLand:before{left:18px;bottom:18px;width:70px;height:17px;border-radius:50%;background:rgba(255,255,255,.16);filter:blur(7px)}
+.islandLand:after{left:21px;bottom:22px;width:22px;height:15px;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,#f4d28a,#9b642e);box-shadow:27px 5px 0 -4px rgba(244,210,138,.86)}
+
+.island-urgent .islandLand{box-shadow:0 0 0 7px rgba(255,255,255,.14),0 0 14px rgba(217,54,54,.22),0 20px 34px rgba(0,0,0,.42),inset -10px -15px 18px rgba(0,0,0,.3)}
+.island-watch .islandLand{box-shadow:0 0 0 7px rgba(255,255,255,.14),0 0 12px rgba(240,200,75,.2),0 20px 34px rgba(0,0,0,.42),inset -10px -15px 18px rgba(0,0,0,.3)}
+.island-progress .islandLand,.island-ok .islandLand{box-shadow:0 0 0 7px rgba(255,255,255,.14),0 20px 34px rgba(0,0,0,.42),inset -10px -15px 18px rgba(0,0,0,.3)}
