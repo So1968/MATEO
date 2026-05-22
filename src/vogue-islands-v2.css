@@ -35,3 +35,6 @@
 .island-village .islandLand:after{left:23px;bottom:23px;width:21px;height:18px;border-radius:6px;background:#efd491;box-shadow:25px -5px 0 -4px #efd491,51px 3px 0 -6px #efd491,39px -17px 0 -11px #efd491}
 .islandBeacon{top:1px;transform:translateX(-50%) scale(.88)}
 .islandPin strong{font-family:Georgia,serif;background:linear-gradient(180deg,#fff4c8,#d4a457);border-color:rgba(82,42,15,.38)}
+
+/* V3.1 — lisibilité écran et anti-dock */
+.commandDeck{padding-top:18px;padding-bottom:150px}.sectionIntro{margin-bottom:12px}.sectionIntro h2{font-size:clamp(2.8rem,4.4vw,5.2rem)}.sectionIntro span{font-size:1rem}.mapFrame{min-height:500px}.rightCommand{gap:12px}.dashboardPanel{border-radius:22px}.panelBody{padding:13px}.panelBody h3{font-size:1.05rem}.harborThumb{height:86px}.islandPin strong{padding:6px 9px;font-size:.8rem}.islandPin em{font-size:.6rem}.islandPin:nth-of-type(4){top:66%!important}.islandPin:nth-of-type(5){top:66%!important}.islandPin:nth-of-type(6){top:64%!important}
