@@ -1,0 +1,15 @@
+/* Panneaux V2 — plus poste de commandement, moins tableau administratif */
+.commandDeck{background:linear-gradient(180deg,rgba(4,22,37,.82),rgba(3,15,26,.64));border-color:rgba(255,224,138,.34)}
+.dashboardPanel{position:relative;border-radius:24px;border:1px solid rgba(255,224,138,.38);background:linear-gradient(180deg,#fff0bf 0%,#e3bd72 100%);box-shadow:0 20px 42px rgba(0,0,0,.32),inset 0 0 0 1px rgba(255,255,255,.22)}
+.dashboardPanel:before{content:"";position:absolute;inset:7px;border-radius:18px;border:1px solid rgba(82,42,15,.16);pointer-events:none}
+.panelTitle{padding:11px 14px;background:linear-gradient(90deg,#251105,#0a2742 42%,#251105);border-bottom:1px solid rgba(255,224,138,.34);font-family:Georgia,serif;letter-spacing:.08em}
+.panelBody{padding:16px 15px 15px}.panelBody h3{font-family:Georgia,serif;font-size:1.12rem;color:#251105}.panelBody p{color:#60451f}.panelBody small{color:#6b4b25}.panelTitle strong{background:linear-gradient(180deg,#d8493d,#8f1f1a);box-shadow:0 0 0 2px rgba(255,224,138,.35),0 0 14px rgba(216,56,56,.28)}
+.urgentPanel{border-color:rgba(216,56,56,.34);box-shadow:0 20px 42px rgba(0,0,0,.32),0 0 32px rgba(216,56,56,.18),inset 0 0 0 1px rgba(255,255,255,.22)}
+.harborThumb{height:92px;border-radius:17px;background:radial-gradient(circle at 72% 22%,#ffe6a0 0 12%,transparent 18%),linear-gradient(135deg,#8ed9ff 0%,#236985 56%,#d7a85b 100%);box-shadow:inset 0 0 36px rgba(255,255,255,.28),0 12px 22px rgba(0,0,0,.18)}
+.primaryButton,.dangerButton{transition:transform .18s,box-shadow .18s}.primaryButton:hover,.dangerButton:hover{transform:translateY(-1px);box-shadow:0 15px 28px rgba(0,0,0,.28)}
+.waterSevenDock{background:linear-gradient(90deg,rgba(4,18,31,.86),rgba(22,52,73,.78));border-color:rgba(255,224,138,.34);box-shadow:0 16px 34px rgba(0,0,0,.26)}
+.waterSevenDock strong{font-family:Georgia,serif;color:#ffe9a7}.bottomDeck .dashboardPanel{min-height:145px}.bottomDeck .panelTitle{font-size:.68rem}.morale strong{font-family:Georgia,serif;color:#251105}.anchors{letter-spacing:.08em;color:#12334e}.activityList li,.panelList li,.bottomDeck li{line-height:1.25}.quoteScroll{box-shadow:0 16px 34px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.35)}
+.profileDock{border-color:rgba(255,224,138,.36);background:linear-gradient(180deg,rgba(3,15,28,.9),rgba(9,38,62,.82))}.sectionIntro h2{text-shadow:0 14px 35px rgba(0,0,0,.38)}
+.mapHeader{background:linear-gradient(90deg,#251105,#0a2742,#251105);font-family:Georgia,serif;letter-spacing:.14em}
+.mapLegend{background:rgba(2,14,26,.88);border-color:rgba(255,224,138,.34);box-shadow:0 12px 24px rgba(0,0,0,.25)}
+.beaconNotice{padding:7px 9px;border-radius:12px;background:rgba(216,56,56,.11);border:1px solid rgba(216,56,56,.18)}
