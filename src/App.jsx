@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import "./style.css";
 import "./vogue-extra.css";
+import "./vogue-da2.css";
 
 const menu = [
   { id: "pont", label: "Pont du navire", icon: ShipWheel },
