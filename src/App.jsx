@@ -23,6 +23,7 @@ import {
 import "./style.css";
 import "./vogue-extra.css";
 import "./vogue-da2.css";
+import "./vogue-islands-v2.css";
 
 const menu = [
   { id: "pont", label: "Pont du navire", icon: ShipWheel },
