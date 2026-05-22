@@ -21,3 +21,17 @@
 .islandPin em{margin-top:5px;padding:3px 10px;letter-spacing:.02em}.island-urgent em{background:#c53d3d}.island-watch em{background:#d39c20}.island-progress em{background:#d7772c}.island-ok em{background:#219461}
 .island-urgent .islandLand,.island-watch .islandLand,.island-progress .islandLand,.island-ok .islandLand{box-shadow:0 18px 30px rgba(0,0,0,.36),inset -12px -18px 20px rgba(0,0,0,.28),inset 10px 9px 18px rgba(255,255,255,.18)}
 .island-urgent .islandBeacon span{box-shadow:0 0 10px rgba(217,54,54,.7)}.island-watch .islandBeacon span{box-shadow:0 0 9px rgba(240,200,75,.58)}.island-progress .islandBeacon span{box-shadow:0 0 8px rgba(217,137,57,.5)}.island-ok .islandBeacon span{box-shadow:0 0 7px rgba(86,184,119,.38)}
+
+/* Îles V3 — moins galets/sushis, plus carte illustrée */
+.islandLand{border-radius:61% 39% 58% 42%/54% 48% 52% 46%;transform:perspective(220px) rotateX(10deg) rotate(-2deg);background:radial-gradient(ellipse at 36% 28%,#fff0af 0 12%,#bedc71 13% 25%,#6db25e 26% 48%,#2d754f 49% 69%,#2b2418 70%);box-shadow:0 22px 28px rgba(0,0,0,.34),0 0 0 5px rgba(244,220,143,.25),inset -16px -18px 20px rgba(0,0,0,.28),inset 12px 8px 16px rgba(255,255,255,.16)}
+.islandPin:nth-of-type(even) .islandLand{border-radius:44% 56% 43% 57%/48% 58% 42% 52%;transform:perspective(220px) rotateX(10deg) rotate(3deg)}
+.islandLand:before{left:7%;right:7%;bottom:-10px;height:25px;background:radial-gradient(ellipse,rgba(2,20,31,.34),transparent 68%);filter:blur(8px)}
+.islandLand:after{height:18px;border-radius:7px;background:linear-gradient(180deg,#f5dca0,#9b6731);box-shadow:24px -5px 0 -6px #f7e3ad,48px 5px 0 -7px #eacb83}
+.island-port .islandLand:after{left:25px;bottom:23px;width:82px;height:18px;border-radius:8px;background:linear-gradient(90deg,#6d4420 0 18%,#f1d898 19% 40%,#7b4d24 41% 58%,#f1d898 59%);box-shadow:0 -14px 0 -8px #f1d898,38px -17px 0 -10px #f1d898}
+.island-observatory .islandLand:after{left:43px;bottom:28px;width:50px;height:30px;border-radius:50% 50% 10px 10px;background:radial-gradient(circle at 50% 38%,#ffe8ad 0 30%,#8e5a2b 31%);box-shadow:0 -15px 0 -10px #ffe8ad}
+.island-cliff .islandLand:after{left:22px;bottom:24px;width:76px;height:18px;border-radius:4px;background:linear-gradient(90deg,#e0cda3,#7b6c51);clip-path:polygon(0 42%,33% 0,100% 22%,86% 100%,10% 100%)}
+.island-lagoon .islandLand:after{left:25px;bottom:22px;width:70px;height:20px;border-radius:50%;background:radial-gradient(ellipse,#9be9d3 0 45%,#e9d49b 46% 65%,transparent 66%);box-shadow:none}
+.island-forge .islandLand:after{left:25px;bottom:24px;width:78px;height:19px;border-radius:5px;background:repeating-linear-gradient(90deg,#5b3518 0 8px,#d7b46e 9px 17px);box-shadow:33px -16px 0 -10px #c45a32}
+.island-village .islandLand:after{left:23px;bottom:23px;width:21px;height:18px;border-radius:6px;background:#efd491;box-shadow:25px -5px 0 -4px #efd491,51px 3px 0 -6px #efd491,39px -17px 0 -11px #efd491}
+.islandBeacon{top:1px;transform:translateX(-50%) scale(.88)}
+.islandPin strong{font-family:Georgia,serif;background:linear-gradient(180deg,#fff4c8,#d4a457);border-color:rgba(82,42,15,.38)}
