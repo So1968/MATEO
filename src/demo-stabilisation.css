@@ -115,6 +115,33 @@
   line-height: 0.92 !important;
 }
 
+/* Mateo doit guider le regard, pas cacher la carte. */
+.captainMateo.started {
+  transform: translate(-50%, 12%) scale(0.64) !important;
+  transform-origin: bottom center !important;
+  opacity: 0.92;
+  pointer-events: none;
+  z-index: 4 !important;
+}
+
+.captainMateo.started .captainAura {
+  opacity: 0.18 !important;
+}
+
+.deckInstruments.instrumentsReady {
+  transform: translateX(-50%) scale(0.84) !important;
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.mapLegend {
+  z-index: 7 !important;
+}
+
+.mapHeader {
+  z-index: 8 !important;
+}
+
 @media (max-width: 1180px) {
   .sectionIntro h2 {
     font-size: clamp(38px, 7vw, 62px) !important;
@@ -137,5 +164,9 @@
 
   .mapFrame {
     min-height: 500px !important;
+  }
+
+  .captainMateo.started {
+    transform: translate(-50%, 18%) scale(0.56) !important;
   }
 }
