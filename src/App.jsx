@@ -90,6 +90,79 @@ const caps = [
   { title: "Démo avant perfection", badge: "Cap", text: "Mercredi, il faut comprendre la promesse, pas finir tout le logiciel." }
 ];
 
+const workspacePanelStyle = {
+  minHeight: "clamp(430px, 54vh, 590px)",
+  border: "4px solid rgba(184, 106, 36, 0.86)",
+  borderRadius: "28px",
+  padding: "28px",
+  background: "linear-gradient(135deg, rgba(5, 27, 43, 0.96), rgba(8, 52, 67, 0.93))",
+  boxShadow: "0 18px 48px rgba(0, 0, 0, 0.22)",
+  position: "relative",
+  overflow: "hidden"
+};
+
+const workspaceHeaderStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: "16px",
+  marginBottom: "24px"
+};
+
+const workspaceIconStyle = {
+  width: "58px",
+  height: "58px",
+  padding: "12px",
+  borderRadius: "20px",
+  color: "#291302",
+  background: "linear-gradient(135deg, #ffe6a0, #bd782b)",
+  boxShadow: "0 12px 24px rgba(0, 0, 0, 0.26)"
+};
+
+const workspaceEyebrowStyle = {
+  margin: "0 0 4px",
+  color: "#ffdc85",
+  textTransform: "uppercase",
+  letterSpacing: "0.22em",
+  fontSize: "0.72rem",
+  fontWeight: 900
+};
+
+const workspaceTitleStyle = {
+  margin: 0,
+  color: "#fff7dc",
+  fontSize: "clamp(2rem, 4vw, 4.2rem)",
+  lineHeight: 0.95
+};
+
+const cardListStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+  gap: "18px"
+};
+
+const cardStyle = {
+  minHeight: "190px",
+  border: "1px solid rgba(255, 218, 129, 0.48)",
+  borderRadius: "24px",
+  padding: "22px",
+  background: "linear-gradient(160deg, rgba(255, 238, 177, 0.96), rgba(210, 152, 73, 0.92))",
+  color: "#2b1605",
+  boxShadow: "0 18px 32px rgba(0, 0, 0, 0.24)"
+};
+
+const badgeStyle = {
+  display: "inline-flex",
+  marginBottom: "16px",
+  padding: "7px 12px",
+  borderRadius: "999px",
+  background: "rgba(6, 29, 48, 0.92)",
+  color: "#ffe7a5",
+  textTransform: "uppercase",
+  letterSpacing: "0.12em",
+  fontSize: "0.68rem",
+  fontWeight: 900
+};
+
 function DashboardPanel({ title, badge, children, className = "" }) {
   return (
     <section className={`dashboardPanel ${className}`}>
@@ -237,12 +310,12 @@ function WaterSevenDock({ onStart }) {
 
 function CardList({ items }) {
   return (
-    <div className="vogueCardList">
+    <div className="vogueCardList" style={cardListStyle}>
       {items.map((item) => (
-        <article className="vogueWorkCard" key={item.title}>
-          <span>{item.badge}</span>
-          <h3>{item.title}</h3>
-          <p>{item.text}</p>
+        <article className="vogueWorkCard" style={cardStyle} key={item.title}>
+          <span style={badgeStyle}>{item.badge}</span>
+          <h3 style={{ margin: "0 0 12px", fontSize: "1.35rem", lineHeight: 1.08 }}>{item.title}</h3>
+          <p style={{ margin: 0, color: "rgba(43, 22, 5, 0.78)", fontWeight: 800, lineHeight: 1.48 }}>{item.text}</p>
         </article>
       ))}
     </div>
@@ -275,12 +348,12 @@ function SectionWorkspace({ active, urgentCount, onStart }) {
   const Icon = current.icon;
 
   return (
-    <section className="sectionWorkspacePanel">
-      <div className="sectionWorkspaceHeader">
-        <Icon size={34} />
+    <section className="sectionWorkspacePanel" style={workspacePanelStyle}>
+      <div className="sectionWorkspaceHeader" style={workspaceHeaderStyle}>
+        <Icon size={34} style={workspaceIconStyle} />
         <div>
-          <p>Zone active</p>
-          <h2>{current.title}</h2>
+          <p style={workspaceEyebrowStyle}>Zone active</p>
+          <h2 style={workspaceTitleStyle}>{current.title}</h2>
         </div>
       </div>
       <CardList items={current.items} />
