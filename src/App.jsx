@@ -37,12 +37,12 @@ const menu = [
 ];
 
 const projects = [
-  { name: "Branding Nébuleuse", status: "urgent", label: "Urgent", x: 16, y: 31, size: "medium", mood: "port" },
-  { name: "Application Hélios", status: "urgent", label: "Urgent", x: 47, y: 25, size: "large", mood: "observatory" },
-  { name: "Site Lumina", status: "watch", label: "À surveiller", x: 78, y: 39, size: "small", mood: "cliff" },
-  { name: "Campagne Océane", status: "ok", label: "OK", x: 25, y: 69, size: "medium", mood: "lagoon" },
-  { name: "Refonte Atlas", status: "progress", label: "En cours", x: 55, y: 72, size: "large volcano", mood: "forge" },
-  { name: "Com’ Vogue Claire", status: "ok", label: "OK", x: 83, y: 68, size: "medium", mood: "village" }
+  { name: "Réunions & escales", status: "watch", label: "À structurer", x: 16, y: 31, size: "medium", mood: "port" },
+  { name: "Cœur du navire", status: "progress", label: "En construction", x: 47, y: 25, size: "large", mood: "observatory" },
+  { name: "Traces audio", status: "urgent", label: "Priorité", x: 78, y: 39, size: "small", mood: "cliff" },
+  { name: "Coffre documentaire", status: "progress", label: "En cours", x: 25, y: 69, size: "medium", mood: "lagoon" },
+  { name: "Longue-vue recherche", status: "watch", label: "À brancher", x: 55, y: 72, size: "large volcano", mood: "forge" },
+  { name: "Transmission Mateo", status: "ok", label: "Cap clair", x: 83, y: 68, size: "medium", mood: "village" }
 ];
 
 const sectionCopy = {
@@ -59,6 +59,36 @@ const sectionCopy = {
 const recentDocuments = ["Brief Projet Hélios.pdf", "Maquette_Accueil.fig", "Charte_Marque_01.docx", "Moodboard_Océane.jpg"];
 const decisions = ["Axe créatif Atlas — validé", "Palette couleurs — validée", "Arborescence — validée"];
 const activities = ["Mateo a ajouté une note", "Mateo cartographe a tracé un cap", "Mateo a validé une décision", "Mateo a rangé 3 documents"];
+
+const escales = [
+  { title: "Démo Mateo", badge: "À dater", text: "Réunion de présentation : audio, notes, décisions et actions à raccrocher au bon projet." },
+  { title: "Point associé", badge: "À préparer", text: "Clarifier ce que Vogue Merry doit faire seul, et ce qui reste dans Azoth Studio." },
+  { title: "Reprise technique", badge: "En cours", text: "Nettoyer les doublons, stabiliser le dépôt et garder une seule version officielle." }
+];
+
+const coffreItems = [
+  { title: "Présentation Mateo", badge: "Support", text: "PDF, PPTX et pitch de présentation à garder comme références." },
+  { title: "Charte Kiwika", badge: "Document", text: "Note de cadrage à relier au coffre documentaire." },
+  { title: "Trames réunion", badge: "Méthode", text: "Déroulé, marqueurs audio et structure de compte-rendu." }
+];
+
+const journalItems = [
+  { title: "Décision : Vogue Merry est le produit officiel", badge: "Validé", text: "Le dépôt So1968/MATEO devient la base applicative. Azoth Studio reste l'atelier qui le porte." },
+  { title: "Règle : ne plus travailler dans les brouillons", badge: "Protection", text: "VOGUE_MARRY_SEUL et les anciennes copies servent d'archives, pas de chantier actif." },
+  { title: "Prochaine synthèse", badge: "À faire", text: "Créer un Log Pose de reprise : état, prochaine action, risques, décisions." }
+];
+
+const manoeuvres = [
+  { title: "Ranger les doublons", badge: "Priorité", text: "Identifier officiel / archives / documentation. Ne rien supprimer sans sauvegarde." },
+  { title: "Brancher la vraie mémoire", badge: "V2", text: "Faire en sorte que les escales, documents, caps et journal ne soient plus seulement visuels." },
+  { title: "Préparer la démo", badge: "Mercredi", text: "Montrer le pont, ouvrir une escale, retrouver une décision, déposer un document." }
+];
+
+const caps = [
+  { title: "Vogue Merry = produit", badge: "Acté", text: "Le produit n'est pas Azoth. Il est porté par Azoth." },
+  { title: "Un fil = un projet", badge: "Règle", text: "On évite de mélanger Azoth, Cortijo, ARTAG et Vogue Merry dans la même zone de travail." },
+  { title: "Démo avant perfection", badge: "Cap", text: "Mercredi, il faut comprendre la promesse, pas finir tout le logiciel." }
+];
 
 function DashboardPanel({ title, badge, children, className = "" }) {
   return (
@@ -160,7 +190,7 @@ function IslandMap() {
         </button>
       ))}
       <div className="compassRose"><Compass size={62} /></div>
-      <aside className="mapLegend"><b>État des projets</b><span className="dot-urgent">Urgent</span><span className="dot-progress">En cours</span><span className="dot-watch">À surveiller</span><span className="dot-ok">En bonne voie</span></aside>
+      <aside className="mapLegend"><b>État des projets</b><span className="dot-urgent">Priorité</span><span className="dot-progress">En cours</span><span className="dot-watch">À structurer</span><span className="dot-ok">Cap clair</span></aside>
     </section>
   );
 }
@@ -170,7 +200,7 @@ function SideNavigation({ active, onChange, onStart }) {
     <aside className="sideNavigation">
       <div className="brandMark"><Compass /><h1>Vogue Merry</h1></div>
       <nav>{menu.map(({ id, label, icon: Icon }) => <button key={id} className={active === id ? "active" : ""} onClick={() => { onStart(); onChange(id); }}><Icon size={21} /><span>{label}</span></button>)}</nav>
-      <div className="crewNote"><strong>Cap clair.</strong><p>Le phare s’allume quand il y a urgence.</p></div>
+      <div className="crewNote"><strong>Cap clair.</strong><p>Le phare s’allume quand une trace risque de se perdre.</p></div>
     </aside>
   );
 }
@@ -182,9 +212,9 @@ function TopBar() {
 function RightCommand({ urgentCount, onStart }) {
   return (
     <aside className="rightCommand">
-      <DashboardPanel title="Prochaine escale"><div className="harborThumb" /><h3>Havre des Idées</h3><p>Réunion de lancement</p><small><CalendarDays size={15} /> 24 mai 2024 · 10:00</small></DashboardPanel>
-      <DashboardPanel title="Prochaine action"><div className="actionLine"><ClipboardList /><div><h3>Valider la maquette</h3><p>Page Accueil · Site Lumina</p></div></div><small>Échéance : 27 mai 2024</small><button className="primaryButton" onClick={onStart}>Ouvrir la tâche →</button></DashboardPanel>
-      <DashboardPanel title="Alertes & urgences" badge={urgentCount} className="urgentPanel"><div className="beaconNotice"><AlertTriangle size={18} /> Phare allumé</div><p>2 tâches en retard</p><p>1 validation en attente</p><button className="dangerButton" onClick={onStart}>Voir les urgences →</button></DashboardPanel>
+      <DashboardPanel title="Prochaine escale"><div className="harborThumb" /><h3>Réunion à transformer</h3><p>Audio, notes, décisions et actions à raccrocher au bon projet</p><small><CalendarDays size={15} /> Démo Mateo · À dater</small></DashboardPanel>
+      <DashboardPanel title="Prochaine action"><div className="actionLine"><ClipboardList /><div><h3>Stabiliser le moteur</h3><p>Escales · Coffre · Journal · Log Pose</p></div></div><small>Objectif : une première version utilisable</small><button className="primaryButton" onClick={onStart}>Ouvrir la tâche →</button></DashboardPanel>
+      <DashboardPanel title="Alertes & urgences" badge={urgentCount} className="urgentPanel"><div className="beaconNotice"><AlertTriangle size={18} /> Phare allumé</div><p>Traces audio à intégrer</p><p>Recherche Longue-vue à brancher</p><button className="dangerButton" onClick={onStart}>Voir les urgences →</button></DashboardPanel>
     </aside>
   );
 }
@@ -205,6 +235,59 @@ function WaterSevenDock({ onStart }) {
   return <div className="waterSevenDock"><Upload size={24} /><div><strong>Water Seven</strong><p>Déposer un document, une image ou une trace audio pour proposer un rangement.</p></div><button className="primaryButton" onClick={onStart}>Ouvrir le quai</button></div>;
 }
 
+function CardList({ items }) {
+  return (
+    <div className="vogueCardList">
+      {items.map((item) => (
+        <article className="vogueWorkCard" key={item.title}>
+          <span>{item.badge}</span>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function SectionWorkspace({ active, urgentCount, onStart }) {
+  if (active === "pont") {
+    return <div className="mainGrid"><IslandMap /><RightCommand urgentCount={urgentCount} onStart={onStart} /></div>;
+  }
+
+  if (active === "iles") {
+    return <div className="mainGrid"><IslandMap /><DashboardPanel title="Lecture des îles"><p>Chaque île représente une zone de mémoire projet. Le statut indique ce qui réclame l'attention.</p><ul><li>Priorité : à reprendre vite.</li><li>En cours : chantier actif.</li><li>À structurer : matière non rangée.</li><li>Cap clair : zone stabilisée.</li></ul></DashboardPanel></div>;
+  }
+
+  const views = {
+    escales: { title: "Escales à transformer", icon: Anchor, items: escales },
+    coffre: { title: "Coffre documentaire", icon: FolderOpen, items: coffreItems },
+    journal: { title: "Journal de bord", icon: BookOpen, items: journalItems },
+    longuevue: { title: "Longue-vue", icon: Telescope, items: [
+      { title: "Recherche globale", badge: "À brancher", text: "Retrouver une décision, un document, une escale ou une trace audio depuis un seul champ." },
+      { title: "Filtres utiles", badge: "Mémoire", text: "Projet, date, personne, type de trace, statut et cap validé." },
+      { title: "Résultat attendu", badge: "Usage", text: "Ne plus fouiller dans tous les dossiers pour retrouver une information." }
+    ] },
+    manoeuvres: { title: "Manœuvres à faire", icon: Sailboat, items: manoeuvres },
+    caps: { title: "Caps validés", icon: Compass, items: caps }
+  };
+
+  const current = views[active] || views.journal;
+  const Icon = current.icon;
+
+  return (
+    <section className="sectionWorkspacePanel">
+      <div className="sectionWorkspaceHeader">
+        <Icon size={34} />
+        <div>
+          <p>Zone active</p>
+          <h2>{current.title}</h2>
+        </div>
+      </div>
+      <CardList items={current.items} />
+    </section>
+  );
+}
+
 export default function App() {
   const [active, setActive] = useState("pont");
   const [started, setStarted] = useState(false);
@@ -222,9 +305,9 @@ export default function App() {
       <section className="commandDeck" onClick={start}>
         <TopBar />
         <div className="sectionIntro"><p>Poste actif · {activeLabel}</p><h2>{activeLabel}</h2><span>{sectionCopy[active]}</span></div>
-        <div className="mainGrid"><IslandMap /><RightCommand urgentCount={urgentCount} onStart={start} /></div>
-        <WaterSevenDock onStart={start} />
-        <BottomDeck />
+        <SectionWorkspace active={active} urgentCount={urgentCount} onStart={start} />
+        {active === "pont" && <WaterSevenDock onStart={start} />}
+        {active === "pont" && <BottomDeck />}
       </section>
       <DeckInstruments started={started} />
       <CaptainMateo started={started} />
