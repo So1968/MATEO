@@ -3,7 +3,7 @@
    sans toucher au moteur fonctionnel. */
 
 :root {
-  --demo-safe-bottom: 84px;
+  --demo-safe-bottom: 96px;
 }
 
 .vogueMerryApp {
@@ -21,43 +21,65 @@
 }
 
 .sectionIntro {
-  margin-top: clamp(8px, 1.2vh, 18px) !important;
-  margin-bottom: clamp(14px, 2vh, 24px) !important;
+  margin-top: clamp(4px, 0.8vh, 12px) !important;
+  margin-bottom: clamp(10px, 1.4vh, 18px) !important;
 }
 
 .sectionIntro h2 {
-  font-size: clamp(44px, 5vw, 76px) !important;
+  font-size: clamp(40px, 4.4vw, 64px) !important;
   line-height: 0.92 !important;
-  margin: 0 0 8px !important;
+  margin: 0 0 6px !important;
   text-wrap: balance;
 }
 
 .sectionIntro p {
   margin-top: 0 !important;
+  margin-bottom: 6px !important;
   letter-spacing: 0.22em !important;
 }
 
 .sectionIntro span {
   display: block;
   max-width: 980px;
-  line-height: 1.35 !important;
+  line-height: 1.28 !important;
+}
+
+.topBar {
+  margin-bottom: 10px !important;
+}
+
+.quoteScroll {
+  padding-block: 10px !important;
 }
 
 .mainGrid {
   align-items: start !important;
+  gap: 14px !important;
 }
 
 .mapFrame {
-  min-height: clamp(480px, 58vh, 660px) !important;
+  min-height: clamp(430px, 54vh, 590px) !important;
 }
 
 .rightCommand {
   position: sticky;
-  top: 18px;
+  top: 12px;
   align-self: start;
-  max-height: calc(100vh - 150px);
+  max-height: calc(100vh - 124px);
   overflow-y: auto;
   padding-right: 4px;
+}
+
+.rightCommand .dashboardPanel {
+  margin-bottom: 12px !important;
+}
+
+.rightCommand .panelBody {
+  padding-block: 12px !important;
+}
+
+.rightCommand h3 {
+  margin-block: 7px !important;
 }
 
 .dashboardPanel,
@@ -72,6 +94,14 @@
   max-height: calc(100vh - 28px);
   overflow-y: auto;
   padding-bottom: var(--demo-safe-bottom) !important;
+}
+
+.sideNavigation nav {
+  gap: 8px !important;
+}
+
+.sideNavigation nav button {
+  min-height: 49px !important;
 }
 
 .sideNavigation nav button,
@@ -117,20 +147,20 @@
 
 /* Mateo doit guider le regard, pas cacher la carte. */
 .captainMateo.started {
-  transform: translate(-50%, 12%) scale(0.64) !important;
+  transform: translate(-50%, 16%) scale(0.54) !important;
   transform-origin: bottom center !important;
-  opacity: 0.92;
+  opacity: 0.88;
   pointer-events: none;
   z-index: 4 !important;
 }
 
 .captainMateo.started .captainAura {
-  opacity: 0.18 !important;
+  opacity: 0.14 !important;
 }
 
 .deckInstruments.instrumentsReady {
-  transform: translateX(-50%) scale(0.84) !important;
-  opacity: 0.92;
+  transform: translateX(-50%) scale(0.78) !important;
+  opacity: 0.90;
   pointer-events: none;
 }
 
@@ -144,7 +174,7 @@
 
 @media (max-width: 1180px) {
   .sectionIntro h2 {
-    font-size: clamp(38px, 7vw, 62px) !important;
+    font-size: clamp(38px, 7vw, 58px) !important;
   }
 
   .mainGrid {
@@ -159,14 +189,18 @@
 
 @media (max-height: 820px) {
   .sectionIntro h2 {
-    font-size: clamp(38px, 4.6vw, 62px) !important;
+    font-size: clamp(34px, 4vw, 54px) !important;
   }
 
   .mapFrame {
-    min-height: 500px !important;
+    min-height: 450px !important;
   }
 
   .captainMateo.started {
-    transform: translate(-50%, 18%) scale(0.56) !important;
+    transform: translate(-50%, 22%) scale(0.48) !important;
+  }
+
+  .deckInstruments.instrumentsReady {
+    transform: translateX(-50%) scale(0.72) !important;
   }
 }
