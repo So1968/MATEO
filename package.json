@@ -1,8 +1,8 @@
 {
-  "name": "vogue-merry",
+  "name": "vogue-mary",
   "version": "0.1.0",
   "private": true,
-  "description": "Vogue Merry — mémoire projet, journaux de bord, recherche, traces audio, escales, caps validés et Log Pose.",
+  "description": "Vogue Mary — mémoire projet, journaux de bord, recherche, traces audio, escales, caps validés et Log Pose.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
