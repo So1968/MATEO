@@ -1,14 +1,14 @@
-# Vogue Merry
+# Vogue Mary
 
 ## Statut du dépôt
 
-Ce dépôt est le dépôt applicatif de **Vogue Merry**.
+Ce dépôt est le dépôt applicatif de **Vogue Mary**.
 
-Vogue Merry est le produit unique. Les anciens noms ou libellés techniques doivent être progressivement remplacés par le vocabulaire Vogue Merry.
+Vogue Mary est le produit unique. Les anciens noms ou libellés techniques doivent être progressivement remplacés par le vocabulaire Vogue Mary.
 
 ## Produit
 
-**Vogue Merry** est un outil de mémoire projet inspiré d’un univers de navigation maritime et de manga d’aventure.
+**Vogue Mary** est un outil de mémoire projet inspiré d’un univers de navigation maritime, sans dépendre directement de l’univers One Piece.
 
 Il sert à transformer les réunions, audios, notes, transcriptions, documents et décisions dispersés en mémoire projet navigable.
 
@@ -16,7 +16,7 @@ Objectif : retrouver rapidement le projet, l’escale, la décision, le document
 
 ## Logique fonctionnelle à préserver
 
-L’outil ne doit pas devenir seulement une page décorative. L’univers maritime / manga d’aventure doit servir le fonctionnement de l’outil.
+L’outil ne doit pas devenir seulement une page décorative. L’univers maritime doit servir le fonctionnement de l’outil.
 
 Organisation cible :
 
@@ -44,12 +44,12 @@ Cycle : source → travail → validé → historique.
 
 ## Règle de développement
 
-Toute évolution graphique Vogue Merry doit conserver le moteur fonctionnel existant : projets, escales, sources, documents de travail, validation, historique, recherche, export local et continuité de la mémoire projet.
+Toute évolution graphique Vogue Mary doit conserver le moteur fonctionnel existant : projets, escales, sources, documents de travail, validation, historique, recherche, export local et continuité de la mémoire projet.
 
 > On garde le moteur. On transforme l’expérience.
 
 ## Lien avec Azoth Studio
 
-Dans **Azoth Studio**, Vogue Merry est le produit.
+Dans **Azoth Studio**, Vogue Mary est le produit.
 
-Dossier produit associé : `02_PRODUITS/VOGUE_MERRY`.
+Dossier produit associé : `02_PRODUITS/VOGUE_MARY`.
