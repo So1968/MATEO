@@ -1,18 +1,18 @@
-# Reprise Git — Vogue Merry
+# Reprise Git — Vogue Mary
 
 ## Statut officiel
 
-Ce dépôt est le dépôt applicatif de **Vogue Merry**.
+Ce dépôt est le dépôt applicatif de **Vogue Mary**.
 
 Nom actuel du dépôt GitHub : `So1968/MATEO`.
 
-Nom produit à utiliser dans les textes, l'interface et la documentation : **Vogue Merry**.
+Nom produit à utiliser dans les textes, l'interface et la documentation : **Vogue Mary**.
 
 > Le nom `MATEO` ne doit plus être compris comme le nom du produit. Il correspond seulement à l'ancien nom du dépôt GitHub, en attente de renommage manuel.
 
 ## Dépôt à conserver
 
-Dépôt officiel :
+Dépôt officiel actuel :
 
 ```text
 So1968/MATEO
@@ -21,16 +21,17 @@ So1968/MATEO
 Dépôt cible conseillé après renommage manuel dans GitHub Settings :
 
 ```text
-So1968/VOGUE-MERRY
+So1968/VOGUE-MARY
 ```
 
 ## Règle de nommage
 
 À partir de maintenant :
 
-- utiliser **Vogue Merry** pour le produit ;
-- utiliser `vogue-merry` pour le nom technique npm ;
-- utiliser `VOGUE-MERRY` pour le futur nom de dépôt GitHub ;
+- utiliser **Vogue Mary** pour le produit ;
+- utiliser `vogue-mary` pour le nom technique npm ;
+- utiliser `VOGUE-MARY` pour le futur nom de dépôt GitHub ;
+- ne pas utiliser **Vogue Merry** comme nom produit, car cela renvoie trop directement à One Piece ;
 - éviter de recréer des variantes comme `VOGUE_MARRY_SEUL`, `VOGUE_MARRY_OUTIL`, `MATEO_OUTIL`, etc. ;
 - conserver les anciennes copies uniquement comme archives, pas comme chantier actif.
 
@@ -72,15 +73,25 @@ Formule de reprise :
 
 ## À faire sur l'ordinateur de Sofia après renommage GitHub
 
-Si le dépôt est renommé dans GitHub Settings en `VOGUE-MERRY`, mettre à jour le remote local :
+Si le dépôt est renommé dans GitHub Settings en `VOGUE-MARY`, mettre à jour le remote local :
 
 ```bash
 cd ~/DEV/VOGUE-MERRY
 pwd
 git status
 git remote -v
-git remote set-url origin https://github.com/So1968/VOGUE-MERRY.git
+git remote set-url origin https://github.com/So1968/VOGUE-MARY.git
 git remote -v
+```
+
+Optionnel, après vérification : renommer aussi le dossier local pour être cohérente :
+
+```bash
+cd ~/DEV
+mv VOGUE-MERRY VOGUE-MARY
+cd ~/DEV/VOGUE-MARY
+pwd
+git status
 ```
 
 Puis vérifier :
