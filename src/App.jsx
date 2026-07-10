@@ -22,7 +22,6 @@ import {
   Waves
 } from "lucide-react";
 import MeetingMode from "./components/MeetingMode.jsx";
-import heroReference from "./assets/references-ancienne-da/hero-sauvegarde.png";
 import "./vogue-maquette.css";
 
 const leftMenu = [
@@ -255,10 +254,6 @@ function Workspace({ active, isRecording, setIsRecording, markers, setMarkers })
             <strong>{value}</strong>
           </article>
         ))}
-      </div>
-      <div className="vmLegacy">
-        <img src={heroReference} alt="Ancienne référence visuelle Vogue Mary" />
-        <p><strong>Référence DA récupérée.</strong> On s’en sert comme mémoire visuelle, sans la laisser remplacer l’ergonomie.</p>
       </div>
       {active === "escales" && (
         <MeetingMode
