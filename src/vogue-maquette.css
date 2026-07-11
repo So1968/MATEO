@@ -1,2 +1,417 @@
-/* Vogue Mary — version respirante */
-:root{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#172235;background:#102a3c}*{box-sizing:border-box}body{margin:0;background:#102a3c}button{font:inherit;cursor:pointer}.vmApp{--ink:#172235;--muted:#667386;--night:#071a2c;--navy:#0d273b;--sea:#0f7790;--paper:#fff4d0;--paper2:#f2d49a;--gold:#d9a74d;--red:#ba4a3e;min-height:100vh;padding:18px 18px 110px;display:grid;grid-template-columns:220px minmax(0,1fr)280px;gap:18px;background:linear-gradient(180deg,#8ccbd7 0 22%,#1b7f97 23% 45%,#0b2d45 46% 100%);position:relative;overflow:auto}.vmApp:before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 22% 18%,rgba(255,238,174,.35),transparent 22%),repeating-linear-gradient(13deg,rgba(255,255,255,.05) 0 1px,transparent 1px 28px);pointer-events:none}.vmBoatGhost{position:fixed;right:22%;bottom:34px;color:rgba(255,238,174,.16);pointer-events:none}.vmLeft,.vmDeck,.vmRight{position:relative;z-index:1}.vmLeft{align-self:start;border-radius:28px;padding:16px;background:linear-gradient(180deg,#0c2538,#071827);border:1px solid rgba(255,226,151,.38);box-shadow:0 22px 55px rgba(0,0,0,.26);color:white}.vmBrand{padding:16px;border-radius:22px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10)}.vmBrand h1{margin:0;font-family:Georgia,serif;font-size:2rem;line-height:1.05;letter-spacing:.03em}.vmBrand p{margin:10px 0 0;color:#f4dc9a;font-weight:800;line-height:1.38}.vmMenu{margin-top:14px;display:grid;gap:7px}.vmMenu button{width:100%;display:flex;align-items:center;gap:11px;padding:11px 10px;border:0;border-radius:16px;background:transparent;color:#f9eed2;text-align:left;font-weight:900}.vmMenu button small{display:block;margin-top:1px;color:#cab986;font-size:.72rem;font-weight:700}.vmMenu button.active{background:linear-gradient(135deg,#b94b3e,#d56c49);box-shadow:0 12px 24px rgba(75,12,5,.25)}.vmSideNote{margin-top:16px;padding:14px;border-radius:18px;background:rgba(255,244,208,.08);border:1px solid rgba(255,255,255,.10)}.vmSideNote strong{color:#f4dc9a}.vmSideNote p{margin:7px 0 0;color:#d8e0e8;font-weight:700;line-height:1.42}.vmDeck{min-width:0}.vmPont,.vmWorkspace{border-radius:34px;background:linear-gradient(135deg,rgba(255,245,214,.96),rgba(239,209,151,.94));border:1px solid rgba(92,54,19,.26);box-shadow:0 28px 70px rgba(0,0,0,.25);padding:28px}.vmHero{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding:8px 6px 24px;border-bottom:1px solid rgba(92,54,19,.16)}.vmEyebrow{margin:0 0 9px;color:#8d3b31;text-transform:uppercase;letter-spacing:.16em;font-size:.72rem;font-weight:950}.vmHero h2,.vmWorkspace h2{margin:0;font-family:Georgia,serif;color:#1d1207;letter-spacing:.02em}.vmHero h2{font-size:clamp(2.4rem,5vw,5.1rem);line-height:.96}.vmHero span,.vmWorkspaceHeader span{display:block;max-width:720px;margin-top:10px;color:#4f4e48;font-size:1.02rem;font-weight:800;line-height:1.5}.vmHero svg{color:#0d5668;opacity:.85;flex:0 0 auto}.vmSeaCalm{position:relative;margin-top:24px;min-height:320px;border-radius:30px;overflow:hidden;background:linear-gradient(180deg,#57bdc9,#127b96 55%,#0a4d6b);border:1px solid rgba(255,241,185,.72);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 18px 40px rgba(0,0,0,.18);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;gap:16px;padding:34px}.vmSeaCalm:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(10deg,rgba(255,255,255,.08) 0 2px,transparent 2px 34px);opacity:.55}.vmSeaLine{position:absolute;left:11%;right:11%;top:52%;height:3px;border-top:4px dashed rgba(255,232,172,.85);border-radius:50%;transform:rotate(4deg)}.vmIslandCard{position:relative;z-index:2;min-height:210px;padding:18px 14px 15px;border:0;border-radius:24px;background:rgba(255,244,210,.92);box-shadow:0 20px 32px rgba(0,0,0,.20);text-align:center;color:#24160a}.vmIslandCard:hover{transform:translateY(-3px)}.vmIslandShape{display:block;width:112px;height:74px;margin:0 auto 14px;border-radius:60% 40% 54% 46%;background:radial-gradient(ellipse at 40% 22%,#fff2a8 0 13%,#8cc36a 14% 42%,#2f7b55 43% 70%,#2b2113 71%);box-shadow:0 15px 22px rgba(0,0,0,.32),inset -10px -12px 14px rgba(0,0,0,.22),0 0 0 6px rgba(255,238,166,.30)}.vmIslandCard strong{display:block;font-family:Georgia,serif;font-size:1.08rem}.vmIslandCard small{display:block;margin-top:5px;color:#61431d;font-weight:850}.vmIslandCard em{display:inline-block;margin-top:12px;padding:5px 10px;border-radius:999px;background:#0d5668;color:white;font-style:normal;font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.vmQuickGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:18px}.vmQuickGrid button{min-height:124px;padding:18px;border:0;border-radius:24px;background:linear-gradient(180deg,#fff7dc,#e3bf76);box-shadow:0 16px 28px rgba(0,0,0,.16);text-align:left;color:#211407}.vmQuickGrid svg{color:#0b5268;margin-bottom:12px}.vmQuickGrid strong{display:block;font-family:Georgia,serif;font-size:1.15rem}.vmQuickGrid span{display:block;margin-top:5px;color:#654723;font-weight:800;font-size:.86rem}.vmRight{align-self:start;border-radius:28px;padding:16px;background:linear-gradient(180deg,#fff5d7,#e9c98b);border:1px solid rgba(92,54,19,.25);box-shadow:0 24px 55px rgba(0,0,0,.24);max-height:calc(100vh - 36px);overflow:auto}.vmLogHeader{text-align:center;padding:14px;border-radius:22px;background:rgba(255,255,255,.45);border:1px solid rgba(92,54,19,.14)}.vmLogHeader svg{color:#0b5268}.vmLogHeader h2{margin:7px 0 0;font-family:Georgia,serif;font-size:1.65rem}.vmLogHeader p{margin:2px 0 0;color:#704527;font-weight:900}.vmRight article{margin-top:12px;padding:14px;border-radius:18px;background:rgba(255,255,255,.46);border:1px solid rgba(92,54,19,.13)}.vmRight small,.vmCard small{display:block;margin-bottom:7px;color:#8d3b31;text-transform:uppercase;letter-spacing:.12em;font-size:.68rem;font-weight:950}.vmRight strong{display:block;color:#211407;line-height:1.38}.vmWorkspaceHeader{display:flex;align-items:flex-start;gap:16px;margin-bottom:22px}.vmWorkspaceIcon{width:58px;height:58px;border-radius:19px;display:grid;place-items:center;color:white;background:linear-gradient(135deg,#b94b3e,#d9a74d);box-shadow:0 14px 22px rgba(0,0,0,.18);flex:0 0 auto}.vmWorkspace h2{font-size:clamp(2.2rem,4vw,4rem);line-height:.98}.vmCards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.vmCard{padding:16px;border-radius:20px;background:rgba(255,255,255,.52);border:1px solid rgba(92,54,19,.14);box-shadow:0 10px 20px rgba(0,0,0,.07)}.vmCard strong{display:block;color:#211407;font-size:1.05rem}.meetingMode{margin-top:22px;padding:20px;border-radius:26px;background:linear-gradient(135deg,#071b2d,#0f566b);color:white;box-shadow:0 18px 38px rgba(0,0,0,.2)}.meetingTop{display:flex;justify-content:space-between;gap:16px}.meetingMode h2{margin:0;font-family:Georgia,serif;font-size:2rem;color:white}.meetingMode p{color:#dbeaf0;font-weight:750}.meetingMode .eyebrow{color:#f4dc9a}.bigTimer{padding:12px 16px;border-radius:18px;background:rgba(255,255,255,.12);text-align:center}.bigTimer span{display:block;color:#f4dc9a;font-size:.7rem;font-weight:950;letter-spacing:.14em}.bigTimer strong{display:block;font-size:1.7rem;color:white}.bigTimer.recording{background:rgba(186,74,62,.42)}.meetingControls{margin:16px 0}.startMeetingButton,.stopMeetingButton,.markerButton{border:0;border-radius:16px;padding:11px 13px;font-weight:900}.startMeetingButton{background:#f4dc9a;color:#1b1208}.stopMeetingButton{background:#ba4a3e;color:white}.markerZone,.markerHistory{margin-top:14px;padding:14px;border-radius:20px;background:rgba(255,255,255,.10)}.markerGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.markerButton{background:rgba(255,255,255,.14);color:white;border:1px solid rgba(255,255,255,.16)}.markerButton:disabled{opacity:.38;cursor:not-allowed}.markerItem{display:flex;gap:10px;margin-top:8px;padding:10px;border-radius:14px;background:rgba(255,255,255,.12)}.empty{margin:0;color:#dbeaf0}@media(max-width:1180px){.vmApp{grid-template-columns:1fr;padding-bottom:120px}.vmQuickGrid,.vmSeaCalm{grid-template-columns:repeat(2,minmax(0,1fr))}.vmCards{grid-template-columns:1fr}.vmSeaCalm{min-height:auto}.vmRight{max-height:none}.meetingTop{display:grid}.markerGrid{grid-template-columns:1fr}}
+/* Vogue Mary — minimaliste propre */
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #172235;
+  background: #102a3c;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: #102a3c; }
+button { font: inherit; cursor: pointer; }
+
+.vmApp {
+  --ink: #182334;
+  --muted: #6f7b87;
+  --night: #071a2c;
+  --navy: #0c2639;
+  --sea: #1b889b;
+  --paper: #fff4d8;
+  --paper-soft: #f4dfb2;
+  --gold: #d5a64f;
+  --red: #b95345;
+  min-height: 100vh;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr) 255px;
+  gap: 18px;
+  background:
+    radial-gradient(circle at 27% 16%, rgba(255, 241, 185, .33), transparent 21%),
+    linear-gradient(180deg, #92ccd5 0 24%, #267f95 25% 47%, #0d2d43 48% 100%);
+  overflow: hidden;
+}
+
+.vmApp::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(115deg, rgba(255,255,255,.05), transparent 38%, rgba(255,255,255,.04));
+  pointer-events: none;
+}
+
+.vmLeft,
+.vmDeck,
+.vmRight { position: relative; z-index: 1; }
+
+.vmLeft {
+  align-self: stretch;
+  border-radius: 26px;
+  padding: 15px;
+  background: rgba(7, 26, 44, .92);
+  border: 1px solid rgba(255, 229, 160, .28);
+  box-shadow: 0 22px 55px rgba(0,0,0,.22);
+  color: white;
+}
+
+.vmBrand {
+  padding: 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.055);
+}
+
+.vmBrand h1 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 1.8rem;
+  line-height: 1.02;
+  letter-spacing: .02em;
+}
+
+.vmBrand p {
+  margin: 9px 0 0;
+  color: #ecd493;
+  font-size: .86rem;
+  font-weight: 760;
+  line-height: 1.38;
+}
+
+.vmMenu {
+  margin-top: 14px;
+  display: grid;
+  gap: 6px;
+}
+
+.vmMenu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 0;
+  border-radius: 15px;
+  background: transparent;
+  color: #fff0cf;
+  text-align: left;
+  font-weight: 850;
+}
+
+.vmMenu button small {
+  display: block;
+  margin-top: 1px;
+  color: #c8b987;
+  font-size: .69rem;
+  font-weight: 650;
+}
+
+.vmMenu button.active {
+  background: rgba(185, 83, 69, .92);
+  color: white;
+}
+
+.vmDeck { min-width: 0; }
+
+.vmPont,
+.vmWorkspace {
+  height: calc(100vh - 36px);
+  border-radius: 32px;
+  background: linear-gradient(135deg, rgba(255, 247, 224, .97), rgba(243, 222, 181, .96));
+  border: 1px solid rgba(94, 55, 21, .20);
+  box-shadow: 0 28px 70px rgba(0,0,0,.22);
+  padding: 26px;
+  overflow: hidden;
+}
+
+.vmHero {
+  max-width: 760px;
+  padding: 2px 0 18px;
+}
+
+.vmEyebrow {
+  margin: 0 0 8px;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: .15em;
+  font-size: .68rem;
+  font-weight: 950;
+}
+
+.vmHero h2,
+.vmWorkspace h2 {
+  margin: 0;
+  font-family: Georgia, serif;
+  color: #1f150a;
+  letter-spacing: .01em;
+}
+
+.vmHero h2 {
+  font-size: clamp(2rem, 4.2vw, 4.15rem);
+  line-height: .96;
+}
+
+.vmHero span,
+.vmWorkspaceHeader span {
+  display: block;
+  max-width: 650px;
+  margin-top: 9px;
+  color: #55514a;
+  font-size: .98rem;
+  font-weight: 760;
+  line-height: 1.48;
+}
+
+.vmMapScene {
+  position: relative;
+  min-height: calc(100vh - 210px);
+  border-radius: 30px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 22% 21%, rgba(255, 240, 173, .36), transparent 18%),
+    radial-gradient(circle at 76% 31%, rgba(255, 240, 173, .22), transparent 13%),
+    linear-gradient(180deg, #58bdc7, #177f98 55%, #0b4e6c);
+  border: 1px solid rgba(255, 240, 185, .72);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.12), 0 18px 40px rgba(0,0,0,.17);
+}
+
+.vmMapScene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(5, 38, 56, .18));
+  pointer-events: none;
+}
+
+.vmRoute {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: .62;
+}
+
+.vmRoute path {
+  fill: none;
+  stroke: rgba(255, 236, 174, .9);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 14 14;
+}
+
+.vmIsland {
+  position: absolute;
+  z-index: 2;
+  width: 164px;
+  transform: translate(-50%, -50%);
+  border: 0;
+  background: transparent;
+  color: #24170a;
+  text-align: center;
+}
+
+.vmIslandShape {
+  display: block;
+  width: 112px;
+  height: 72px;
+  margin: 0 auto 10px;
+  border-radius: 61% 39% 55% 45% / 52% 46% 54% 48%;
+  background: radial-gradient(ellipse at 39% 21%, #fff2ab 0 12%, #9fcf75 13% 37%, #477f53 38% 65%, #2f2919 66%);
+  box-shadow: 0 16px 22px rgba(0,0,0,.28), inset -10px -12px 16px rgba(0,0,0,.22), 0 0 0 5px rgba(255, 236, 166, .24);
+}
+
+.vmIsland strong,
+.vmIsland small,
+.vmIsland em { display: block; }
+.vmIsland strong {
+  padding: 7px 9px 2px;
+  border-radius: 13px 13px 0 0;
+  background: rgba(255, 245, 211, .94);
+  font-family: Georgia, serif;
+  font-size: .98rem;
+  box-shadow: 0 10px 20px rgba(0,0,0,.13);
+}
+
+.vmIsland small {
+  padding: 0 9px 7px;
+  border-radius: 0 0 13px 13px;
+  background: rgba(255, 245, 211, .94);
+  color: #68451f;
+  font-size: .71rem;
+  font-weight: 800;
+}
+
+.vmIsland em {
+  width: max-content;
+  margin: 7px auto 0;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(9, 45, 61, .88);
+  color: white;
+  font-size: .65rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.vmIsland.priority .vmIslandShape {
+  box-shadow: 0 0 0 5px rgba(255, 236, 166, .30), 0 0 24px rgba(185, 83, 69, .48), 0 16px 22px rgba(0,0,0,.28);
+}
+
+.vmIsland.priority em { background: var(--red); }
+
+.vmCurrentCap {
+  position: absolute;
+  left: 26px;
+  bottom: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border-radius: 999px;
+  background: rgba(255, 246, 218, .92);
+  color: #1f150a;
+  font-weight: 900;
+  box-shadow: 0 12px 24px rgba(0,0,0,.16);
+}
+
+.vmRight {
+  align-self: start;
+  border-radius: 26px;
+  padding: 15px;
+  background: rgba(255, 245, 215, .94);
+  border: 1px solid rgba(94, 55, 21, .20);
+  box-shadow: 0 24px 55px rgba(0,0,0,.20);
+}
+
+.vmRight header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.48);
+}
+
+.vmRight svg { color: #0e5a6b; }
+.vmRight h2 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 1.42rem;
+}
+.vmRight header p {
+  margin: 2px 0 0;
+  color: #765331;
+  font-size: .78rem;
+  font-weight: 850;
+}
+
+.vmRight article {
+  margin-top: 11px;
+  padding: 13px;
+  border-radius: 17px;
+  background: rgba(255,255,255,.44);
+}
+
+.vmRight small,
+.vmCard small {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-size: .66rem;
+  font-weight: 950;
+}
+
+.vmRight strong,
+.vmCard strong {
+  display: block;
+  color: #221609;
+  line-height: 1.38;
+}
+
+.vmWorkspace { overflow: auto; }
+.vmWorkspaceHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.vmWorkspaceIcon {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  color: white;
+  background: linear-gradient(135deg, #b95345, #d5a64f);
+  flex: 0 0 auto;
+}
+
+.vmWorkspace h2 {
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  line-height: .98;
+}
+
+.vmCards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.vmCard {
+  padding: 15px;
+  border-radius: 19px;
+  background: rgba(255,255,255,.52);
+  border: 1px solid rgba(94, 55, 21, .12);
+}
+
+.meetingMode {
+  margin-top: 22px;
+  padding: 20px;
+  border-radius: 26px;
+  background: linear-gradient(135deg, #071b2d, #0f566b);
+  color: white;
+  box-shadow: 0 18px 38px rgba(0,0,0,.2);
+}
+
+.meetingTop { display: flex; justify-content: space-between; gap: 16px; }
+.meetingMode h2 { margin: 0; font-family: Georgia, serif; font-size: 2rem; color: white; }
+.meetingMode p { color: #dbeaf0; font-weight: 750; }
+.meetingMode .eyebrow { color: #f4dc9a; }
+.bigTimer { padding: 12px 16px; border-radius: 18px; background: rgba(255,255,255,.12); text-align: center; }
+.bigTimer span { display: block; color: #f4dc9a; font-size: .7rem; font-weight: 950; letter-spacing: .14em; }
+.bigTimer strong { display: block; font-size: 1.7rem; color: white; }
+.bigTimer.recording { background: rgba(186,74,62,.42); }
+.meetingControls { margin: 16px 0; }
+.startMeetingButton,.stopMeetingButton,.markerButton { border: 0; border-radius: 16px; padding: 11px 13px; font-weight: 900; }
+.startMeetingButton { background: #f4dc9a; color: #1b1208; }
+.stopMeetingButton { background: #ba4a3e; color: white; }
+.markerZone,.markerHistory { margin-top: 14px; padding: 14px; border-radius: 20px; background: rgba(255,255,255,.10); }
+.markerGrid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 9px; }
+.markerButton { background: rgba(255,255,255,.14); color: white; border: 1px solid rgba(255,255,255,.16); }
+.markerButton:disabled { opacity: .38; cursor: not-allowed; }
+.markerItem { display: flex; gap: 10px; margin-top: 8px; padding: 10px; border-radius: 14px; background: rgba(255,255,255,.12); }
+.empty { margin: 0; color: #dbeaf0; }
+
+.vmBoatGhost {
+  position: fixed;
+  right: 24%;
+  bottom: 24px;
+  color: rgba(255, 238, 174, .14);
+  pointer-events: none;
+}
+
+@media (max-width: 1180px) {
+  .vmApp {
+    min-height: auto;
+    overflow: auto;
+    grid-template-columns: 1fr;
+    padding-bottom: 120px;
+  }
+  .vmPont,
+  .vmWorkspace { height: auto; min-height: 620px; }
+  .vmMapScene { min-height: 500px; }
+  .vmCards { grid-template-columns: 1fr; }
+  .meetingTop { display: grid; }
+  .markerGrid { grid-template-columns: 1fr; }
+}
