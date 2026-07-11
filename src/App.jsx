@@ -2,18 +2,12 @@ import React, { useMemo, useState } from "react";
 import {
   Anchor,
   BookOpen,
-  CheckCircle2,
   Compass,
-  FileText,
   FolderOpen,
   Map,
-  Mic,
   Sailboat,
-  Search,
-  Settings,
   ShipWheel,
-  Telescope,
-  Users
+  Telescope
 } from "lucide-react";
 import MeetingMode from "./components/MeetingMode.jsx";
 import "./vogue-maquette.css";
@@ -28,30 +22,23 @@ const navItems = [
 ];
 
 const islands = [
-  { name: "Île des Courants", subtitle: "Reporting performance", status: "priorité" },
-  { name: "Baie des Alizés", subtitle: "Campagne budget", status: "en cours" },
-  { name: "Phare d’Émeraude", subtitle: "Forecast grand compte", status: "en cours" },
-  { name: "Atoll des Brumes", subtitle: "Marge & chiffre d’affaires", status: "à venir" }
-];
-
-const quickModules = [
-  { id: "escales", title: "Mode réunion", subtitle: "enregistrer, marquer, reprendre", icon: Mic },
-  { id: "journal", title: "Journal de bord", subtitle: "compte rendu et synthèse", icon: BookOpen },
-  { id: "coffre", title: "Coffre", subtitle: "documents et références", icon: FolderOpen },
-  { id: "longuevue", title: "Longue-vue", subtitle: "retrouver une info", icon: Search }
+  { name: "Île des Courants", subtitle: "Reporting performance", status: "priorité", x: 29, y: 57 },
+  { name: "Baie des Alizés", subtitle: "Campagne budget", status: "en cours", x: 47, y: 38 },
+  { name: "Phare d’Émeraude", subtitle: "Forecast grand compte", status: "en cours", x: 67, y: 55 },
+  { name: "Atoll des Brumes", subtitle: "Marge & chiffre d’affaires", status: "à venir", x: 78, y: 31 }
 ];
 
 const workspaceData = {
   iles: {
     title: "Îles projets",
     icon: Map,
-    intro: "Chaque île correspond à une mission client ou un chantier EPM. On choisit une destination, puis on ouvre ses escales, ses documents et ses décisions.",
+    intro: "Chaque île correspond à une mission client ou un chantier EPM. On choisit une destination, puis on ouvre seulement ce qui est utile.",
     cards: [["Île active", "Île des Courants"], ["Métier", "Reporting performance"], ["Statut", "Priorité"]]
   },
   escales: {
     title: "Escales",
     icon: Anchor,
-    intro: "Les réunions, ateliers et comités deviennent des escales : on enregistre, on pose quelques marqueurs, puis le journal de bord reprend le fil.",
+    intro: "Les réunions, ateliers et comités deviennent des escales : on enregistre, on pose quelques marqueurs, puis le journal reprend le fil.",
     cards: [["Prochaine escale", "Escale de cadrage"], ["Marqueurs", "Décision · action · blocage"], ["Sortie attendue", "Compte rendu exploitable"]]
   },
   journal: {
@@ -84,15 +71,11 @@ function LeftNav({ active, onChange }) {
       <nav className="vmMenu">
         {navItems.map(({ id, label, subtitle, icon: Icon }) => (
           <button key={id} className={active === id ? "active" : ""} onClick={() => onChange(id)} type="button">
-            <Icon size={20} />
+            <Icon size={19} />
             <span>{label}<small>{subtitle}</small></span>
           </button>
         ))}
       </nav>
-      <div className="vmSideNote">
-        <strong>Règle de bord</strong>
-        <p>Une zone active à la fois. Le navire respire, le capitaine aussi.</p>
-      </div>
     </aside>
   );
 }
@@ -105,15 +88,21 @@ function LogPose({ active }) {
 
   return (
     <aside className="vmRight">
-      <div className="vmLogHeader">
-        <Compass size={42} />
-        <h2>Log Pose</h2>
-        <p>cap actuel</p>
-      </div>
-      <article><small>Zone active</small><strong>{activeLabel}</strong></article>
-      <article><small>Cap suivi</small><strong>Livrer une V1 claire, belle et utilisable.</strong></article>
-      <article><small>Prochaine direction</small><strong>Brancher les vraies données sans surcharger l’écran.</strong></article>
-      <article><small>À préserver</small><strong>Le Log Pose oriente. Les caps validés décident.</strong></article>
+      <header>
+        <Compass size={34} />
+        <div>
+          <h2>Log Pose</h2>
+          <p>{activeLabel}</p>
+        </div>
+      </header>
+      <article>
+        <small>Cap actuel</small>
+        <strong>Rendre Vogue Mary clair, beau et utilisable.</strong>
+      </article>
+      <article>
+        <small>Prochaine direction</small>
+        <strong>Brancher les vraies données sans surcharger l’écran.</strong>
+      </article>
     </aside>
   );
 }
@@ -122,34 +111,34 @@ function PontView({ onChange }) {
   return (
     <section className="vmPont">
       <header className="vmHero">
-        <div>
-          <p className="vmEyebrow">Pont du navire</p>
-          <h2>Vue calme de toutes les îles.</h2>
-          <span>On choisit le projet, puis seulement ensuite on ouvre les outils nécessaires.</span>
-        </div>
-        <Compass size={54} />
+        <p className="vmEyebrow">Pont du navire</p>
+        <h2>Choisir une île. Garder le cap.</h2>
+        <span>Une seule scène pour retrouver le projet, puis ouvrir l’outil nécessaire.</span>
       </header>
 
-      <div className="vmSeaCalm">
-        <div className="vmSeaLine" />
+      <div className="vmMapScene" aria-label="Carte des îles projets">
+        <svg className="vmRoute" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M190 310 C310 200 410 245 500 190 S690 180 800 295" />
+          <path d="M290 315 C410 390 560 365 675 300" />
+        </svg>
         {islands.map((island) => (
-          <button key={island.name} className="vmIslandCard" onClick={() => onChange("iles")} type="button">
+          <button
+            key={island.name}
+            className={`vmIsland ${island.status === "priorité" ? "priority" : ""}`}
+            style={{ left: `${island.x}%`, top: `${island.y}%` }}
+            onClick={() => onChange("iles")}
+            type="button"
+          >
             <span className="vmIslandShape" />
             <strong>{island.name}</strong>
             <small>{island.subtitle}</small>
             <em>{island.status}</em>
           </button>
         ))}
-      </div>
-
-      <div className="vmQuickGrid">
-        {quickModules.map(({ id, title, subtitle, icon: Icon }) => (
-          <button key={id} onClick={() => onChange(id)} type="button">
-            <Icon size={24} />
-            <strong>{title}</strong>
-            <span>{subtitle}</span>
-          </button>
-        ))}
+        <div className="vmCurrentCap">
+          <Compass size={18} />
+          <span>Prochaine reprise : Île des Courants</span>
+        </div>
       </div>
     </section>
   );
@@ -162,7 +151,7 @@ function Workspace({ active, isRecording, setIsRecording, markers, setMarkers })
   return (
     <section className="vmWorkspace">
       <div className="vmWorkspaceHeader">
-        <div className="vmWorkspaceIcon"><Icon size={28} /></div>
+        <div className="vmWorkspaceIcon"><Icon size={26} /></div>
         <div>
           <p className="vmEyebrow">Zone active</p>
           <h2>{data.title}</h2>
@@ -201,11 +190,7 @@ export default function App() {
         {active === "pont" ? <PontView onChange={setActive} /> : <Workspace active={active} isRecording={isRecording} setIsRecording={setIsRecording} markers={markers} setMarkers={setMarkers} />}
       </section>
       <LogPose active={active} />
-      <Sailboat className="vmBoatGhost" size={120} />
-      <Settings style={{ display: "none" }} />
-      <FileText style={{ display: "none" }} />
-      <Users style={{ display: "none" }} />
-      <CheckCircle2 style={{ display: "none" }} />
+      <Sailboat className="vmBoatGhost" size={90} />
     </main>
   );
 }
