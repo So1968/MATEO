@@ -5,10 +5,8 @@ export function LogPoseOverlay() {
   const [slot, setSlot] = useState(null);
 
   useEffect(() => {
-    const commandDeck = document.querySelector(".commandDeck");
     const sectionIntro = document.querySelector(".sectionIntro");
-
-    if (!commandDeck || !sectionIntro) return undefined;
+    if (!sectionIntro) return undefined;
 
     let target = document.querySelector(".logPoseSlot");
     if (!target) {
@@ -16,6 +14,16 @@ export function LogPoseOverlay() {
       target.className = "logPoseSlot";
       sectionIntro.insertAdjacentElement("afterend", target);
     }
+
+    Object.assign(target.style, {
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      boxSizing: "border-box",
+      padding: "0 18px",
+      margin: "-2px 0 12px"
+    });
 
     setSlot(target);
 
@@ -27,45 +35,45 @@ export function LogPoseOverlay() {
   }, []);
 
   const panel = {
-    width: "min(760px, 100%)",
-    margin: "8px auto 12px",
+    width: "min(680px, 92%)",
+    minHeight: "54px",
     display: "grid",
-    gridTemplateColumns: "92px repeat(3, minmax(0, 1fr))",
-    gap: "7px",
-    alignItems: "stretch"
+    gridTemplateColumns: "86px repeat(3, minmax(0, 1fr))",
+    gap: "6px",
+    alignItems: "stretch",
+    padding: "6px",
+    borderRadius: "18px",
+    border: "1px solid rgba(255, 218, 129, 0.26)",
+    background: "rgba(5, 27, 43, 0.58)",
+    boxShadow: "0 8px 22px rgba(0, 0, 0, 0.16)"
   };
 
   const titleBox = {
     display: "grid",
     placeItems: "center",
-    minHeight: "44px",
-    borderRadius: "12px",
-    border: "1px solid rgba(255, 218, 129, 0.48)",
+    borderRadius: "13px",
     background: "linear-gradient(145deg, rgba(255, 221, 139, 0.96), rgba(178, 111, 39, 0.92))",
     color: "#251404",
     fontWeight: 900,
-    fontSize: "0.62rem",
+    fontSize: "0.58rem",
     letterSpacing: "0.10em",
     textTransform: "uppercase",
     textAlign: "center",
-    padding: "7px"
+    padding: "6px 8px"
   };
 
   const card = {
-    minHeight: "44px",
-    border: "1px solid rgba(255, 218, 129, 0.24)",
-    borderRadius: "12px",
+    borderRadius: "13px",
     padding: "7px 9px",
-    background: "rgba(3, 24, 38, 0.58)",
+    background: "rgba(255, 247, 220, 0.08)",
     color: "#fff4cf",
-    boxShadow: "0 6px 14px rgba(0, 0, 0, 0.14)",
     overflow: "hidden"
   };
 
   const label = {
     display: "block",
     color: "#ffdc85",
-    fontSize: "0.50rem",
+    fontSize: "0.48rem",
     letterSpacing: "0.10em",
     textTransform: "uppercase",
     marginBottom: "2px"
@@ -74,8 +82,9 @@ export function LogPoseOverlay() {
   const text = {
     display: "block",
     fontWeight: 800,
-    fontSize: "0.72rem",
-    lineHeight: 1.15
+    fontSize: "0.68rem",
+    lineHeight: 1.13,
+    whiteSpace: "normal"
   };
 
   const content = (
@@ -83,15 +92,15 @@ export function LogPoseOverlay() {
       <div style={titleBox}>Log Pose</div>
       <article style={card}>
         <strong style={label}>Cap</strong>
-        <span style={text}>Transformer le flou.</span>
+        <span style={text}>Clarifier le prochain geste.</span>
       </article>
       <article style={card}>
         <strong style={label}>À protéger</strong>
         <span style={text}>Mémoire et décisions.</span>
       </article>
       <article style={card}>
-        <strong style={label}>Prochaine manœuvre</strong>
-        <span style={text}>Stabiliser la V1.</span>
+        <strong style={label}>Manœuvre</strong>
+        <span style={text}>Stabiliser la démo.</span>
       </article>
     </aside>
   );
