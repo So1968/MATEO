@@ -13,12 +13,10 @@ import {
   Mail,
   Map,
   Sailboat,
-  Search,
   Settings,
   ShipWheel,
   Telescope,
-  Upload,
-  Waves
+  Upload
 } from "lucide-react";
 import "./style.css";
 import "./vogue-extra.css";
@@ -172,79 +170,6 @@ function DashboardPanel({ title, badge, children, className = "" }) {
   );
 }
 
-function ShipAtmosphere() {
-  return (
-    <div className="shipAtmosphere" aria-hidden="true">
-      <div className="sunDisk" />
-      <div className="cloud cloudOne" />
-      <div className="cloud cloudTwo" />
-      <div className="mast mastLeft" />
-      <div className="mast mastRight" />
-      <div className="sail sailLeft" />
-      <div className="sail sailRight" />
-      <div className="rope ropeOne" />
-      <div className="rope ropeTwo" />
-      <div className="deckRail" />
-      <div className="bowCurve" />
-    </div>
-  );
-}
-
-function DeckInstruments({ started }) {
-  return (
-    <div className={`deckInstruments ${started ? "instrumentsReady" : ""}`} aria-hidden="true">
-      <div className="instrumentCard compassCard"><Compass size={30} /><strong>Cap</strong><span>Nord-Est</span></div>
-      <div className="instrumentCard windCard"><Waves size={30} /><strong>Vent</strong><span>18 nœuds</span></div>
-      <div className="instrumentCard logCard"><BookOpen size={30} /><strong>Journal</strong><span>4 traces</span></div>
-      <div className="brassDial"><span /><span /><span /></div>
-    </div>
-  );
-}
-
-function LighthouseAlert({ urgentCount }) {
-  return (
-    <div className={`lighthouseScene ${urgentCount ? "lighthouseOn" : ""}`} aria-label="Phare des urgences">
-      <div className="lightBeam one" />
-      <div className="lightBeam two" />
-      <div className="lighthouseGlow" />
-      <div className="lighthouseTop" />
-      <div className="lighthouseBody"><span /><span /><span /></div>
-      <div className="lighthouseRock" />
-    </div>
-  );
-}
-
-function MateoIntro({ onStart }) {
-  return (
-    <section className="mateoIntro">
-      <div className="introCompass"><Compass size={42} /></div>
-      <div className="introPortrait">
-        <div className="portraitHat" />
-        <div className="portraitHead"><span className="portraitHair" /><span className="portraitEye l" /><span className="portraitEye r" /><span className="portraitSmile" /><span className="portraitBeard" /></div>
-        <div className="portraitShoulders" />
-      </div>
-      <p>Vogue Merry</p>
-      <h2>Mateo, reprends la barre.</h2>
-      <span>Le pont t’attend. Un clic, et le capitaine pose les deux mains sur la barre : phare, îles, coffre et prochaines manœuvres s’alignent.</span>
-      <button onClick={onStart}>Prendre la barre</button>
-    </section>
-  );
-}
-
-function CaptainMateo({ started }) {
-  return (
-    <div className={`captainMateo ${started ? "started" : "waiting"}`} aria-label="Mateo capitaine">
-      <div className="captainAura" />
-      <div className="captainHat" />
-      <div className="captainHead"><span className="hair" /><span className="eye left" /><span className="eye right" /><span className="smile" /><span className="beard" /></div>
-      <div className="captainBody"><span className="shirt" /><span className="sash" /><span className="ep left" /><span className="ep right" /></div>
-      <div className="arm leftArm" />
-      <div className="arm rightArm" />
-      <div className="helm"><span className="ring" /><span className="center"><Compass size={28} /></span><span className="spoke s1" /><span className="spoke s2" /><span className="spoke s3" /><span className="spoke s4" /></div>
-    </div>
-  );
-}
-
 function IslandMap() {
   return (
     <section className="mapFrame">
@@ -268,11 +193,11 @@ function IslandMap() {
   );
 }
 
-function SideNavigation({ active, onChange, onStart }) {
+function SideNavigation({ active, onChange }) {
   return (
     <aside className="sideNavigation">
       <div className="brandMark"><Compass /><h1>Vogue Merry</h1></div>
-      <nav>{menu.map(({ id, label, icon: Icon }) => <button key={id} className={active === id ? "active" : ""} onClick={() => { onStart(); onChange(id); }}><Icon size={21} /><span>{label}</span></button>)}</nav>
+      <nav>{menu.map(({ id, label, icon: Icon }) => <button key={id} className={active === id ? "active" : ""} onClick={() => onChange(id)}><Icon size={21} /><span>{label}</span></button>)}</nav>
       <div className="crewNote"><strong>Cap clair.</strong><p>Le phare s’allume quand une trace risque de se perdre.</p></div>
     </aside>
   );
@@ -282,12 +207,12 @@ function TopBar() {
   return <header className="topBar"><div className="quoteScroll">“Chaque projet est une île. Chaque décision, un nouveau cap.”</div><div className="profileDock"><div className="avatarMateo">M</div><div><strong>Capitaine de projet</strong><span>Équipage Vogue Merry</span></div><Bell size={19} /><Mail size={19} /><Settings size={19} /></div></header>;
 }
 
-function RightCommand({ urgentCount, onStart }) {
+function RightCommand({ urgentCount }) {
   return (
     <aside className="rightCommand">
       <DashboardPanel title="Prochaine escale"><div className="harborThumb" /><h3>Réunion à transformer</h3><p>Audio, notes, décisions et actions à raccrocher au bon projet</p><small><CalendarDays size={15} /> Démo Mateo · À dater</small></DashboardPanel>
-      <DashboardPanel title="Prochaine action"><div className="actionLine"><ClipboardList /><div><h3>Stabiliser le moteur</h3><p>Escales · Coffre · Journal · Log Pose</p></div></div><small>Objectif : une première version utilisable</small><button className="primaryButton" onClick={onStart}>Ouvrir la tâche →</button></DashboardPanel>
-      <DashboardPanel title="Alertes & urgences" badge={urgentCount} className="urgentPanel"><div className="beaconNotice"><AlertTriangle size={18} /> Phare allumé</div><p>Traces audio à intégrer</p><p>Recherche Longue-vue à brancher</p><button className="dangerButton" onClick={onStart}>Voir les urgences →</button></DashboardPanel>
+      <DashboardPanel title="Prochaine action"><div className="actionLine"><ClipboardList /><div><h3>Stabiliser le moteur</h3><p>Escales · Coffre · Journal · Log Pose</p></div></div><small>Objectif : une première version utilisable</small><button className="primaryButton">Ouvrir la tâche →</button></DashboardPanel>
+      <DashboardPanel title="Alertes & urgences" badge={urgentCount} className="urgentPanel"><div className="beaconNotice"><AlertTriangle size={18} /> Phare allumé</div><p>Traces audio à intégrer</p><p>Recherche Longue-vue à brancher</p><button className="dangerButton">Voir les urgences →</button></DashboardPanel>
     </aside>
   );
 }
@@ -304,8 +229,8 @@ function BottomDeck() {
   );
 }
 
-function WaterSevenDock({ onStart }) {
-  return <div className="waterSevenDock"><Upload size={24} /><div><strong>Water Seven</strong><p>Déposer un document, une image ou une trace audio pour proposer un rangement.</p></div><button className="primaryButton" onClick={onStart}>Ouvrir le quai</button></div>;
+function WaterSevenDock() {
+  return <div className="waterSevenDock"><Upload size={24} /><div><strong>Water Seven</strong><p>Déposer un document, une image ou une trace audio pour proposer un rangement.</p></div><button className="primaryButton">Ouvrir le quai</button></div>;
 }
 
 function CardList({ items }) {
@@ -322,9 +247,9 @@ function CardList({ items }) {
   );
 }
 
-function SectionWorkspace({ active, urgentCount, onStart }) {
+function SectionWorkspace({ active, urgentCount }) {
   if (active === "pont") {
-    return <div className="mainGrid"><IslandMap /><RightCommand urgentCount={urgentCount} onStart={onStart} /></div>;
+    return <div className="mainGrid"><IslandMap /><RightCommand urgentCount={urgentCount} /></div>;
   }
 
   if (active === "iles") {
@@ -363,30 +288,19 @@ function SectionWorkspace({ active, urgentCount, onStart }) {
 
 export default function App() {
   const [active, setActive] = useState("pont");
-  const [started, setStarted] = useState(false);
   const urgentCount = useMemo(() => projects.filter((p) => p.status === "urgent").length + 1, []);
   const activeLabel = menu.find((item) => item.id === active)?.label || "Pont du navire";
-  const start = () => setStarted(true);
 
   return (
-    <main className={`vogueMerryApp ${started ? "appStarted" : "appIntro"}`}>
-      <div className="skyGlow" />
-      <div className="oceanHorizon"><Waves size={110} /></div>
-      <ShipAtmosphere />
-      <LighthouseAlert urgentCount={urgentCount} />
-      <SideNavigation active={active} onChange={setActive} onStart={start} />
-      <section className="commandDeck" onClick={start}>
+    <main className="vogueMerryApp appStarted">
+      <SideNavigation active={active} onChange={setActive} />
+      <section className="commandDeck">
         <TopBar />
         <div className="sectionIntro"><p>Poste actif · {activeLabel}</p><h2>{activeLabel}</h2><span>{sectionCopy[active]}</span></div>
-        <SectionWorkspace active={active} urgentCount={urgentCount} onStart={start} />
-        {active === "pont" && <WaterSevenDock onStart={start} />}
+        <SectionWorkspace active={active} urgentCount={urgentCount} />
+        {active === "pont" && <WaterSevenDock />}
         {active === "pont" && <BottomDeck />}
       </section>
-      <DeckInstruments started={started} />
-      <CaptainMateo started={started} />
-      {!started && <MateoIntro onStart={start} />}
-      <div className="deckFloor" />
-      <Search className="hiddenSearchIcon" />
     </main>
   );
 }
