@@ -1,0 +1,306 @@
+/* RESET DIRECTION ARTISTIQUE VOGUE MERRY
+   Objectif : sortir du dashboard a galets et poser une vraie scene pirate-manga elegante. */
+
+:root {
+  --vm-ink: #110805;
+  --vm-night: #04111f;
+  --vm-deep: #082235;
+  --vm-sea: #0a6074;
+  --vm-paper: #f4dfb0;
+  --vm-paper-soft: #fff2cf;
+  --vm-brass: #c78932;
+  --vm-gold: #f4c96c;
+  --vm-line: rgba(255, 220, 142, 0.28);
+}
+
+.vogueMerryApp {
+  padding: 18px !important;
+  grid-template-columns: 248px minmax(0, 1fr) !important;
+  gap: 18px !important;
+  background:
+    radial-gradient(circle at 72% 10%, rgba(249, 207, 111, 0.45), transparent 17%),
+    radial-gradient(circle at 42% 18%, rgba(64, 205, 224, 0.22), transparent 25%),
+    linear-gradient(180deg, #08283d 0%, #0a6578 36%, #071a2a 67%, #120804 100%) !important;
+}
+
+.commandDeck {
+  width: min(1180px, calc(100vw - 312px)) !important;
+  margin-inline: auto !important;
+  padding: 22px clamp(22px, 2vw, 34px) 150px !important;
+  border-radius: 42px !important;
+  border: 1px solid rgba(255, 225, 154, 0.22) !important;
+  background:
+    linear-gradient(180deg, rgba(4, 17, 31, 0.82), rgba(4, 17, 31, 0.58)),
+    radial-gradient(circle at 50% 4%, rgba(255, 226, 156, 0.11), transparent 48%) !important;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.36) !important;
+}
+
+.topBar,
+.sectionIntro,
+.mainGrid,
+.sectionWorkspacePanel,
+.waterSevenDock,
+.bottomDeck {
+  max-width: 1060px !important;
+  margin-inline: auto !important;
+}
+
+.topBar {
+  margin-bottom: 14px !important;
+}
+
+.quoteScroll {
+  max-width: 620px !important;
+  padding: 11px 24px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(180deg, rgba(255, 243, 204, 0.96), rgba(212, 158, 75, 0.92)) !important;
+  color: var(--vm-ink) !important;
+  font-size: 0.95rem !important;
+}
+
+.sectionIntro {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 18px !important;
+  align-items: end !important;
+  margin-top: 2px !important;
+  margin-bottom: 18px !important;
+}
+
+.sectionIntro p,
+.sectionIntro span {
+  grid-column: 1 / -1 !important;
+}
+
+.sectionIntro h2 {
+  grid-column: 1 !important;
+  max-width: 760px !important;
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-size: clamp(42px, 4.4vw, 76px) !important;
+  line-height: 0.9 !important;
+  letter-spacing: -0.065em !important;
+  color: #fff4cf !important;
+  text-shadow: 0 18px 42px rgba(0, 0, 0, 0.42) !important;
+}
+
+.sectionIntro span {
+  max-width: 760px !important;
+  color: rgba(255, 242, 207, 0.82) !important;
+  font-size: 0.98rem !important;
+  line-height: 1.35 !important;
+}
+
+/* Carte : on arrete les iles-galets. On pose une table de navigation. */
+.mapFrame {
+  min-height: clamp(455px, 58vh, 620px) !important;
+  border: 1px solid rgba(255, 225, 154, 0.26) !important;
+  border-radius: 34px !important;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 242, 200, 0.12), transparent 34%),
+    linear-gradient(145deg, rgba(244, 223, 176, 0.94), rgba(189, 131, 58, 0.86) 46%, rgba(15, 81, 94, 0.88)) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15), 0 26px 68px rgba(0, 0, 0, 0.34) !important;
+}
+
+.mapFrame::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 22px !important;
+  border-radius: 26px !important;
+  background:
+    linear-gradient(rgba(43, 24, 9, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(43, 24, 9, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 50% 56%, rgba(3, 17, 30, 0.35), transparent 24%) !important;
+  background-size: 44px 44px, 44px 44px, auto !important;
+  opacity: 0.78 !important;
+}
+
+.mapFrame::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  width: min(620px, 64%);
+  height: 245px;
+  transform: translate(-50%, -50%);
+  background:
+    linear-gradient(90deg, transparent 0 7%, rgba(36, 18, 6, 0.92) 8% 92%, transparent 93%),
+    linear-gradient(100deg, transparent 0 35%, rgba(255, 245, 215, 0.88) 36% 54%, transparent 55%),
+    linear-gradient(78deg, transparent 0 47%, rgba(255, 245, 215, 0.72) 48% 64%, transparent 65%);
+  clip-path: polygon(5% 64%, 20% 52%, 48% 52%, 50% 0, 52% 52%, 80% 52%, 95% 64%, 84% 86%, 18% 86%);
+  opacity: 0.72;
+  filter: drop-shadow(0 28px 34px rgba(0, 0, 0, 0.30));
+  pointer-events: none;
+  z-index: 3;
+}
+
+.routeLayer path {
+  stroke: rgba(50, 26, 8, 0.48) !important;
+  stroke-width: 3 !important;
+  stroke-dasharray: 12 16 !important;
+  opacity: 0.52 !important;
+}
+
+.mapHeader {
+  top: 18px !important;
+  padding: 9px 24px !important;
+  border-radius: 999px !important;
+  background: rgba(17, 8, 5, 0.82) !important;
+  color: var(--vm-paper-soft) !important;
+  letter-spacing: 0.18em !important;
+}
+
+.islandLand,
+.islandBeacon {
+  display: none !important;
+}
+
+.islandPin {
+  width: 172px !important;
+  min-height: 58px !important;
+  padding: 10px 12px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(70, 36, 11, 0.20) !important;
+  background: rgba(255, 243, 210, 0.90) !important;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22) !important;
+  color: var(--vm-ink) !important;
+  text-align: left !important;
+  backdrop-filter: blur(2px) !important;
+}
+
+.islandPin::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: -10px;
+  width: 22px;
+  height: 28px;
+  border-radius: 6px 6px 12px 12px;
+  background: linear-gradient(180deg, #e84f3d, #8f1d18);
+  box-shadow: 0 0 0 3px rgba(255, 241, 205, 0.78);
+}
+
+.islandPin strong {
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 0.82rem !important;
+  line-height: 1.05 !important;
+  color: var(--vm-ink) !important;
+}
+
+.islandPin em {
+  margin-top: 6px !important;
+  padding: 3px 8px !important;
+  border-radius: 999px !important;
+  font-size: 0.56rem !important;
+  letter-spacing: 0.08em !important;
+}
+
+.compassRose {
+  left: 30px !important;
+  bottom: 26px !important;
+  color: rgba(35, 18, 5, 0.64) !important;
+}
+
+.mapLegend {
+  right: 18px !important;
+  top: auto !important;
+  bottom: 18px !important;
+  background: rgba(17, 8, 5, 0.76) !important;
+  border-radius: 18px !important;
+}
+
+/* Onglets metier : fini les gros paves jaunes. On passe en fiches de mission. */
+.sectionWorkspacePanel {
+  min-height: clamp(360px, 48vh, 520px) !important;
+  border: 1px solid rgba(255, 225, 154, 0.22) !important;
+  border-radius: 34px !important;
+  padding: clamp(24px, 2.2vw, 34px) !important;
+  background:
+    linear-gradient(145deg, rgba(4, 17, 31, 0.94), rgba(8, 44, 58, 0.90)),
+    radial-gradient(circle at 88% 12%, rgba(244, 201, 108, 0.14), transparent 28%) !important;
+}
+
+.sectionWorkspaceHeader {
+  margin-bottom: 22px !important;
+}
+
+.sectionWorkspaceHeader svg {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 16px !important;
+  background: linear-gradient(145deg, var(--vm-gold), var(--vm-brass)) !important;
+}
+
+.vogueCardList {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+}
+
+.vogueWorkCard {
+  min-height: 88px !important;
+  display: grid !important;
+  grid-template-columns: 116px minmax(0, 1fr) !important;
+  align-items: center !important;
+  column-gap: 18px !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 225, 154, 0.20) !important;
+  background: rgba(255, 245, 218, 0.08) !important;
+  color: var(--vm-paper-soft) !important;
+  box-shadow: none !important;
+  padding: 16px 18px !important;
+}
+
+.vogueWorkCard span:first-child {
+  margin: 0 !important;
+  justify-self: start !important;
+  background: rgba(244, 201, 108, 0.16) !important;
+  color: #f8d98c !important;
+}
+
+.vogueWorkCard h3 {
+  margin: 0 0 4px !important;
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-size: 1.26rem !important;
+  color: #fff2cf !important;
+}
+
+.vogueWorkCard p {
+  margin: 0 !important;
+  color: rgba(255, 242, 207, 0.76) !important;
+  font-size: 0.92rem !important;
+  line-height: 1.35 !important;
+}
+
+.rightCommand .dashboardPanel {
+  border-radius: 22px !important;
+  background: rgba(255, 243, 210, 0.92) !important;
+}
+
+.captainMateo.started {
+  transform: translate(-50%, 28%) scale(0.42) !important;
+  opacity: 0.42 !important;
+}
+
+.deckInstruments.instrumentsReady {
+  opacity: 0.48 !important;
+}
+
+@media (max-width: 1180px) {
+  .commandDeck {
+    width: 100% !important;
+  }
+
+  .sectionIntro {
+    grid-template-columns: 1fr !important;
+  }
+
+  .vogueWorkCard {
+    grid-template-columns: 1fr !important;
+  }
+}
