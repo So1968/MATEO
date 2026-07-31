@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import MeetingMode from "./components/MeetingMode.jsx";
 import "./vogue-maquette.css";
+import "./vogue-structure-fix.css";
 
 const navItems = [
   { id: "pont", label: "Pont", subtitle: "vue d’ensemble", icon: ShipWheel },
