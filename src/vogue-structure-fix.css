@@ -1,0 +1,173 @@
+/* Correctif structure — centre le pont et compacte l’écran */
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+.vmApp {
+  height: 100vh;
+  min-height: 0;
+  padding: 18px;
+  grid-template-columns: 210px minmax(0, 960px) 230px;
+  justify-content: center;
+  align-items: stretch;
+  gap: 18px;
+}
+
+.vmPont,
+.vmWorkspace {
+  height: calc(100vh - 36px);
+  min-height: 0;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 26px 22px;
+}
+
+.vmHero {
+  flex: 0 0 auto;
+  max-width: 720px;
+  padding: 0 0 14px;
+}
+
+.vmHero h2 {
+  max-width: 760px;
+  font-size: clamp(2.45rem, 3.35vw, 3.55rem);
+  line-height: .94;
+}
+
+.vmHero span,
+.vmWorkspaceHeader span {
+  margin-top: 7px;
+  font-size: .92rem;
+  line-height: 1.35;
+}
+
+.vmMapScene {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  border-radius: 26px;
+}
+
+.vmIsland {
+  width: 145px;
+}
+
+.vmIslandShape {
+  width: 96px;
+  height: 62px;
+  margin-bottom: 7px;
+}
+
+.vmIsland strong {
+  padding: 6px 8px 2px;
+  font-size: .9rem;
+}
+
+.vmIsland small {
+  padding: 0 8px 6px;
+  font-size: .66rem;
+}
+
+.vmIsland em {
+  margin-top: 6px;
+  padding: 4px 8px;
+  font-size: .58rem;
+}
+
+.vmCurrentCap {
+  left: 20px;
+  bottom: 18px;
+  max-width: calc(100% - 40px);
+  padding: 9px 12px;
+  font-size: .82rem;
+}
+
+.vmRight {
+  width: 230px;
+  align-self: start;
+  border-radius: 24px;
+  padding: 14px;
+}
+
+.vmRight header {
+  padding: 10px;
+  border-radius: 18px;
+}
+
+.vmRight h2 {
+  font-size: 1.28rem;
+}
+
+.vmRight header p {
+  font-size: .7rem;
+}
+
+.vmRight article {
+  margin-top: 10px;
+  padding: 11px;
+  border-radius: 16px;
+}
+
+.vmRight small,
+.vmCard small {
+  margin-bottom: 6px;
+  font-size: .58rem;
+}
+
+.vmRight strong,
+.vmCard strong {
+  font-size: .92rem;
+  line-height: 1.32;
+}
+
+.vmLeft {
+  width: 210px;
+}
+
+.vmBrand h1 {
+  font-size: 1.62rem;
+}
+
+.vmBrand p {
+  font-size: .8rem;
+}
+
+.vmMenu button {
+  padding: 9px 10px;
+}
+
+@media (max-width: 1220px) {
+  html,
+  body,
+  #root {
+    overflow: auto;
+  }
+
+  .vmApp {
+    height: auto;
+    min-height: 100vh;
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+    overflow: auto;
+  }
+
+  .vmLeft,
+  .vmRight {
+    width: auto;
+  }
+
+  .vmPont,
+  .vmWorkspace {
+    height: auto;
+    min-height: 640px;
+  }
+
+  .vmMapScene {
+    min-height: 470px;
+  }
+}
