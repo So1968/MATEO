@@ -3,10 +3,8 @@ import {
   Anchor,
   BookOpen,
   Compass,
-  FileText,
   FolderOpen,
   Map,
-  Search,
   ShipWheel,
   Telescope
 } from "lucide-react";
@@ -14,73 +12,61 @@ import MeetingMode from "./components/MeetingMode.jsx";
 import "./vogue-mainee-pirate.css";
 
 const navItems = [
-  { id: "pont", label: "Pont", icon: ShipWheel },
-  { id: "iles", label: "Îles", icon: Map },
-  { id: "escales", label: "Escales", icon: Anchor },
-  { id: "journal", label: "Journal", icon: BookOpen },
-  { id: "coffre", label: "Coffre", icon: FolderOpen },
-  { id: "longuevue", label: "Longue-vue", icon: Telescope }
+  { id: "pont", label: "Pont", subtitle: "Vue d’ensemble", icon: ShipWheel },
+  { id: "iles", label: "Îles", subtitle: "Vos projets", icon: Map },
+  { id: "escales", label: "Escales", subtitle: "Réunions & comités", icon: Anchor, count: 5 },
+  { id: "journal", label: "Journal", subtitle: "Comptes rendus", icon: BookOpen, count: 8 },
+  { id: "coffre", label: "Coffre", subtitle: "Documents", icon: FolderOpen, count: 23 },
+  { id: "longuevue", label: "Longue-vue", subtitle: "Recherche & veille", icon: Telescope }
 ];
 
-const voyageObjects = [
-  { id: "iles", kicker: "Carte au trésor", title: "Îles-projets", text: "Choisir une destination de travail, voir son état, ouvrir la bonne reprise." },
-  { id: "escales", kicker: "Épisode", title: "Escales", text: "Transformer une réunion en marqueurs, décisions, actions et compte rendu." },
-  { id: "journal", kicker: "Carnet", title: "Journal de bord", text: "Garder la mémoire longue du navire sans refaire toute l’histoire." },
-  { id: "coffre", kicker: "Inventaire", title: "Coffre", text: "Ranger documents, captures, preuves et versions utiles." },
-  { id: "longuevue", kicker: "Longue-vue", title: "Recherche", text: "Retrouver une trace sans fouiller partout." }
-];
-
-const crew = [
-  ["Capitaine", "Mateo", "reprend la barre"],
-  ["Navigatrice", "Mémoire", "retrouve le fil"],
-  ["Charpentier", "Azoth", "porte le chantier"]
+const islands = [
+  { id: "longuevue", name: "Phare d’Émeraude", subtitle: "Forecast grand compte", status: "En cours", tone: "green", x: 22, y: 38, icon: "⚓" },
+  { id: "iles", name: "Baie des Alizés", subtitle: "Campagne budget", status: "En cours", tone: "green", x: 49, y: 31, icon: "🌴" },
+  { id: "coffre", name: "Atoll des Brumes", subtitle: "Marge & chiffre d’affaires", status: "À venir", tone: "blue", x: 74, y: 58, icon: "☁" },
+  { id: "journal", name: "Île des Courants", subtitle: "Reporting performance", status: "Priorité", tone: "red", x: 47, y: 71, icon: "≋" }
 ];
 
 const workspaceData = {
   iles: {
     title: "Archipel des projets",
-    icon: Map,
-    intro: "Les projets deviennent des îles : chacune a son cap, son état, ses traces et sa prochaine reprise.",
+    intro: "Chaque projet devient une île lisible : contexte, état, documents, décisions et prochaine reprise.",
     cards: [
       ["Destination active", "Île des Courants", "Reporting performance à reprendre en priorité."],
-      ["Cap à tenir", "Ne pas mélanger", "Projet, document, réunion et décision doivent rester reliés."],
-      ["Prochain geste", "Ouvrir une fiche", "Contexte, traces, documents, décisions, actions."]
+      ["Cap à tenir", "Ne pas mélanger", "Projet, réunion, document et décision restent reliés."],
+      ["Prochain geste", "Ouvrir une fiche", "Une page claire, exploitable, transmissible."]
     ]
   },
   escales: {
     title: "Escales de réunion",
-    icon: Anchor,
-    intro: "Une escale est une réunion transformée en épisode utile : audio, marqueurs, décisions, actions et reprise claire.",
+    intro: "Une réunion devient une escale : audio, marqueurs, décisions, actions et compte rendu utile.",
     cards: [
       ["Départ", "Cadre de réunion", "Pourquoi on se réunit, avec qui, pour décider quoi."],
-      ["Pendant", "Marqueurs simples", "Décision · action · blocage · idée à reprendre."],
-      ["Arrivée", "Compte rendu", "Un texte exploitable, relié au projet et au journal."]
+      ["Pendant", "Marqueurs", "Décision · action · blocage · idée à reprendre."],
+      ["Arrivée", "Compte rendu", "Une reprise reliée au projet et au journal."]
     ]
   },
   journal: {
     title: "Journal de bord",
-    icon: BookOpen,
-    intro: "La mémoire longue de l’équipage : ce qui a été décidé, ce qui reste fragile, ce qu’il faut reprendre.",
+    intro: "La mémoire longue du navire : ce qui a été décidé, ce qui reste fragile, ce qu’il faut reprendre.",
     cards: [
       ["Dernière page", "Direction artistique", "Arrêt des dashboards déguisés et retour au navire."],
-      ["Cap validé", "Vogue Merry n’est pas Azoth", "Azoth porte le produit, Vogue Merry est le navire de Mateo."],
+      ["Cap validé", "Vogue Merry ≠ Azoth", "Azoth porte le produit, Vogue Merry est le navire de Mateo."],
       ["À écrire", "Synthèse de continuité", "Ce qui change, ce qui reste à faire, le prochain cap."]
     ]
   },
   coffre: {
     title: "Coffre de bord",
-    icon: FolderOpen,
-    intro: "Le coffre protège les pièces utiles : documents, maquettes, captures, versions, preuves et références.",
+    intro: "Le coffre protège les pièces utiles : documents, captures, versions, preuves et références.",
     cards: [
       ["À classer", "Supports de démo", "Pitch, captures, documents de présentation, anciennes pistes."],
-      ["Protection", "Archiver avant nettoyage", "Ne rien supprimer tant que le cap officiel n’est pas clair."],
+      ["Protection", "Archive avant nettoyage", "Ne rien supprimer tant que le cap officiel n’est pas clair."],
       ["Règle", "Chaque pièce a un usage", "Projet, escale, décision ou journal de reprise."]
     ]
   },
   longuevue: {
     title: "Longue-vue",
-    icon: Telescope,
-    intro: "La recherche doit retrouver une trace avec son contexte, pas afficher une liste de résultats sans âme.",
+    intro: "Retrouver une trace avec son contexte, pas afficher une liste de résultats sans âme.",
     cards: [
       ["Question", "Une requête simple", "Retrouver une décision, un document, une réunion ou une action."],
       ["Filtres", "Projet · date · type", "Réduire le bruit sans casser la fluidité."],
@@ -89,135 +75,127 @@ const workspaceData = {
   }
 };
 
-function TopNav({ active, onChange }) {
+function Sidebar({ active, onChange }) {
   return (
-    <header className="vpTop">
-      <button className="vpBrand" type="button" onClick={() => onChange("pont")}>
-        <span className="vpFlagMark">VM</span>
-        <span><strong>Vogue Merry</strong><small>navire de mémoire projet</small></span>
-      </button>
-      <nav className="vpNav" aria-label="Navigation Vogue Merry">
-        {navItems.map(({ id, label, icon: Icon }) => (
+    <aside className="bridgeSidebar">
+      <div className="sidebarOrnament" />
+      <div className="brandCompass"><Compass size={34} /></div>
+      <div className="brandBlock">
+        <h1>Vogue Mary</h1>
+        <p>Le journal de bord qui vous aide à garder le cap sur vos projets.</p>
+      </div>
+      <nav className="sideNav" aria-label="Navigation Vogue Merry">
+        {navItems.map(({ id, label, subtitle, icon: Icon, count }) => (
           <button key={id} type="button" className={active === id ? "active" : ""} onClick={() => onChange(id)}>
-            <Icon size={17} />
-            <span>{label}</span>
+            <Icon size={30} />
+            <span><strong>{label}</strong><small>{subtitle}</small></span>
+            {count ? <em>{count}</em> : null}
           </button>
         ))}
       </nav>
-    </header>
-  );
-}
-
-function MangaShip() {
-  return (
-    <div className="vpShipScene" aria-label="Trois-mâts Vogue Merry">
-      <div className="vpSpeedLines" />
-      <div className="vpIslandBack one" />
-      <div className="vpIslandBack two" />
-      <div className="vpRouteArc" />
-      <div className="vpShip" aria-hidden="true">
-        <div className="vpMast mastOne" />
-        <div className="vpMast mastTwo" />
-        <div className="vpMast mastThree" />
-        <div className="vpSail sailOne" />
-        <div className="vpSail sailTwo" />
-        <div className="vpSail sailThree" />
-        <div className="vpJollyFlag" />
-        <div className="vpCabin" />
-        <div className="vpHull" />
+      <div className="captainDock">
+        <div className="captainAvatar">M</div>
+        <div><strong>Capitaine Mateo</strong><span>Gardien du cap</span></div>
       </div>
-      <div className="vpWave front" />
-      <div className="vpWave back" />
-      <div className="vpLogOrb">
-        <Compass size={34} />
-        <span>Log Pose</span>
-      </div>
-    </div>
-  );
-}
-
-function WantedNote() {
-  return (
-    <aside className="vpWanted">
-      <small>AVIS DE CAP</small>
-      <strong>Prime du jour</strong>
-      <span>Rendre le pont assez clair pour une démo, assez vivant pour Mateo.</span>
+      <div className="sideTools"><span>⚙</span><span>🔔</span><span>?</span></div>
     </aside>
   );
 }
 
-function Home({ onChange }) {
+function IslandCard({ island, onChange }) {
   return (
-    <>
-      <section className="vpHero">
-        <div className="vpHeroText">
-          <p className="vpEyebrow">Manga pirate · équipage · mémoire projet</p>
-          <h1>Monte à bord. On reprend le cap.</h1>
-          <p className="vpLead">
-            Vogue Merry transforme projets, réunions, documents et décisions en voyage lisible :
-            une île à choisir, une escale à ouvrir, une trace à retrouver.
-          </p>
-          <div className="vpActions">
-            <button className="vpPrimary" type="button" onClick={() => onChange("iles")}>Choisir une île</button>
-            <button className="vpSecondary" type="button" onClick={() => onChange("escales")}>Ouvrir une escale</button>
-          </div>
-        </div>
-        <MangaShip />
-        <WantedNote />
-      </section>
+    <button
+      className={`islandCard ${island.tone}`}
+      style={{ left: `${island.x}%`, top: `${island.y}%` }}
+      type="button"
+      onClick={() => onChange(island.id)}
+    >
+      <span className="islandBadge">{island.icon}</span>
+      <strong>{island.name}</strong>
+      <small>{island.subtitle}</small>
+      <em>{island.status}</em>
+    </button>
+  );
+}
 
-      <section className="vpObjects">
-        <header className="vpSectionHead">
-          <p className="vpEyebrow">Objets du navire</p>
-          <h2>Chaque fonction devient un objet d’aventure.</h2>
-        </header>
-        <div className="vpObjectGrid">
-          {voyageObjects.map((item) => (
-            <button key={item.id} className="vpObjectCard" type="button" onClick={() => onChange(item.id)}>
-              <small>{item.kicker}</small>
-              <strong>{item.title}</strong>
-              <span>{item.text}</span>
-            </button>
-          ))}
+function PontMap({ onChange }) {
+  return (
+    <section className="mapWindow" aria-label="Carte des îles de Vogue Merry">
+      <div className="mapSky left" />
+      <div className="mapSky right" />
+      <div className="seaIllustration">
+        <svg className="routeLines" viewBox="0 0 1000 620" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M150 300 C310 200 430 350 520 255 S700 230 850 360" />
+          <path d="M360 455 C270 325 430 270 580 355 S710 500 820 415" />
+          <path d="M245 415 C365 550 520 470 600 380" />
+        </svg>
+        <div className="mapCompassRose">N<br /><span>W&nbsp;&nbsp;&nbsp;&nbsp;E</span><br />S</div>
+        <div className="paintedIsland lighthouse" />
+        <div className="paintedIsland palms" />
+        <div className="paintedIsland rocks" />
+        <div className="paintedIsland harbor" />
+        {islands.map((island) => <IslandCard key={island.name} island={island} onChange={onChange} />)}
+        <div className="deskObjects">
+          <div className="spyglass" />
+          <div className="openJournal" />
+          <div className="deckCompass" />
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      <section className="vpCrewDeck">
-        <article className="vpCrewPoster">
-          <p className="vpEyebrow">Équipage</p>
-          <h2>Pas de solitude face au bazar.</h2>
-          <p>Le navire organise les rôles : qui garde le cap, qui range, qui retrouve, qui transmet.</p>
-        </article>
-        <div className="vpCrewList">
-          {crew.map(([role, name, text]) => (
-            <article key={role}>
-              <small>{role}</small>
-              <strong>{name}</strong>
-              <span>{text}</span>
-            </article>
-          ))}
-        </div>
-      </section>
-    </>
+function LogPose({ active }) {
+  const activeLabel = useMemo(() => navItems.find((item) => item.id === active)?.label || "Pont", [active]);
+  return (
+    <aside className="logPosePanel">
+      <div className="paperPins"><span /><span /></div>
+      <header>
+        <h2>Log Pose</h2>
+        <small>{activeLabel}</small>
+      </header>
+      <div className="compassObject"><Compass size={98} /></div>
+      <article>
+        <small>Cap actuel</small>
+        <strong>Nord-Est</strong>
+        <p>Croissance & efficacité</p>
+      </article>
+      <article>
+        <small>Prochaine direction</small>
+        <strong>Transformer les cartes en vraies pages métier</strong>
+        <p>Données & automatisation</p>
+      </article>
+      <button type="button">Voir le détail <span>→</span></button>
+    </aside>
+  );
+}
+
+function Pont({ onChange }) {
+  return (
+    <section className="pontScene">
+      <div className="ceilingBeam" />
+      <div className="lantern" />
+      <div className="topRoundButtons"><span>🔔</span><span>⚙</span></div>
+      <header className="pontHeader">
+        <h1>Pont du navire</h1>
+        <p>Reprendre le cap sur vos projets actifs</p>
+      </header>
+      <PontMap onChange={onChange} />
+    </section>
   );
 }
 
 function Workspace({ active, isRecording, setIsRecording, markers, setMarkers }) {
   const data = workspaceData[active] || workspaceData.iles;
-  const Icon = data.icon;
-
   return (
-    <section className="vpWorkspace">
-      <div className="vpWorkspaceHero">
-        <div className="vpWorkspaceIcon"><Icon size={30} /></div>
-        <div>
-          <p className="vpEyebrow">Zone active</p>
-          <h1>{data.title}</h1>
-          <p>{data.intro}</p>
-        </div>
-      </div>
-
-      <div className="vpBoard">
+    <section className="workspaceScene">
+      <div className="ceilingBeam" />
+      <header className="workspaceHeader">
+        <p>Zone active</p>
+        <h1>{data.title}</h1>
+        <span>{data.intro}</span>
+      </header>
+      <div className="workspaceBoard">
         {data.cards.map(([label, value, text]) => (
           <article key={label}>
             <small>{label}</small>
@@ -226,9 +204,8 @@ function Workspace({ active, isRecording, setIsRecording, markers, setMarkers })
           </article>
         ))}
       </div>
-
       {active === "escales" && (
-        <div className="vpMeetingBox">
+        <div className="meetingWrap">
           <MeetingMode
             projectName="Île des Courants — Reporting performance"
             reportTitle="Escale de cadrage"
@@ -244,33 +221,20 @@ function Workspace({ active, isRecording, setIsRecording, markers, setMarkers })
   );
 }
 
-function Footer() {
-  return (
-    <footer className="vpFooter">
-      <span>Vogue Merry</span>
-      <span>·</span>
-      <span>pirate manga, mais outil de travail</span>
-      <span>·</span>
-      <span>Azoth Studio</span>
-    </footer>
-  );
-}
-
 export default function App() {
   const [active, setActive] = useState("pont");
   const [isRecording, setIsRecording] = useState(false);
   const [markers, setMarkers] = useState([]);
-  const isHome = useMemo(() => active === "pont", [active]);
 
   return (
-    <main className="vpApp">
-      <TopNav active={active} onChange={setActive} />
-      {isHome ? (
-        <Home onChange={setActive} />
+    <main className="bridgeApp">
+      <Sidebar active={active} onChange={setActive} />
+      {active === "pont" ? (
+        <Pont onChange={setActive} />
       ) : (
         <Workspace active={active} isRecording={isRecording} setIsRecording={setIsRecording} markers={markers} setMarkers={setMarkers} />
       )}
-      <Footer />
+      <LogPose active={active} />
     </main>
   );
 }
