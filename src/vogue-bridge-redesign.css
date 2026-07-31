@@ -1,0 +1,692 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: #07111d;
+}
+
+button {
+  font: inherit;
+}
+
+.vrApp {
+  min-height: 100vh;
+  padding: 22px;
+  color: #fff1d0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 72% 12%, rgba(247, 192, 83, 0.30), transparent 18%),
+    radial-gradient(circle at 18% 18%, rgba(71, 185, 197, 0.34), transparent 24%),
+    linear-gradient(180deg, #0e2e43 0%, #0a6a78 34%, #082238 66%, #130807 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.vrApp::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.10), transparent 24%),
+    repeating-linear-gradient(172deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 2px 58px);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.vrShell {
+  position: relative;
+  z-index: 1;
+  max-width: 1460px;
+  height: calc(100vh - 44px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 16px;
+}
+
+.vrTopbar {
+  min-height: 70px;
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 226, 166, 0.22);
+  border-radius: 28px;
+  background: rgba(5, 16, 27, 0.72);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(16px);
+}
+
+.vrBrand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vrBrandMark {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: #1d0e06;
+  background: linear-gradient(145deg, #ffe6a3, #b76a2e);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.26);
+}
+
+.vrBrand h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.82rem;
+  line-height: 0.9;
+  letter-spacing: -0.055em;
+}
+
+.vrBrand p {
+  margin: 3px 0 0;
+  color: #d9c79c;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.vrNav {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.vrNav button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 226, 166, 0.14);
+  border-radius: 999px;
+  padding: 10px 12px;
+  color: #fff1d0;
+  background: rgba(255, 244, 212, 0.06);
+  font-size: 0.84rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.vrNav button.active {
+  color: #221205;
+  background: linear-gradient(145deg, #ffe6a3, #c77b36);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+.vrStatus {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 18px;
+  background: rgba(255, 244, 212, 0.08);
+  border: 1px solid rgba(255, 226, 166, 0.16);
+}
+
+.vrStatus strong {
+  display: block;
+  font-size: 0.82rem;
+}
+
+.vrStatus span {
+  display: block;
+  color: #d9c79c;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.vrMain {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.vrPont {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 16px;
+}
+
+.vrStage {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  padding: clamp(22px, 2.4vw, 34px);
+  border: 1px solid rgba(255, 226, 166, 0.32);
+  border-radius: 34px;
+  background:
+    linear-gradient(180deg, rgba(255, 241, 204, 0.94), rgba(230, 203, 148, 0.88)),
+    radial-gradient(circle at 70% 12%, rgba(255, 255, 255, 0.65), transparent 32%);
+  color: #201006;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.38);
+  overflow: hidden;
+  position: relative;
+}
+
+.vrStage::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border: 1px solid rgba(90, 47, 20, 0.12);
+  border-radius: 26px;
+  pointer-events: none;
+}
+
+.vrHeroText {
+  position: relative;
+  z-index: 2;
+  max-width: 840px;
+}
+
+.vrEyebrow {
+  margin: 0 0 8px;
+  color: #b24d3f;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  font-weight: 1000;
+}
+
+.vrHeroText h2 {
+  margin: 0;
+  max-width: 780px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3.2rem, 6.1vw, 6.9rem);
+  line-height: 0.82;
+  letter-spacing: -0.075em;
+}
+
+.vrHeroText span {
+  display: block;
+  margin-top: 14px;
+  max-width: 640px;
+  color: rgba(32, 16, 6, 0.72);
+  font-size: 1.04rem;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.vrSeaTable {
+  position: relative;
+  z-index: 1;
+  min-height: 320px;
+  border-radius: 30px;
+  border: 1px solid rgba(11, 79, 94, 0.30);
+  background:
+    radial-gradient(circle at 34% 34%, rgba(255, 238, 166, 0.30), transparent 16%),
+    radial-gradient(circle at 76% 62%, rgba(255, 238, 166, 0.22), transparent 18%),
+    linear-gradient(135deg, #2ba1a8 0%, #116b7b 48%, #08283d 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 18px 42px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+
+.vrSeaTable::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.22;
+}
+
+.vrRouteSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.82;
+}
+
+.vrRouteSvg path {
+  fill: none;
+  stroke: rgba(255, 232, 164, 0.72);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 12 16;
+}
+
+.vrShip {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(620px, 72%);
+  height: 260px;
+  transform: translate(-50%, -43%);
+}
+
+.vrHull {
+  position: absolute;
+  left: 11%;
+  right: 11%;
+  bottom: 36px;
+  height: 64px;
+  border-radius: 0 0 120px 120px;
+  background: linear-gradient(180deg, #5b3017, #1b0a05);
+  box-shadow: 0 24px 40px rgba(0, 0, 0, 0.35);
+}
+
+.vrHull::before {
+  content: "";
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  top: 12px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 220, 138, 0.46);
+}
+
+.vrMast {
+  position: absolute;
+  bottom: 80px;
+  width: 7px;
+  height: 170px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2a1209, #b97732, #2a1209);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.30);
+}
+
+.vrMast.m1 { left: 29%; height: 148px; }
+.vrMast.m2 { left: 50%; height: 195px; }
+.vrMast.m3 { left: 70%; height: 156px; }
+
+.vrSail {
+  position: absolute;
+  bottom: 118px;
+  width: 126px;
+  height: 132px;
+  background: linear-gradient(135deg, rgba(255, 248, 222, 0.95), rgba(233, 204, 151, 0.74));
+  border: 1px solid rgba(76, 43, 18, 0.14);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.18);
+}
+
+.vrSail.s1 {
+  left: 22%;
+  clip-path: polygon(100% 0, 100% 100%, 0 82%);
+}
+
+.vrSail.s2 {
+  left: 42%;
+  width: 170px;
+  height: 178px;
+  clip-path: polygon(50% 0, 100% 100%, 0 84%);
+}
+
+.vrSail.s3 {
+  left: 63%;
+  clip-path: polygon(0 0, 100% 82%, 0 100%);
+}
+
+.vrFlag {
+  position: absolute;
+  left: calc(50% + 8px);
+  bottom: 266px;
+  width: 78px;
+  height: 34px;
+  border-radius: 4px 14px 14px 4px;
+  background: linear-gradient(135deg, #c54b3f, #7e231e);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+}
+
+.vrFlag::after {
+  content: "cap";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #ffe9b1;
+  font-size: 0.6rem;
+  font-weight: 1000;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.vrCompassPlate {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  width: 104px;
+  height: 104px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffe2a2;
+  background: radial-gradient(circle, #5b3017 0 26%, #241008 27% 58%, rgba(255, 228, 164, 0.24) 59% 61%, rgba(5, 18, 29, 0.70) 62%);
+  box-shadow: 0 20px 36px rgba(0, 0, 0, 0.28);
+}
+
+.vrDeckNote {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  max-width: 300px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 999px;
+  background: rgba(255, 244, 212, 0.94);
+  color: #201006;
+  font-weight: 950;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.20);
+}
+
+.vrMissionStrip {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.vrDestination {
+  min-width: 0;
+  border: 1px solid rgba(57, 32, 15, 0.14);
+  border-radius: 20px;
+  padding: 14px;
+  text-align: left;
+  color: #201006;
+  background: rgba(255, 249, 229, 0.66);
+  cursor: pointer;
+}
+
+.vrDestination strong {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.05rem;
+  line-height: 1.05;
+}
+
+.vrDestination span {
+  display: block;
+  margin-top: 6px;
+  color: rgba(32, 16, 6, 0.62);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.vrDestination em {
+  display: inline-flex;
+  margin-top: 10px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: #fff2d4;
+  background: #0d3043;
+  font-style: normal;
+  font-size: 0.60rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+}
+
+.vrDestination.priority em {
+  background: #b84c3f;
+}
+
+.vrLog {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 226, 166, 0.28);
+  background: rgba(255, 241, 204, 0.92);
+  color: #201006;
+  box-shadow: 0 26px 76px rgba(0, 0, 0, 0.28);
+}
+
+.vrLog header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.vrLogIcon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: #0d3043;
+  background: rgba(22, 131, 145, 0.14);
+}
+
+.vrLog h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.75rem;
+  line-height: 0.9;
+}
+
+.vrLog p {
+  margin: 4px 0 0;
+  color: rgba(32, 16, 6, 0.60);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.vrLog article {
+  padding: 15px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.46);
+  border: 1px solid rgba(57, 32, 15, 0.08);
+}
+
+.vrLog small,
+.vrBoardCard small,
+.vrAgenda small {
+  display: block;
+  color: #b64b3e;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.62rem;
+  font-weight: 1000;
+  margin-bottom: 6px;
+}
+
+.vrLog strong {
+  display: block;
+  font-size: 1.02rem;
+  line-height: 1.28;
+}
+
+.vrWorkspace {
+  height: 100%;
+  overflow: auto;
+  padding: clamp(22px, 2.6vw, 36px);
+  border: 1px solid rgba(255, 226, 166, 0.30);
+  border-radius: 34px;
+  background: rgba(255, 241, 204, 0.94);
+  color: #201006;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.36);
+}
+
+.vrWorkspaceHeader {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  max-width: 980px;
+}
+
+.vrWorkspaceIcon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  color: #201006;
+  background: linear-gradient(145deg, #ffe6a3, #c77b36);
+}
+
+.vrWorkspace h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.8rem, 5vw, 5.8rem);
+  line-height: 0.86;
+  letter-spacing: -0.065em;
+}
+
+.vrWorkspaceHeader span {
+  display: block;
+  margin-top: 12px;
+  max-width: 760px;
+  color: rgba(32, 16, 6, 0.68);
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.vrBoard {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+  max-width: 980px;
+}
+
+.vrBoardCard {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(57, 32, 15, 0.10);
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.vrBoardCard strong {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+}
+
+.vrBoardCard p {
+  margin: 0;
+  color: rgba(32, 16, 6, 0.66);
+  font-weight: 850;
+}
+
+.vrBoardCard button,
+.vrAction {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  color: #fff1d0;
+  background: #0d3043;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.vrAgenda {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 12px;
+  margin-top: 18px;
+  max-width: 980px;
+}
+
+.vrAgenda article {
+  padding: 18px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(11, 48, 67, 0.96), rgba(20, 104, 114, 0.90));
+  color: #fff1d0;
+}
+
+.vrAgenda h3 {
+  margin: 0 0 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.7rem;
+  line-height: 0.95;
+}
+
+.vrAgenda p {
+  margin: 0;
+  color: rgba(255, 241, 208, 0.72);
+  font-weight: 780;
+  line-height: 1.45;
+}
+
+.vrMeetingBox {
+  margin-top: 18px;
+  max-width: 980px;
+}
+
+@media (max-width: 1180px) {
+  body {
+    overflow: auto;
+  }
+
+  .vrApp {
+    overflow: auto;
+  }
+
+  .vrShell {
+    height: auto;
+  }
+
+  .vrTopbar {
+    grid-template-columns: 1fr;
+  }
+
+  .vrNav {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .vrPont {
+    grid-template-columns: 1fr;
+  }
+
+  .vrMissionStrip,
+  .vrAgenda {
+    grid-template-columns: 1fr;
+  }
+
+  .vrBoardCard {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 820px) and (min-width: 1181px) {
+  .vrHeroText h2 {
+    font-size: clamp(3rem, 5.4vw, 5.6rem);
+  }
+
+  .vrSeaTable {
+    min-height: 280px;
+  }
+
+  .vrShip {
+    transform: translate(-50%, -45%) scale(0.88);
+  }
+
+  .vrMissionStrip {
+    gap: 8px;
+  }
+
+  .vrDestination {
+    padding: 12px;
+  }
+}
