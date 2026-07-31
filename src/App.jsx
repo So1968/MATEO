@@ -3,15 +3,12 @@ import {
   Anchor,
   BookOpen,
   Compass,
-  Feather,
+  FileText,
   FolderOpen,
-  Instagram,
-  Mail,
   Map,
   Search,
   ShipWheel,
-  Telescope,
-  UsersRound
+  Telescope
 } from "lucide-react";
 import MeetingMode from "./components/MeetingMode.jsx";
 import "./vogue-mainee-pirate.css";
@@ -107,8 +104,8 @@ function TopNav({ active, onChange }) {
         ))}
       </nav>
       <div className="mpIcons" aria-hidden="true">
-        <Instagram size={20} />
-        <Mail size={20} />
+        <span>☠</span>
+        <span>✉</span>
       </div>
     </header>
   );
@@ -211,8 +208,8 @@ function LowerPanels({ onChange }) {
         <h2>Sur le pont</h2>
         <p>Un lieu d’action, de transmission et d’équipage.</p>
         <ul>
-          <li><span className="mpRound"><UsersRound size={18} /></span> Équipage, rôles et relais</li>
-          <li><span className="mpRound"><Feather size={18} /></span> Journal, décisions et synthèses</li>
+          <li><span className="mpRound"><Compass size={18} /></span> Équipage, rôles et relais</li>
+          <li><span className="mpRound"><FileText size={18} /></span> Journal, décisions et synthèses</li>
           <li><span className="mpRound"><Search size={18} /></span> Recherche et documents utiles</li>
         </ul>
       </article>
