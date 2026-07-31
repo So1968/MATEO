@@ -210,9 +210,25 @@ function TopBar() {
 function RightCommand({ urgentCount }) {
   return (
     <aside className="rightCommand">
-      <DashboardPanel title="Prochaine escale"><div className="harborThumb" /><h3>Réunion à transformer</h3><p>Audio, notes, décisions et actions à raccrocher au bon projet</p><small><CalendarDays size={15} /> Démo Mateo · À dater</small></DashboardPanel>
-      <DashboardPanel title="Prochaine action"><div className="actionLine"><ClipboardList /><div><h3>Stabiliser le moteur</h3><p>Escales · Coffre · Journal · Log Pose</p></div></div><small>Objectif : une première version utilisable</small><button className="primaryButton">Ouvrir la tâche →</button></DashboardPanel>
-      <DashboardPanel title="Alertes & urgences" badge={urgentCount} className="urgentPanel"><div className="beaconNotice"><AlertTriangle size={18} /> Phare allumé</div><p>Traces audio à intégrer</p><p>Recherche Longue-vue à brancher</p><button className="dangerButton">Voir les urgences →</button></DashboardPanel>
+      <DashboardPanel title="Prochaine escale">
+        <div className="actionLine">
+          <CalendarDays />
+          <div><h3>Démo Mateo</h3><p>Réunion à transformer · À dater</p></div>
+        </div>
+      </DashboardPanel>
+      <DashboardPanel title="Prochaine action">
+        <div className="actionLine">
+          <ClipboardList />
+          <div><h3>Stabiliser le moteur</h3><p>Escales · Coffre · Journal · Log Pose</p></div>
+        </div>
+        <button className="primaryButton">Ouvrir la tâche →</button>
+      </DashboardPanel>
+      <DashboardPanel title="Alertes & urgences" badge={urgentCount} className="urgentPanel">
+        <div className="beaconNotice"><AlertTriangle size={18} /> Deux points à reprendre</div>
+        <p>Traces audio à intégrer</p>
+        <p>Longue-vue à brancher</p>
+        <button className="dangerButton">Voir les urgences →</button>
+      </DashboardPanel>
     </aside>
   );
 }
