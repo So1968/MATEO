@@ -67,6 +67,33 @@ const ISLAND_PROJECTS = [
   }
 ];
 
+const GLOBAL_PRIORITIES = [
+  {
+    rank: 1,
+    project: "Reporting performance",
+    island: "Île des Courants",
+    reason: "Données de départ à valider",
+    action: "Valider les données de départ.",
+    tone: "red"
+  },
+  {
+    rank: 2,
+    project: "Marge & chiffre d’affaires",
+    island: "Atoll des Brumes",
+    reason: "Projet à reprendre",
+    action: "Reprendre les traces disponibles.",
+    tone: "blue"
+  },
+  {
+    rank: 3,
+    project: "Forecast grand compte",
+    island: "Phare d’Émeraude",
+    reason: "Dernière escale à reprendre",
+    action: "Reprendre la dernière escale.",
+    tone: "green"
+  }
+];
+
 const VIEW_CONTENT = {
   iles: [
     ["Réunions & escales", "À structurer", "Les réunions, décisions et comptes rendus rassemblés au même endroit."],
@@ -168,6 +195,22 @@ button { font: inherit; }
 .header-tools button { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid rgba(83,61,28,.26); border-radius: 50%; color: #2b3740; background: rgba(255,255,255,.28); }
 
 .stage-content { min-height: 0; background: #173f4e; }
+.pont-view { height: 100%; min-height: 470px; display: grid; grid-template-rows: auto minmax(0,1fr); overflow: hidden; background: #173f4e; }
+.priorities-board { padding: 12px 18px 11px; color: #f1dca6; background: linear-gradient(180deg,#0a3446,#082a3a); border-bottom: 2px solid #8d6633; box-shadow: inset 0 -10px 20px rgba(0,0,0,.16); }
+.priorities-heading { margin-bottom: 9px; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.priorities-heading strong { font-size: 1.05rem; font-weight: 600; }
+.priorities-heading span { color: #c9b78b; font: .72rem Arial,sans-serif; }
+.priorities-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; }
+.priority-card { min-width: 0; padding: 9px 11px; display: grid; grid-template-columns: 28px minmax(0,1fr); gap: 9px; color: #382b18; background: linear-gradient(180deg,#f7e4b5,#dfc17f); border: 1px solid #8d6431; border-radius: 7px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.34); }
+.priority-rank { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; color: #f8e5b4; background: #6c4421; font: 700 .72rem Arial,sans-serif; }
+.priority-card.red .priority-rank { background: #8f3933; }
+.priority-card.blue .priority-rank { background: #286b83; }
+.priority-card small { display: block; color: #7b5d31; font: 700 .62rem Arial,sans-serif; letter-spacing: .06em; text-transform: uppercase; }
+.priority-card strong { display: block; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .91rem; }
+.priority-card p { margin: 4px 0 0; color: #624e32; font: .69rem/1.28 Arial,sans-serif; }
+.priority-card p b { color: #4d3920; font-weight: 700; }
+.pont-view .sea-map { min-height: 0; }
+
 .sea-map { position: relative; height: 100%; min-height: 470px; overflow: hidden; background: radial-gradient(circle at 20% 20%,rgba(255,255,255,.17) 0 2px,transparent 3px),radial-gradient(circle at 70% 35%,rgba(255,255,255,.12) 0 1px,transparent 2px),repeating-linear-gradient(164deg,rgba(255,255,255,.045) 0 2px,transparent 3px 54px),linear-gradient(155deg,#42a7bb 0%,#1d8299 38%,#0e526d 70%,#07384e 100%); background-size: 120px 120px,90px 90px,auto,auto; box-shadow: inset 0 0 0 10px rgba(62,32,12,.55),inset 0 0 80px rgba(0,0,0,.32); }
 .sea-map::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 42% 22%,rgba(255,255,255,.13),transparent 30%),repeating-radial-gradient(ellipse at 50% 50%,transparent 0 24px,rgba(255,255,255,.025) 25px 27px); }
 .sea-map::after { content: ""; position: absolute; inset: auto 0 0; height: 58px; background: linear-gradient(180deg,transparent,rgba(26,13,6,.55)),repeating-linear-gradient(100deg,#3b1d0c 0 50px,#5a2d12 51px 96px); border-top: 7px ridge #7c4b22; pointer-events: none; z-index: 2; }
@@ -287,6 +330,8 @@ button { font: inherit; }
   .lantern-mark { width: 44px; height: 58px; }
   .header-title h2 { font-size: 2.35rem; }
   .header-title span { font-size: .85rem; }
+  .pont-view { height: auto; min-height: 680px; overflow: visible; }
+  .priorities-grid { grid-template-columns: 1fr; }
   .sea-map, .generic-view, .islands-view { min-height: 680px; }
   .generic-grid, .island-project-grid { grid-template-columns: 1fr; }
   .islands-toolbar { align-items: flex-start; flex-direction: column; }
@@ -399,6 +444,38 @@ function SeaMap() {
   );
 }
 
+function PriorityBoard() {
+  return (
+    <section className="priorities-board" aria-label="Priorités maintenant">
+      <div className="priorities-heading">
+        <strong>Priorités maintenant</strong>
+        <span>3 caps à regarder avant le reste</span>
+      </div>
+      <div className="priorities-grid">
+        {GLOBAL_PRIORITIES.map((priority) => (
+          <article className={`priority-card ${priority.tone}`} key={priority.project}>
+            <span className="priority-rank">{priority.rank}</span>
+            <div>
+              <small>{priority.island}</small>
+              <strong>{priority.project}</strong>
+              <p>{priority.reason} · <b>{priority.action}</b></p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PontView() {
+  return (
+    <section className="pont-view">
+      <PriorityBoard />
+      <SeaMap />
+    </section>
+  );
+}
+
 function IslandsView() {
   const [mode, setMode] = useState("cards");
 
@@ -506,7 +583,7 @@ function LogPose({ active }) {
 export default function App() {
   const [active, setActive] = useState("pont");
   const centralView = useMemo(() => {
-    if (active === "pont") return <SeaMap />;
+    if (active === "pont") return <PontView />;
     if (active === "iles") return <IslandsView />;
     return <GenericView active={active} />;
   }, [active]);
