@@ -32,6 +32,41 @@ const PROJECTS = [
   { name: "Lagune des Archives", detail: "Coffre documentaire", status: "En cours", tone: "gold", kind: "lagoon", x: 22, y: 67 }
 ];
 
+const ISLAND_PROJECTS = [
+  {
+    island: "Phare d’Émeraude",
+    name: "Forecast grand compte",
+    status: "En cours",
+    tone: "green",
+    cap: "Consolider les hypothèses de prévision.",
+    next: "Reprendre la dernière escale."
+  },
+  {
+    island: "Baie des Alizés",
+    name: "Campagne budget",
+    status: "En cours",
+    tone: "green",
+    cap: "Stabiliser les arbitrages et l’enveloppe.",
+    next: "Rassembler les décisions à valider."
+  },
+  {
+    island: "Atoll des Brumes",
+    name: "Marge & chiffre d’affaires",
+    status: "À reprendre",
+    tone: "blue",
+    cap: "Clarifier les indicateurs réellement utiles.",
+    next: "Reprendre les traces disponibles."
+  },
+  {
+    island: "Île des Courants",
+    name: "Reporting performance",
+    status: "Priorité",
+    tone: "red",
+    cap: "Rendre le reporting lisible et fiable.",
+    next: "Valider les données de départ."
+  }
+];
+
 const VIEW_CONTENT = {
   iles: [
     ["Réunions & escales", "À structurer", "Les réunions, décisions et comptes rendus rassemblés au même endroit."],
@@ -195,6 +230,31 @@ button { font: inherit; }
 .generic-card h3 { margin: 0 0 10px; font-size: 1.35rem; }
 .generic-card p { margin: 0; color: #624f35; font: .95rem/1.5 Arial,sans-serif; }
 
+.islands-view { height: 100%; min-height: 470px; padding: 22px 24px 24px; background: linear-gradient(160deg,#0c6175,#07384e); box-shadow: inset 0 0 0 10px rgba(62,32,12,.55); overflow: auto; }
+.islands-toolbar { min-height: 42px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 16px; color: #f1dca6; }
+.islands-toolbar p { margin: 0; font: .82rem/1.35 Arial,sans-serif; color: #d8c89d; }
+.view-switch { display: inline-flex; flex: 0 0 auto; padding: 3px; border: 1px solid rgba(238,213,154,.42); border-radius: 8px; background: rgba(4,29,40,.34); }
+.view-switch button { padding: 7px 13px; border: 0; border-radius: 5px; color: #ead5a4; background: transparent; cursor: pointer; font: 700 .76rem Arial,sans-serif; }
+.view-switch button.active { color: #26313a; background: #efd79c; }
+.island-project-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.project-card { min-height: 142px; padding: 15px 17px; color: #332715; background: linear-gradient(180deg,#fff1ca,#e5c785); border: 1px solid #8d6431; border-radius: 9px; box-shadow: 0 10px 20px rgba(0,0,0,.23),inset 0 0 0 2px rgba(255,255,255,.38); }
+.project-card-top { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.project-card small { display: block; color: #7b5c2e; font: 700 .68rem Arial,sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.project-card h3 { margin: 4px 0 0; font-size: 1.2rem; line-height: 1.15; }
+.project-status { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; color: #5c4b33; font: .7rem Arial,sans-serif; }
+.project-status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #3aa56c; }
+.project-status.blue::before { background: #3690b5; }
+.project-status.red::before { background: #c74b45; }
+.project-meta { margin-top: 12px; padding-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; border-top: 1px solid rgba(112,75,28,.2); }
+.project-meta label { display: block; margin-bottom: 4px; color: #806334; font: 700 .65rem Arial,sans-serif; text-transform: uppercase; letter-spacing: .06em; }
+.project-meta p { margin: 0; color: #5e4b31; font: .78rem/1.35 Arial,sans-serif; }
+.island-project-list { display: grid; gap: 8px; }
+.project-row { display: grid; grid-template-columns: minmax(170px,1.15fr) 112px minmax(190px,1.3fr) minmax(190px,1.3fr); gap: 14px; align-items: center; padding: 13px 15px; color: #332715; background: linear-gradient(180deg,#fff1ca,#e7cb90); border: 1px solid #8d6431; border-radius: 8px; box-shadow: 0 8px 16px rgba(0,0,0,.18); }
+.project-row.header { padding-top: 7px; padding-bottom: 7px; color: #dfc991; background: rgba(4,29,40,.36); border-color: rgba(238,213,154,.35); box-shadow: none; font: 700 .67rem Arial,sans-serif; letter-spacing: .07em; text-transform: uppercase; }
+.project-row strong { display: block; font-size: .98rem; }
+.project-row .project-island { display: block; margin-top: 2px; color: #7a633f; font: .7rem Arial,sans-serif; }
+.project-row p { margin: 0; color: #5f4c31; font: .76rem/1.3 Arial,sans-serif; }
+
 .log-pose { min-height: 0; padding: 22px 25px 16px; display: flex; flex-direction: column; overflow: hidden; color: #372916; background: linear-gradient(rgba(255,255,255,.24),rgba(255,255,255,.04)),repeating-linear-gradient(0deg,rgba(112,75,28,.035) 0 1px,transparent 2px 6px),#ead7aa; box-shadow: inset 18px 0 34px rgba(80,48,14,.13); }
 .log-pose h2 { margin: 0; text-align: center; font-size: 2rem; font-weight: 500; }
 .log-ornament { width: 90px; height: 1px; margin: 10px auto 16px; background: #9d7845; }
@@ -212,6 +272,8 @@ button { font: inherit; }
   .log-compass { width: 120px; height: 120px; min-width: 120px; min-height: 120px; flex-basis: 120px; margin: 0; }
   .log-section { border-top: 0; border-left: 1px solid rgba(112,75,28,.25); }
   .log-button { margin-top: 0; }
+  .project-row { grid-template-columns: minmax(160px,1fr) 100px minmax(180px,1.2fr); }
+  .project-row > :last-child { display: none; }
 }
 @media (max-width: 820px) {
   .vogue-shell { display: block; border-width: 6px; }
@@ -225,8 +287,12 @@ button { font: inherit; }
   .lantern-mark { width: 44px; height: 58px; }
   .header-title h2 { font-size: 2.35rem; }
   .header-title span { font-size: .85rem; }
-  .sea-map, .generic-view { min-height: 680px; }
-  .generic-grid { grid-template-columns: 1fr; }
+  .sea-map, .generic-view, .islands-view { min-height: 680px; }
+  .generic-grid, .island-project-grid { grid-template-columns: 1fr; }
+  .islands-toolbar { align-items: flex-start; flex-direction: column; }
+  .project-row, .project-row.header { grid-template-columns: 1fr; }
+  .project-row.header { display: none; }
+  .project-row > :last-child { display: block; }
   .log-pose { display: block; padding: 25px; overflow: auto; }
   .log-pose h2 { display: block; }
   .log-compass { margin: 20px auto; }
@@ -333,6 +399,56 @@ function SeaMap() {
   );
 }
 
+function IslandsView() {
+  const [mode, setMode] = useState("cards");
+
+  return (
+    <section className="islands-view">
+      <div className="islands-toolbar">
+        <p>Une île = un projet. Les escales, traces, documents et décisions vivent ensuite à l’intérieur.</p>
+        <div className="view-switch" aria-label="Mode d’affichage des îles">
+          <button type="button" className={mode === "cards" ? "active" : ""} onClick={() => setMode("cards")}>Cartes</button>
+          <button type="button" className={mode === "list" ? "active" : ""} onClick={() => setMode("list")}>Liste</button>
+        </div>
+      </div>
+
+      {mode === "cards" ? (
+        <div className="island-project-grid">
+          {ISLAND_PROJECTS.map((project) => (
+            <article className="project-card" key={project.name}>
+              <div className="project-card-top">
+                <div>
+                  <small>{project.island}</small>
+                  <h3>{project.name}</h3>
+                </div>
+                <span className={`project-status ${project.tone}`}>{project.status}</span>
+              </div>
+              <div className="project-meta">
+                <div><label>Cap actuel</label><p>{project.cap}</p></div>
+                <div><label>Prochaine reprise</label><p>{project.next}</p></div>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="island-project-list">
+          <div className="project-row header" aria-hidden="true">
+            <span>Projet</span><span>État</span><span>Cap actuel</span><span>Prochaine reprise</span>
+          </div>
+          {ISLAND_PROJECTS.map((project) => (
+            <article className="project-row" key={project.name}>
+              <div><strong>{project.name}</strong><span className="project-island">{project.island}</span></div>
+              <span className={`project-status ${project.tone}`}>{project.status}</span>
+              <p>{project.cap}</p>
+              <p>{project.next}</p>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function GenericView({ active }) {
   const cards = VIEW_CONTENT[active] || VIEW_CONTENT.iles;
   return (
@@ -389,7 +505,12 @@ function LogPose({ active }) {
 
 export default function App() {
   const [active, setActive] = useState("pont");
-  const centralView = useMemo(() => active === "pont" ? <SeaMap /> : <GenericView active={active} />, [active]);
+  const centralView = useMemo(() => {
+    if (active === "pont") return <SeaMap />;
+    if (active === "iles") return <IslandsView />;
+    return <GenericView active={active} />;
+  }, [active]);
+
   return (
     <>
       <style>{APP_CSS}</style>
