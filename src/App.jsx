@@ -198,7 +198,7 @@ button { font: inherit; }
 .log-pose { min-height: 0; padding: 34px 25px 26px; display: flex; flex-direction: column; overflow: auto; color: #372916; background: linear-gradient(rgba(255,255,255,.24),rgba(255,255,255,.04)),repeating-linear-gradient(0deg,rgba(112,75,28,.035) 0 1px,transparent 2px 6px),#ead7aa; box-shadow: inset 18px 0 34px rgba(80,48,14,.13); }
 .log-pose h2 { margin: 0; text-align: center; font-size: 2rem; font-weight: 500; }
 .log-ornament { width: 90px; height: 1px; margin: 13px auto 26px; background: #9d7845; }
-.log-compass { width: 165px; height: 165px; margin: 0 auto 26px; display: grid; place-items: center; color: #77501f; border: 9px double #7d5224; border-radius: 50%; background: radial-gradient(circle,#4cb1ca 0 20%,#0f6b85 21% 49%,#d5aa52 50% 53%,#6f461e 54%); box-shadow: 0 12px 24px rgba(70,42,12,.25),inset 0 0 20px rgba(255,255,255,.34); }
+.log-compass { width: 132px; height: 132px; min-width: 132px; min-height: 132px; flex: 0 0 132px; aspect-ratio: 1 / 1; margin: 0 auto 26px; display: grid; place-items: center; color: #77501f; border: 9px double #7d5224; border-radius: 50%; background: radial-gradient(circle,#4cb1ca 0 20%,#0f6b85 21% 49%,#d5aa52 50% 53%,#6f461e 54%); box-shadow: 0 12px 24px rgba(70,42,12,.25),inset 0 0 20px rgba(255,255,255,.34); }
 .log-section { padding: 22px 8px; border-top: 1px solid rgba(112,75,28,.25); }
 .log-section label { display: block; margin-bottom: 8px; color: #735a34; font: .78rem Arial,sans-serif; }
 .log-section strong { display: block; font-size: 1.3rem; font-weight: 500; line-height: 1.25; }
@@ -209,7 +209,7 @@ button { font: inherit; }
   .vogue-shell { height: auto; min-height: 100vh; grid-template-columns: 245px minmax(0,1fr); overflow: visible; }
   .log-pose { grid-column: 1/-1; min-height: auto; display: grid; grid-template-columns: 180px repeat(2,1fr) auto; align-items: center; gap: 18px; }
   .log-pose h2, .log-ornament { display: none; }
-  .log-compass { width: 120px; height: 120px; margin: 0; }
+  .log-compass { width: 120px; height: 120px; min-width: 120px; min-height: 120px; flex-basis: 120px; margin: 0; }
   .log-section { border-top: 0; border-left: 1px solid rgba(112,75,28,.25); }
   .log-button { margin-top: 0; }
 }
