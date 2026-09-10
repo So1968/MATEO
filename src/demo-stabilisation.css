@@ -172,6 +172,47 @@
   z-index: 8 !important;
 }
 
+/* Mes îles : rendre l'action d'ouverture immédiatement visible sans modifier la structure JSX. */
+.project-card,
+.project-row:not(.header) {
+  position: relative;
+  cursor: pointer;
+}
+
+.project-card {
+  padding-bottom: 42px !important;
+}
+
+.project-card::after {
+  content: "Ouvrir →";
+  position: absolute;
+  right: 17px;
+  bottom: 13px;
+  color: #4c351b;
+  font: 700 .72rem Arial, sans-serif;
+  letter-spacing: .02em;
+}
+
+.project-row:not(.header) {
+  padding-right: 88px !important;
+}
+
+.project-row:not(.header)::after {
+  content: "Ouvrir →";
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #4c351b;
+  font: 700 .7rem Arial, sans-serif;
+  white-space: nowrap;
+}
+
+.project-card:hover::after,
+.project-row:not(.header):hover::after {
+  text-decoration: underline;
+}
+
 @media (max-width: 1180px) {
   .sectionIntro h2 {
     font-size: clamp(38px, 7vw, 58px) !important;
