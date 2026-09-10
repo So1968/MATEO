@@ -243,7 +243,7 @@ function Sidebar({ active, onChange }) {
         <p>Le journal de bord<br />qui vous aide à garder<br />le cap sur vos projets.</p>
       </div>
       <nav className="side-nav">
-        {MENU.map(({ id, label, sublabel, icon: Icon, count }) => (
+        {MENU.filter(({ id }) => id !== "manoeuvres" && id !== "caps").map(({ id, label, sublabel, icon: Icon, count }) => (
           <button key={id} className={active === id ? "active" : ""} onClick={() => onChange(id)}>
             <span className="nav-icon"><Icon size={25} /></span>
             <span className="nav-label"><strong>{label}</strong><span>{sublabel}</span></span>
