@@ -95,30 +95,30 @@ button { font: inherit; }
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  overflow: hidden;
   color: #f4dba5;
   background: radial-gradient(circle at 50% 0, rgba(54,107,128,.18), transparent 34%), linear-gradient(180deg,#062236,#061d2d);
   border-right: 7px ridge #5c3519;
   box-shadow: inset -18px 0 30px rgba(0,0,0,.35);
 }
-.brand { padding: 28px 30px 20px; text-align: center; border-bottom: 1px solid rgba(214,174,105,.22); }
-.brand-rose { width: 54px; height: 54px; margin: 0 auto 12px; display: grid; place-items: center; color: #dcb86f; border: 1px solid rgba(220,184,111,.35); border-radius: 50%; }
-.brand h1 { margin: 0; font-size: 2.05rem; font-weight: 500; }
-.brand p { margin: 11px 0 0; color: #c8b589; line-height: 1.45; font-size: .92rem; }
-.side-nav { padding: 14px 18px 8px; display: grid; gap: 5px; }
-.side-nav button { width: 100%; display: grid; grid-template-columns: 42px minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 10px 13px; color: #ecd39c; text-align: left; border: 1px solid transparent; border-radius: 8px; background: transparent; cursor: pointer; }
+.brand { padding: 16px 30px 12px; text-align: center; border-bottom: 1px solid rgba(214,174,105,.22); }
+.brand-rose { width: 46px; height: 46px; margin: 0 auto 8px; display: grid; place-items: center; color: #dcb86f; border: 1px solid rgba(220,184,111,.35); border-radius: 50%; }
+.brand h1 { margin: 0; font-size: 1.9rem; font-weight: 500; }
+.brand p { margin: 7px 0 0; color: #c8b589; line-height: 1.32; font-size: .85rem; }
+.side-nav { padding: 9px 18px 6px; display: grid; gap: 2px; }
+.side-nav button { width: 100%; display: grid; grid-template-columns: 40px minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 8px 13px; color: #ecd39c; text-align: left; border: 1px solid transparent; border-radius: 8px; background: transparent; cursor: pointer; }
 .side-nav button:hover { background: rgba(255,255,255,.045); }
 .side-nav button.active { color: #162532; background: linear-gradient(180deg,#fff1c9,#e8cb8e); border-color: #b7873d; box-shadow: inset 0 0 0 2px rgba(255,255,255,.45),0 6px 16px rgba(0,0,0,.26); }
 .nav-icon { display: grid; place-items: center; }
-.nav-label strong { display: block; font-size: 1.08rem; font-weight: 600; }
-.nav-label span { display: block; margin-top: 2px; color: #bda879; font: .75rem Arial,sans-serif; }
+.nav-label strong { display: block; font-size: 1.03rem; font-weight: 600; }
+.nav-label span { display: block; margin-top: 1px; color: #bda879; font: .72rem Arial,sans-serif; }
 .side-nav button.active .nav-label span { color: #6b5838; }
-.nav-count { min-width: 25px; height: 25px; display: grid; place-items: center; border-radius: 999px; color: #f1d9a4; background: #60401f; font: .72rem Arial,sans-serif; }
-.captain-card { margin: auto 20px 10px; padding: 13px; display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 10px; border-top: 1px solid rgba(214,174,105,.2); }
-.captain-avatar { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; color: #f2d59c; border: 1px solid #b28a4d; background: linear-gradient(145deg,#3b5661,#8a6334); }
-.captain-card strong { display: block; font-size: .9rem; }
-.captain-card span { display: block; color: #bfa777; font: .72rem Arial,sans-serif; }
-.sidebar-tools { margin: 0 20px 16px; padding: 10px; display: flex; justify-content: space-around; border: 1px solid rgba(214,174,105,.2); border-radius: 10px; }
+.nav-count { min-width: 24px; height: 24px; display: grid; place-items: center; border-radius: 999px; color: #f1d9a4; background: #60401f; font: .7rem Arial,sans-serif; }
+.captain-card { margin: auto 20px 6px; padding: 10px 13px; display: grid; grid-template-columns: 38px 1fr auto; align-items: center; gap: 9px; border-top: 1px solid rgba(214,174,105,.2); }
+.captain-avatar { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; color: #f2d59c; border: 1px solid #b28a4d; background: linear-gradient(145deg,#3b5661,#8a6334); }
+.captain-card strong { display: block; font-size: .86rem; }
+.captain-card span { display: block; color: #bfa777; font: .7rem Arial,sans-serif; }
+.sidebar-tools { margin: 0 20px 10px; padding: 7px; display: flex; justify-content: space-around; border: 1px solid rgba(214,174,105,.2); border-radius: 10px; }
 .sidebar-tools button, .header-tools button { color: inherit; border: 0; background: transparent; cursor: pointer; }
 
 .main-stage { min-width: 0; min-height: 0; display: grid; grid-template-rows: auto minmax(0,1fr); background: #efe0ba; border-right: 7px ridge #5c3519; }
