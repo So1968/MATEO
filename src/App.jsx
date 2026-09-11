@@ -205,6 +205,8 @@ button { font: inherit; }
   border: 10px solid #2a1509;
   box-shadow: inset 0 0 0 3px #7b4b22, inset 0 0 45px #000;
 }
+.vogue-shell.no-log { grid-template-columns: 285px minmax(0, 1fr); }
+.vogue-shell.no-log .main-stage { border-right: 0; }
 
 .sidebar {
   min-height: 0;
@@ -427,6 +429,7 @@ button { font: inherit; }
 
 @media (max-width: 1180px) {
   .vogue-shell { height: auto; min-height: 100vh; grid-template-columns: 245px minmax(0,1fr); overflow: visible; }
+  .vogue-shell.no-log { grid-template-columns: 245px minmax(0,1fr); }
   .log-pose { grid-column: 1/-1; min-height: auto; display: grid; grid-template-columns: 180px repeat(2,1fr) auto; align-items: center; gap: 18px; }
   .log-pose h2, .log-ornament { display: none; }
   .log-compass { width: 120px; height: 120px; min-width: 120px; min-height: 120px; flex-basis: 120px; margin: 0; }
@@ -843,16 +846,18 @@ export default function App() {
     return <GenericView active={active} />;
   }, [active, selectedProject]);
 
+  const showShipLog = active === "pont" && !selectedProject;
+
   return (
     <>
       <style>{APP_CSS}</style>
-      <main className="vogue-shell">
+      <main className={`vogue-shell${showShipLog ? "" : " no-log"}`}>
         <Sidebar active={active} onChange={handleSectionChange} />
         <section className="main-stage">
           <StageHeader active={active} project={selectedProject} />
           <div className="stage-content">{centralView}</div>
         </section>
-        <LogPose active={active} project={selectedProject} />
+        {showShipLog ? <LogPose active={active} project={null} /> : null}
       </main>
     </>
   );
