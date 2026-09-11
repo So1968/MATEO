@@ -125,9 +125,9 @@ const PILOT_WORLD = {
       ["Sécuriser le planning", "Vérifier que recette, corrections et formation tiennent avant l’ouverture de la campagne budgétaire."]
     ]
   },
-  ressources: {
-    label: "Ressources",
-    subtitle: "Les documents, données et références utiles pour travailler sur l’île",
+  arsenal: {
+    label: "Arsenal",
+    subtitle: "Les outils, documents, données et références embarqués pour avancer sur l’île",
     items: [
       ["Cadrage fonctionnel v1.4", "Périmètre Budget, Forecast, reporting P&L, utilisateurs, règles de gestion et jalons du projet."],
       ["Mapping ERP → EPM", "Correspondance comptes, centres de coûts, BU, produits et axes analytiques."],
@@ -626,7 +626,7 @@ function IslandProjectView({ project, onBack }) {
     ["carte", "Carte"],
     ["cap", "Cap"],
     ["manoeuvres", "Manœuvres"],
-    ["ressources", "Ressources"],
+    ["arsenal", "Arsenal"],
     ["journal", "Journal de bord"]
   ];
   const currentSection = PILOT_WORLD[section];
