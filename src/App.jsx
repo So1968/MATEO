@@ -100,16 +100,16 @@ const VIEW_CONTENT = {
     ["Cœur du navire", "En construction", "La mémoire centrale et les liens entre les projets."],
     ["Traces audio", "Priorité", "Les enregistrements à transcrire et rattacher aux bonnes escales."],
     ["Coffre documentaire", "En cours", "Les documents, versions, preuves et pièces utiles."],
-    ["Longue-vue recherche", "À brancher", "La recherche globale dans la mémoire de Vogue Merry."],
+    ["Longue-vue recherche", "À brancher", "La recherche globale dans la mémoire de Vogue Marry."],
     ["Transmission Mateo", "Cap clair", "Les éléments prêts à être transmis et repris."]
   ],
   escales: [
     ["Démo Mateo", "À dater", "Préparer la réunion, rattacher l’audio et consigner les décisions."],
-    ["Point associé", "À préparer", "Clarifier le périmètre autonome de Vogue Merry."],
+    ["Point associé", "À préparer", "Clarifier le périmètre autonome de Vogue Marry."],
     ["Reprise technique", "En cours", "Stabiliser le dépôt et éviter les versions concurrentes."]
   ],
   journal: [
-    ["Vogue Merry est le produit officiel", "Validé", "Azoth Studio reste l’atelier qui le porte."],
+    ["Vogue Marry est le produit officiel", "Validé", "Azoth Studio reste l’atelier qui le porte."],
     ["Ne plus travailler dans les brouillons", "Protection", "Les anciennes copies servent uniquement d’archives."],
     ["Créer le Log Pose de reprise", "À faire", "État, prochaine action, risques et décisions."]
   ],
@@ -129,7 +129,7 @@ const VIEW_CONTENT = {
     ["Préparer la démo", "À suivre", "Montrer un parcours simple et compréhensible."]
   ],
   caps: [
-    ["Vogue Merry = produit", "Acté", "Le produit n’est pas Azoth : il est porté par Azoth."],
+    ["Vogue Marry = produit", "Acté", "Le produit n’est pas Azoth : il est porté par Azoth."],
     ["Un fil = un projet", "Règle", "Éviter de mélanger plusieurs chantiers dans la même zone."],
     ["Lisibilité avant décoration", "Cap", "La structure doit rester utilisable avant toute finition esthétique."]
   ]
@@ -350,7 +350,7 @@ function Sidebar({ active, onChange }) {
     <aside className="sidebar">
       <div className="brand">
         <div className="brand-rose"><Compass size={38} /></div>
-        <h1>Vogue Merry</h1>
+        <h1>Vogue Marry</h1>
         <p>Le journal de bord<br />qui vous aide à garder<br />le cap sur vos projets.</p>
       </div>
       <nav className="side-nav">
@@ -393,7 +393,7 @@ function StageHeader({ active }) {
     <header className="stage-header">
       <div className="lantern-mark"><Compass size={26} /></div>
       <div className="header-title">
-        <p>Vogue Merry · {current.label}</p>
+        <p>Vogue Marry · {current.label}</p>
         <h2>{title}</h2>
         <div className="header-rule" />
         <span>{subtitle}</span>
