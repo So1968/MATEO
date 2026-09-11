@@ -95,84 +95,54 @@ const GLOBAL_PRIORITIES = [
 ];
 
 const PILOT_WORLD = {
-  escales: {
-    label: "Escales",
-    subtitle: "Toutes les réunions et ateliers du projet EPM",
+  carte: {
+    label: "Carte de l’île",
+    subtitle: "La photographie actuelle du projet : où nous sommes aujourd’hui",
     items: [
-      ["Comité projet — DAF / Kiwika", "09 sept. · Avancement du cadrage, points de vigilance sur les données sources et validation du planning de recette."],
-      ["Atelier Budget & Forecast", "12 sept. · Règles de gestion, granularité de saisie, fréquence de reforecast et circuit de validation à arbitrer."],
-      ["Atelier Data / SI", "16 sept. · Mapping ERP → EPM, contrôles de cohérence et stratégie de reprise des historiques."],
-      ["Comité de recette", "23 sept. · Préparer les scénarios UAT, les jeux de données et la liste des utilisateurs pilotes."]
+      ["Étape actuelle", "Cadrage fonctionnel avancé. Le modèle Budget / Forecast est défini ; les derniers arbitrages précèdent la recette métier."],
+      ["Acteurs clés", "Matéo pilote la mission avec la DAF, le contrôle de gestion et le référent SI du Client Horizon."],
+      ["Sujets ouverts", "Granularité du Forecast, qualité de l’axe produit, règles d’allocation et validation du mapping analytique."],
+      ["Risque principal", "Des historiques ERP hétérogènes peuvent fragiliser les comparaisons Réel / Budget / Forecast pendant la recette."]
     ]
   },
-  journal: {
-    label: "Journal",
-    subtitle: "Les comptes rendus et la mémoire longue du projet",
+  cap: {
+    label: "Cap",
+    subtitle: "La direction choisie : ce que le projet cherche à atteindre maintenant",
     items: [
-      ["CR Comité projet — 09/09", "Décision : conserver un forecast glissant 12 mois. Risque identifié : qualité hétérogène des axes analytiques dans l’ERP."],
-      ["CR Atelier métier — Budget", "Les responsables de BU saisiront les hypothèses opérationnelles ; le contrôle de gestion gardera la validation finale."],
-      ["Note de reprise — avant recette", "Relire le mapping comptes / centres de coûts, vérifier les règles d’allocation et reprendre les trois anomalies encore ouvertes."],
-      ["Historique des arbitrages", "Trace des décisions métier qui expliquent pourquoi le modèle cible a été construit ainsi."]
-    ]
-  },
-  coffre: {
-    label: "Coffre",
-    subtitle: "Les documents de référence du projet Client Horizon",
-    items: [
-      ["Cadrage fonctionnel v1.4", "Périmètre Budget, Forecast, reporting P&L, utilisateurs et jalons du projet."],
-      ["Mapping ERP → EPM", "Correspondance comptes, centres de coûts, BU, produits et axes analytiques."],
-      ["Dictionnaire des données", "Définition des indicateurs, sources, fréquence de mise à jour et responsable de chaque donnée."],
-      ["Plan de recette UAT", "Scénarios de test métier, résultats attendus, anomalies et critères de validation."]
-    ]
-  },
-  audio: {
-    label: "Traces audio",
-    subtitle: "Les enregistrements et passages utiles des ateliers",
-    items: [
-      ["Atelier règles de gestion — 41 min", "Transcription disponible. Marqueurs sur la saisonnalité, les allocations et les hypothèses commerciales."],
-      ["Décision à 24:18", "La DAF confirme le forecast glissant 12 mois et demande une comparaison systématique Réel / Budget / Forecast."],
-      ["Point sensible à 33:05", "Doute sur la fiabilité de l’axe produit dans l’ERP ; contrôle complémentaire demandé au SI."],
-      ["Résumé audio comité projet", "Synthèse de 4 minutes générée pour reprendre le contexte avant le prochain rendez-vous."]
-    ]
-  },
-  equipage: {
-    label: "Équipage",
-    subtitle: "Les acteurs du projet et leur rôle",
-    items: [
-      ["Matéo — Chef de projet / Consultant", "Pilotage du projet, cadrage fonctionnel, animation des ateliers et coordination entre métier et intégration."],
-      ["Claire — Directrice financière", "Sponsor métier. Arbitre les règles de gestion, les priorités et les critères de succès."],
-      ["Nicolas — Contrôle de gestion", "Référent Budget / Forecast. Porte les besoins utilisateurs et prépare la recette métier."],
-      ["Samir — Référent SI", "Sécurise les sources ERP, les flux, les accès et la qualité des données alimentant la solution EPM."]
+      ["Cap actuel", "Cadrer et sécuriser le modèle Budget / Forecast avant la recette métier."],
+      ["Critère de réussite", "Une DAF capable de piloter Réel, Budget et Forecast dans un même modèle, avec des règles comprises et validées."],
+      ["Prochain jalon", "Atelier DAF sur les règles de gestion et le workflow, puis lancement des scénarios de recette UAT."],
+      ["Direction actée", "Forecast glissant 12 mois, ERP comme source du Réel et workflow de validation à deux niveaux."]
     ]
   },
   manoeuvres: {
     label: "Manœuvres",
-    subtitle: "Les actions concrètes à mener dans ce projet",
+    subtitle: "Les actions concrètes nécessaires pour tenir le cap",
     items: [
-      ["Finaliser le mapping analytique", "Responsable : Matéo · Échéance : 13/09 · 12 correspondances restent à valider avec le contrôle de gestion."],
-      ["Arbitrer la granularité du Forecast", "Décider si la saisie se fait au niveau BU × Produit ou uniquement BU pour la première mise en production."],
-      ["Préparer la recette UAT", "Constituer 8 scénarios de test : import réel, saisie budget, reforecast, allocation, validation, restitution et export."],
-      ["Sécuriser le planning", "Vérifier que la recette, les corrections et la formation tiennent avant l’ouverture de la campagne budgétaire."]
+      ["Finaliser le mapping analytique", "Matéo · 12 correspondances comptes / centres de coûts restent à valider avec le contrôle de gestion."],
+      ["Arbitrer la granularité du Forecast", "Choisir entre BU × Produit et BU seule pour la première mise en production."],
+      ["Préparer la recette UAT", "Construire les scénarios import Réel, saisie Budget, reforecast, allocation, validation, restitution et export."],
+      ["Sécuriser le planning", "Vérifier que recette, corrections et formation tiennent avant l’ouverture de la campagne budgétaire."]
     ]
   },
-  caps: {
-    label: "Caps validés",
-    subtitle: "Les décisions actées pour éviter de rouvrir les mêmes débats",
+  ressources: {
+    label: "Ressources",
+    subtitle: "Les documents, données et références utiles pour travailler sur l’île",
     items: [
-      ["Forecast glissant sur 12 mois", "Validé par la DAF le 09/09. Actualisation mensuelle avec conservation de l’historique des versions."],
-      ["Comparatif Réel / Budget / Forecast", "Les trois scénarios seront visibles dans les restitutions principales et partageables par BU."],
-      ["ERP = source du Réel", "Les données réalisées proviennent du SI financier ; les corrections manuelles devront être tracées dans l’EPM."],
-      ["Workflow de validation à 2 niveaux", "Responsable de BU puis contrôle de gestion avant consolidation finale."]
+      ["Cadrage fonctionnel v1.4", "Périmètre Budget, Forecast, reporting P&L, utilisateurs, règles de gestion et jalons du projet."],
+      ["Mapping ERP → EPM", "Correspondance comptes, centres de coûts, BU, produits et axes analytiques."],
+      ["Dictionnaire des données", "Définition des indicateurs, sources, fréquence de mise à jour et responsable de chaque donnée."],
+      ["Plan de recette UAT", "Scénarios de test métier, jeux de données, résultats attendus, anomalies et critères de validation."]
     ]
   },
-  longuevue: {
-    label: "Longue-vue",
-    subtitle: "Chercher uniquement dans le monde de cette mission EPM",
+  journal: {
+    label: "Journal de bord",
+    subtitle: "Les passages de Vogue Marry sur cette île, consignés dans l’ordre du voyage",
     items: [
-      ["“règle allocation marge”", "Retrouve la décision du comité, le passage audio associé et la section correspondante du cadrage fonctionnel."],
-      ["“écart Réel / Forecast”", "Recherche dans les comptes rendus, anomalies de recette, documents et décisions de l’île."],
-      ["Filtre : DAF + décisions", "Affiche uniquement les arbitrages validés par la direction financière."],
-      ["Filtre : recette + ouvert", "Retrouve les scénarios UAT et les anomalies encore non résolues."]
+      ["09 sept. — Escale · Comité projet DAF / Kiwika", "Avancement du cadrage. Décision : forecast glissant 12 mois. Risque : qualité hétérogène des axes ERP. Action : contrôler le mapping analytique."],
+      ["12 sept. — Escale · Atelier Budget & Forecast", "Arbitrage attendu sur la granularité de saisie et le circuit de validation. Document : cadrage fonctionnel v1.4. Audio et transcription rattachés à l’escale."],
+      ["16 sept. — Escale · Atelier Data / SI", "Mapping ERP → EPM, contrôles de cohérence et reprise des historiques. Point sensible : fiabilité de l’axe produit à confirmer avec le SI."],
+      ["23 sept. — Escale prévue · Comité de recette", "Préparer les scénarios UAT, les utilisateurs pilotes et les critères de validation. La sortie de cette escale mettra à jour la carte de l’île."]
     ]
   }
 };
@@ -604,7 +574,7 @@ function IslandsView({ onOpenProject }) {
   return (
     <section className="islands-view">
       <div className="islands-toolbar">
-        <p>Une île = un projet. Les escales, traces, documents et décisions vivent ensuite à l’intérieur.</p>
+        <p>Une île = un projet. Sa carte montre son état actuel ; son journal conserve les escales et ce qu’elles ont produit.</p>
         <div className="view-switch" aria-label="Mode d’affichage des îles">
           <button type="button" className={mode === "cards" ? "active" : ""} onClick={() => setMode("cards")}>Cartes</button>
           <button type="button" className={mode === "list" ? "active" : ""} onClick={() => setMode("list")}>Liste</button>
@@ -651,25 +621,21 @@ function IslandsView({ onOpenProject }) {
 }
 
 function IslandProjectView({ project, onBack }) {
-  const [section, setSection] = useState("overview");
+  const [section, setSection] = useState("carte");
   const tabs = [
-    ["overview", "Vue d’ensemble"],
-    ["escales", "Escales"],
-    ["journal", "Journal"],
-    ["coffre", "Coffre"],
-    ["audio", "Traces audio"],
-    ["equipage", "Équipage"],
+    ["carte", "Carte"],
+    ["cap", "Cap"],
     ["manoeuvres", "Manœuvres"],
-    ["caps", "Caps validés"],
-    ["longuevue", "Longue-vue"]
+    ["ressources", "Ressources"],
+    ["journal", "Journal de bord"]
   ];
-  const currentSection = section === "overview" ? null : PILOT_WORLD[section];
+  const currentSection = PILOT_WORLD[section];
 
   return (
     <section className="project-world-view">
       <div className="project-world-top">
         <button type="button" className="back-to-islands" onClick={onBack}>← Mes îles</button>
-        <span className="world-kicker">Démo métier EPM · données fictives · mission de transformation Finance</span>
+        <span className="world-kicker">Démo métier EPM · données fictives · une île = un projet</span>
       </div>
       <nav className="world-tabs" aria-label="Espaces de l’île">
         {tabs.map(([id, label]) => (
@@ -677,45 +643,21 @@ function IslandProjectView({ project, onBack }) {
         ))}
       </nav>
 
-      {section === "overview" ? (
-        <div className="world-overview">
-          <article className="world-summary-card">
-            <small>Cap actuel</small>
-            <h3>{project.cap}</h3>
-            <p>Objectif : transformer les besoins Finance en un modèle EPM fiable, compréhensible et exploitable par les équipes métier.</p>
-          </article>
-          <article className="world-summary-card">
-            <small>Prochaine reprise</small>
-            <h3>{project.next}</h3>
-            <p>À reprendre avec le dernier compte rendu, les règles de gestion encore ouvertes et les décisions déjà actées.</p>
-          </article>
-          <article className="world-summary-card wide">
-            <small>Tout le monde du projet</small>
-            <h3>Ateliers métier, comptes rendus, données, recette, décisions et actions restent rattachés à cette mission.</h3>
-            <div className="world-map">
-              {tabs.slice(1).map(([id, label]) => (
-                <button type="button" key={id} onClick={() => setSection(id)}>{label}</button>
-              ))}
-            </div>
-          </article>
+      <article className="world-section">
+        <div className="world-section-header">
+          <small>{project.island}</small>
+          <h3>{currentSection.label}</h3>
+          <span>{currentSection.subtitle}</span>
         </div>
-      ) : (
-        <article className="world-section">
-          <div className="world-section-header">
-            <small>{project.island}</small>
-            <h3>{currentSection.label}</h3>
-            <span>{currentSection.subtitle}</span>
-          </div>
-          <div className="world-items">
-            {currentSection.items.map(([title, text]) => (
-              <div className="world-item" key={title}>
-                <strong>{title}</strong>
-                <span>{text}</span>
-              </div>
-            ))}
-          </div>
-        </article>
-      )}
+        <div className="world-items">
+          {currentSection.items.map(([title, text]) => (
+            <div className="world-item" key={title}>
+              <strong>{title}</strong>
+              <span>{text}</span>
+            </div>
+          ))}
+        </div>
+      </article>
     </section>
   );
 }
