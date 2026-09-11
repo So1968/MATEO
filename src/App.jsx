@@ -666,49 +666,34 @@ function IslandsView({ onOpenProject }) {
 
 function IslandProjectView({ project, onBack }) {
   const [section, setSection] = useState("carte");
-  const [openBranch, setOpenBranch] = useState(null);
-  const tabs = [
-    ["carte", "Carte"],
-    ["cap", "Cap"],
-    ["manoeuvres", "Manœuvres"],
-    ["arsenal", "Arsenal"],
-    ["journal", "Journal de bord"]
-  ];
-  const mapBranches = [
-    ["cap", "Cap", "Où va le projet ?"],
-    ["journal", "Journal", "Ce qui s’est passé"],
-    ["manoeuvres", "Manœuvres", "Ce qu’on fait maintenant"],
-    ["arsenal", "Arsenal", "Ce qu’on a pour agir"]
-  ];
   const currentSection = PILOT_WORLD[section];
-  const branchSection = openBranch ? PILOT_WORLD[openBranch] : null;
+  const returnToMap = () => setSection("carte");
 
   return (
     <section className="project-world-view">
       <div className="project-world-top">
-        <button type="button" className="back-to-islands" onClick={onBack}>← Mes îles</button>
-        <span className="world-kicker">Démo métier EPM · données fictives · une île = un projet</span>
+        {section === "carte" ? (
+          <button type="button" className="back-to-islands" onClick={onBack}>← Mes îles</button>
+        ) : (
+          <button type="button" className="back-to-islands" onClick={returnToMap}>← Carte de l’île</button>
+        )}
+        <span className="world-kicker">{section === "carte" ? "La carte est le menu du projet" : `${project.island} · ${currentSection.label}`}</span>
       </div>
-      <nav className="world-tabs" aria-label="Espaces de l’île">
-        {tabs.map(([id, label]) => (
-          <button type="button" key={id} className={section === id ? "active" : ""} onClick={() => setSection(id)}>{label}</button>
-        ))}
-      </nav>
 
       {section === "carte" ? (
         <section className="mind-map-shell" aria-label="Carte mentale du projet">
           <div className="mind-map-heading">
             <small>{project.island}</small>
             <h3>Carte mentale</h3>
-            <span>Voir le projet d’un coup d’œil, puis ouvrir uniquement la branche utile.</span>
+            <span>Choisir une branche pour entrer dans l’espace correspondant.</span>
           </div>
           <div className="mind-map">
-            <button type="button" className={`mind-branch mind-branch-cap${openBranch === "cap" ? " active" : ""}`} onClick={() => setOpenBranch(openBranch === "cap" ? null : "cap")}>
+            <button type="button" className="mind-branch mind-branch-cap" onClick={() => setSection("cap")}>
               <strong>Cap</strong><span>Où va le projet ?</span>
             </button>
             <span className="mind-link north" aria-hidden="true" />
 
-            <button type="button" className={`mind-branch mind-branch-journal${openBranch === "journal" ? " active" : ""}`} onClick={() => setOpenBranch(openBranch === "journal" ? null : "journal")}>
+            <button type="button" className="mind-branch mind-branch-journal" onClick={() => setSection("journal")}>
               <strong>Journal</strong><span>Ce qui s’est passé</span>
             </button>
             <span className="mind-link west" aria-hidden="true" />
@@ -726,34 +711,15 @@ function IslandProjectView({ project, onBack }) {
             </article>
 
             <span className="mind-link east" aria-hidden="true" />
-            <button type="button" className={`mind-branch mind-branch-manoeuvres${openBranch === "manoeuvres" ? " active" : ""}`} onClick={() => setOpenBranch(openBranch === "manoeuvres" ? null : "manoeuvres")}>
+            <button type="button" className="mind-branch mind-branch-manoeuvres" onClick={() => setSection("manoeuvres")}>
               <strong>Manœuvres</strong><span>Ce qu’on fait maintenant</span>
             </button>
 
             <span className="mind-link south" aria-hidden="true" />
-            <button type="button" className={`mind-branch mind-branch-arsenal${openBranch === "arsenal" ? " active" : ""}`} onClick={() => setOpenBranch(openBranch === "arsenal" ? null : "arsenal")}>
+            <button type="button" className="mind-branch mind-branch-arsenal" onClick={() => setSection("arsenal")}>
               <strong>Arsenal</strong><span>Ce qu’on a pour agir</span>
             </button>
           </div>
-
-          {branchSection ? (
-            <article className="mind-detail">
-              <div className="mind-detail-header">
-                <strong>{branchSection.label}</strong>
-                <button type="button" onClick={() => setSection(openBranch)}>Ouvrir {branchSection.label}</button>
-              </div>
-              <div className="mind-detail-list">
-                {branchSection.items.slice(0, 3).map(([title, text]) => (
-                  <div className="mind-detail-item" key={title}>
-                    <strong>{title}</strong>
-                    <span>{text}</span>
-                  </div>
-                ))}
-              </div>
-            </article>
-          ) : (
-            <p className="mind-map-help">Cliquez sur une branche pour voir seulement ce qui vous intéresse.</p>
-          )}
         </section>
       ) : (
         <article className="world-section">
