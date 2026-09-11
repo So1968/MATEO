@@ -379,6 +379,42 @@ button { font: inherit; }
 .world-item strong { display: block; margin-bottom: 4px; font-size: .94rem; }
 .world-item span { color: #675438; font: .74rem/1.4 Arial,sans-serif; }
 
+.mind-map-shell { padding: 14px 16px 16px; color: #332715; background: linear-gradient(180deg,#fff1ca,#e5c785); border: 1px solid #8d6431; border-radius: 9px; box-shadow: 0 10px 20px rgba(0,0,0,.22),inset 0 0 0 2px rgba(255,255,255,.36); }
+.mind-map-heading { margin-bottom: 10px; }
+.mind-map-heading small { display: block; margin-bottom: 4px; color: #806334; font: 700 .65rem Arial,sans-serif; letter-spacing: .06em; text-transform: uppercase; }
+.mind-map-heading h3 { margin: 0; font-size: 1.12rem; }
+.mind-map-heading span { color: #79613f; font: .75rem Arial,sans-serif; }
+.mind-map { display: grid; grid-template-columns: minmax(140px,1fr) 34px minmax(210px,1.25fr) 34px minmax(140px,1fr); grid-template-rows: auto 28px auto 28px auto; align-items: center; gap: 0; padding: 4px 2px 8px; }
+.mind-branch { min-height: 72px; padding: 10px 12px; color: #4d3b25; border: 1px solid rgba(112,75,28,.28); border-radius: 10px; background: rgba(255,255,255,.34); cursor: pointer; box-shadow: inset 0 0 0 1px rgba(255,255,255,.28); }
+.mind-branch:hover, .mind-branch.active { background: rgba(255,247,220,.78); border-color: #9b6c32; }
+.mind-branch strong { display: block; font-size: 1rem; }
+.mind-branch span { display: block; margin-top: 3px; color: #725e40; font: .72rem/1.25 Arial,sans-serif; }
+.mind-branch-cap { grid-column: 3; grid-row: 1; }
+.mind-branch-journal { grid-column: 1; grid-row: 3; }
+.mind-branch-manoeuvres { grid-column: 5; grid-row: 3; }
+.mind-branch-arsenal { grid-column: 3; grid-row: 5; }
+.mind-link { display: block; background: rgba(112,75,28,.48); }
+.mind-link.north { grid-column: 3; grid-row: 2; width: 2px; height: 100%; justify-self: center; }
+.mind-link.south { grid-column: 3; grid-row: 4; width: 2px; height: 100%; justify-self: center; }
+.mind-link.west { grid-column: 2; grid-row: 3; width: 100%; height: 2px; }
+.mind-link.east { grid-column: 4; grid-row: 3; width: 100%; height: 2px; }
+.mind-center { grid-column: 3; grid-row: 3; padding: 15px 14px; text-align: center; border: 2px solid #8d6431; border-radius: 18px; background: linear-gradient(180deg,#f8e6b8,#dfbd76); box-shadow: 0 8px 18px rgba(86,52,18,.18),inset 0 0 0 2px rgba(255,255,255,.36); }
+.mind-center small { display: block; color: #806334; font: 700 .62rem Arial,sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.mind-center strong { display: block; margin-top: 4px; font-size: 1.08rem; line-height: 1.2; }
+.mind-center p { margin: 5px 0 0; color: #655236; font: .73rem/1.3 Arial,sans-serif; }
+.mind-center-meta { margin-top: 9px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+.mind-center-meta span { padding: 4px 7px; color: #604b2e; border: 1px solid rgba(112,75,28,.2); border-radius: 999px; background: rgba(255,255,255,.28); font: .62rem Arial,sans-serif; }
+.mind-position { margin-top: 9px; padding-top: 8px; display: block; color: #734d21; border-top: 1px solid rgba(112,75,28,.22); font: 700 .68rem/1.3 Arial,sans-serif; }
+.mind-map-help { margin: 8px 0 0; text-align: center; color: #735d3e; font: .72rem Arial,sans-serif; }
+.mind-detail { margin-top: 10px; padding: 11px 12px; border: 1px solid rgba(112,75,28,.22); border-radius: 8px; background: rgba(255,255,255,.22); }
+.mind-detail-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.mind-detail-header strong { font-size: .95rem; }
+.mind-detail-header button { padding: 5px 8px; color: #6e451c; border: 1px solid rgba(112,75,28,.25); border-radius: 5px; background: rgba(255,255,255,.25); cursor: pointer; font: 700 .68rem Arial,sans-serif; }
+.mind-detail-list { margin-top: 8px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; }
+.mind-detail-item { padding: 8px 9px; border-radius: 6px; background: rgba(255,255,255,.22); }
+.mind-detail-item strong { display: block; font-size: .79rem; }
+.mind-detail-item span { display: block; margin-top: 3px; color: #6c593c; font: .67rem/1.3 Arial,sans-serif; }
+
 .log-pose { min-height: 0; padding: 22px 25px 16px; display: flex; flex-direction: column; overflow: hidden; color: #372916; background: linear-gradient(rgba(255,255,255,.24),rgba(255,255,255,.04)),repeating-linear-gradient(0deg,rgba(112,75,28,.035) 0 1px,transparent 2px 6px),#ead7aa; box-shadow: inset 18px 0 34px rgba(80,48,14,.13); }
 .log-pose h2 { margin: 0; text-align: center; font-size: 2rem; font-weight: 500; }
 .log-ornament { width: 90px; height: 1px; margin: 10px auto 16px; background: #9d7845; }
@@ -422,6 +458,11 @@ button { font: inherit; }
   .project-row, .project-row.header { grid-template-columns: 1fr; }
   .project-row.header { display: none; }
   .project-row > :nth-child(4), .project-row > :last-child { display: block; }
+  .mind-map { grid-template-columns: 1fr; grid-template-rows: auto; gap: 8px; }
+  .mind-branch-cap, .mind-branch-journal, .mind-branch-manoeuvres, .mind-branch-arsenal, .mind-center { grid-column: 1; grid-row: auto; }
+  .mind-center { order: -1; }
+  .mind-link { display: none; }
+  .mind-detail-list { grid-template-columns: 1fr; }
   .log-pose { display: block; padding: 25px; overflow: auto; }
   .log-pose h2 { display: block; }
   .log-compass { margin: 20px auto; }
@@ -622,6 +663,7 @@ function IslandsView({ onOpenProject }) {
 
 function IslandProjectView({ project, onBack }) {
   const [section, setSection] = useState("carte");
+  const [openBranch, setOpenBranch] = useState(null);
   const tabs = [
     ["carte", "Carte"],
     ["cap", "Cap"],
@@ -629,7 +671,14 @@ function IslandProjectView({ project, onBack }) {
     ["arsenal", "Arsenal"],
     ["journal", "Journal de bord"]
   ];
+  const mapBranches = [
+    ["cap", "Cap", "Où va le projet ?"],
+    ["journal", "Journal", "Ce qui s’est passé"],
+    ["manoeuvres", "Manœuvres", "Ce qu’on fait maintenant"],
+    ["arsenal", "Arsenal", "Ce qu’on a pour agir"]
+  ];
   const currentSection = PILOT_WORLD[section];
+  const branchSection = openBranch ? PILOT_WORLD[openBranch] : null;
 
   return (
     <section className="project-world-view">
@@ -643,21 +692,83 @@ function IslandProjectView({ project, onBack }) {
         ))}
       </nav>
 
-      <article className="world-section">
-        <div className="world-section-header">
-          <small>{project.island}</small>
-          <h3>{currentSection.label}</h3>
-          <span>{currentSection.subtitle}</span>
-        </div>
-        <div className="world-items">
-          {currentSection.items.map(([title, text]) => (
-            <div className="world-item" key={title}>
-              <strong>{title}</strong>
-              <span>{text}</span>
-            </div>
-          ))}
-        </div>
-      </article>
+      {section === "carte" ? (
+        <section className="mind-map-shell" aria-label="Carte mentale du projet">
+          <div className="mind-map-heading">
+            <small>{project.island}</small>
+            <h3>Carte mentale</h3>
+            <span>Voir le projet d’un coup d’œil, puis ouvrir uniquement la branche utile.</span>
+          </div>
+          <div className="mind-map">
+            <button type="button" className={`mind-branch mind-branch-cap${openBranch === "cap" ? " active" : ""}`} onClick={() => setOpenBranch(openBranch === "cap" ? null : "cap")}>
+              <strong>Cap</strong><span>Où va le projet ?</span>
+            </button>
+            <span className="mind-link north" aria-hidden="true" />
+
+            <button type="button" className={`mind-branch mind-branch-journal${openBranch === "journal" ? " active" : ""}`} onClick={() => setOpenBranch(openBranch === "journal" ? null : "journal")}>
+              <strong>Journal</strong><span>Ce qui s’est passé</span>
+            </button>
+            <span className="mind-link west" aria-hidden="true" />
+
+            <article className="mind-center">
+              <small>Projet</small>
+              <strong>{project.name}</strong>
+              <p>Budget / Forecast · mission EPM</p>
+              <div className="mind-center-meta">
+                <span>4 acteurs clés</span>
+                <span>2 risques ouverts</span>
+                <span>Prochaine escale · 12 sept.</span>
+              </div>
+              <span className="mind-position">Log Pose · Vous êtes ici : mapping analytique à finaliser</span>
+            </article>
+
+            <span className="mind-link east" aria-hidden="true" />
+            <button type="button" className={`mind-branch mind-branch-manoeuvres${openBranch === "manoeuvres" ? " active" : ""}`} onClick={() => setOpenBranch(openBranch === "manoeuvres" ? null : "manoeuvres")}>
+              <strong>Manœuvres</strong><span>Ce qu’on fait maintenant</span>
+            </button>
+
+            <span className="mind-link south" aria-hidden="true" />
+            <button type="button" className={`mind-branch mind-branch-arsenal${openBranch === "arsenal" ? " active" : ""}`} onClick={() => setOpenBranch(openBranch === "arsenal" ? null : "arsenal")}>
+              <strong>Arsenal</strong><span>Ce qu’on a pour agir</span>
+            </button>
+          </div>
+
+          {branchSection ? (
+            <article className="mind-detail">
+              <div className="mind-detail-header">
+                <strong>{branchSection.label}</strong>
+                <button type="button" onClick={() => setSection(openBranch)}>Ouvrir {branchSection.label}</button>
+              </div>
+              <div className="mind-detail-list">
+                {branchSection.items.slice(0, 3).map(([title, text]) => (
+                  <div className="mind-detail-item" key={title}>
+                    <strong>{title}</strong>
+                    <span>{text}</span>
+                  </div>
+                ))}
+              </div>
+            </article>
+          ) : (
+            <p className="mind-map-help">Cliquez sur une branche pour voir seulement ce qui vous intéresse.</p>
+          )}
+        </section>
+      ) : (
+        <article className="world-section">
+          <div className="world-section-header">
+            <small>{project.island}</small>
+            <h3>{currentSection.label}</h3>
+            <span>{currentSection.subtitle}</span>
+          </div>
+          <div className="world-items">
+            {currentSection.items.map(([title, text]) => (
+              <div className="world-item" key={title}>
+                <strong>{title}</strong>
+                <span>{text}</span>
+              </div>
+            ))}
+          </div>
+        </article>
+      )}
     </section>
   );
 }
