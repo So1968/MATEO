@@ -516,8 +516,11 @@ function StageHeader({ active, project }) {
     manoeuvres: ["Manœuvres", "Voir les actions à mener et les prochaines relances"],
     caps: ["Caps validés", "Retrouver les décisions déjà actées"]
   };
+  const projectParts = project ? project.name.split("—").map((part) => part.trim()) : [];
+  const projectMission = projectParts[0] || "Projet";
+  const projectClient = projectParts[1] || project?.name || "";
   const [title, subtitle] = project
-    ? [project.name, "Pilotage EPM · Budget, Forecast, reporting et données"]
+    ? [projectClient.toUpperCase(), `${projectMission} · Budget / Forecast · ${project.status}`]
     : titles[current.id];
   return (
     <header className={`stage-header${project ? " project-mode" : ""}`}>
