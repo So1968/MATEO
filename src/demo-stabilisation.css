@@ -246,7 +246,7 @@
   }
 }
 
-/* Carte de l'île : une vraie lecture mentale, compacte et visible d'un seul coup. */
+/* Carte de l'île : lecture mentale lisible et respirante. */
 .mind-map-shell {
   padding: 8px 12px 10px !important;
   min-height: 0 !important;
@@ -503,5 +503,79 @@
 
   .stage-header.project-mode .header-title span {
     font-size: .66rem !important;
+  }
+}
+
+/* La carte mentale doit occuper le plateau de travail, pas rester ratatinée en haut. */
+@media (min-width: 821px) {
+  .mind-map-shell {
+    min-height: 440px !important;
+    padding: 22px 28px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .mind-map {
+    width: 100% !important;
+    min-height: 396px !important;
+    grid-template-columns: minmax(210px, 1fr) 64px minmax(300px, 1.25fr) 64px minmax(210px, 1fr) !important;
+    grid-template-rows: 82px 34px 148px 34px 82px !important;
+    padding: 0 24px !important;
+  }
+
+  .mind-branch {
+    min-height: 76px !important;
+    padding: 14px 20px !important;
+  }
+
+  .mind-branch strong {
+    font-size: 1.12rem !important;
+    line-height: 1.12 !important;
+  }
+
+  .mind-branch::after {
+    margin-top: 7px !important;
+    font-size: .79rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .mind-center {
+    min-height: 142px !important;
+    padding: 22px 24px 18px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+  }
+
+  .mind-center small {
+    font-size: .7rem !important;
+  }
+
+  .mind-center strong {
+    margin-top: 5px !important;
+    font-size: 1.25rem !important;
+    line-height: 1.18 !important;
+  }
+
+  .mind-center p {
+    margin-top: 6px !important;
+    font-size: .82rem !important;
+  }
+
+  .mind-position {
+    margin-top: 12px !important;
+    padding-top: 10px !important;
+    font-size: .77rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .mind-link.north,
+  .mind-link.south {
+    width: 3px !important;
+  }
+
+  .mind-link.west,
+  .mind-link.east {
+    height: 3px !important;
   }
 }
