@@ -94,6 +94,73 @@ const GLOBAL_PRIORITIES = [
   }
 ];
 
+const PILOT_WORLD = {
+  escales: {
+    label: "Escales",
+    subtitle: "Toutes les réunions rattachées à cette île",
+    items: [
+      ["Dernière escale", "Réunion du projet prête à être reprise avec ses notes et décisions."],
+      ["Prochaine escale", "Préparation à construire à partir du cap actuel et des éléments en attente."]
+    ]
+  },
+  journal: {
+    label: "Journal",
+    subtitle: "Les comptes rendus et la mémoire longue du projet",
+    items: [
+      ["Compte rendu de la dernière escale", "Synthèse, décisions et points à reprendre au même endroit."],
+      ["Fil de reprise", "Ce qu’il faut relire pour revenir dans le projet sans repartir de zéro."]
+    ]
+  },
+  coffre: {
+    label: "Coffre",
+    subtitle: "Les documents qui appartiennent à Forecast grand compte",
+    items: [
+      ["Hypothèses de prévision", "Document de travail rattaché à cette île."],
+      ["Version de référence", "Pièce utile conservée avec son contexte et sa version."]
+    ]
+  },
+  audio: {
+    label: "Traces audio",
+    subtitle: "Les enregistrements et transcriptions de cette île",
+    items: [
+      ["Trace de la dernière escale", "Audio à écouter, transcrire ou rattacher au compte rendu."],
+      ["Extrait à reprendre", "Passage marqué pour retrouver rapidement un point important."]
+    ]
+  },
+  equipage: {
+    label: "Équipage",
+    subtitle: "Les personnes qui font partie du monde de ce projet",
+    items: [
+      ["Mateo", "Pilote du projet et gardien du cap."],
+      ["Contributeurs", "Interlocuteurs et rôles rattachés à l’île."]
+    ]
+  },
+  manoeuvres: {
+    label: "Manœuvres",
+    subtitle: "Les actions à mener dans cette île",
+    items: [
+      ["Consolider les hypothèses", "Action directement liée au cap actuel."],
+      ["Préparer la prochaine escale", "Reprendre les éléments utiles avant la prochaine réunion."]
+    ]
+  },
+  caps: {
+    label: "Caps validés",
+    subtitle: "Les décisions déjà actées pour ne pas les rediscuter",
+    items: [
+      ["Périmètre du forecast", "Décision conservée avec son contexte."],
+      ["Version de référence", "Cap validé et relié aux documents concernés."]
+    ]
+  },
+  longuevue: {
+    label: "Longue-vue",
+    subtitle: "Chercher uniquement dans le monde de cette île",
+    items: [
+      ["Recherche Forecast grand compte", "Réunions, comptes rendus, documents, audios et décisions de cette île seulement."],
+      ["Filtres de l’île", "Date, personne, type de trace, statut et provenance."]
+    ]
+  }
+};
+
 const VIEW_CONTENT = {
   iles: [
     ["Réunions & escales", "À structurer", "Les réunions, décisions et comptes rendus rassemblés au même endroit."],
@@ -185,6 +252,7 @@ button { font: inherit; }
 
 .main-stage { min-width: 0; min-height: 0; display: grid; grid-template-rows: auto minmax(0,1fr); background: #efe0ba; border-right: 7px ridge #5c3519; }
 .stage-header { min-height: 205px; padding: 26px 42px 20px; display: grid; grid-template-columns: 72px minmax(0,1fr) 100px; align-items: start; gap: 18px; background: radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.72),transparent 24%),radial-gradient(ellipse at 92% 4%,rgba(255,255,255,.72),transparent 24%),linear-gradient(180deg,rgba(255,255,255,.42),transparent),#efe0ba; border-bottom: 2px solid #8d6633; box-shadow: inset 0 -18px 30px rgba(106,72,25,.08); }
+.stage-header.project-mode .header-title h2 { font-size: clamp(2.45rem,4vw,4.2rem); }
 .lantern-mark { width: 56px; height: 72px; display: grid; place-items: center; border: 2px solid #6e4822; border-radius: 18px 18px 12px 12px; color: #6c451e; background: radial-gradient(circle,#fff2a8,#d4983d 52%,#734319 54%); box-shadow: 0 0 22px rgba(255,184,67,.48); }
 .header-title { text-align: center; }
 .header-title p { margin: 0 0 4px; color: #74572e; font: .76rem Arial,sans-serif; letter-spacing: .18em; text-transform: uppercase; }
@@ -281,6 +349,7 @@ button { font: inherit; }
 .view-switch button.active { color: #26313a; background: #efd79c; }
 .island-project-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
 .project-card { min-height: 142px; padding: 15px 17px; color: #332715; background: linear-gradient(180deg,#fff1ca,#e5c785); border: 1px solid #8d6431; border-radius: 9px; box-shadow: 0 10px 20px rgba(0,0,0,.23),inset 0 0 0 2px rgba(255,255,255,.38); }
+.project-card::after, .project-row:not(.header)::after { content: none !important; }
 .project-card-top { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
 .project-card small { display: block; color: #7b5c2e; font: 700 .68rem Arial,sans-serif; letter-spacing: .08em; text-transform: uppercase; }
 .project-card h3 { margin: 4px 0 0; font-size: 1.2rem; line-height: 1.15; }
@@ -291,12 +360,38 @@ button { font: inherit; }
 .project-meta { margin-top: 12px; padding-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; border-top: 1px solid rgba(112,75,28,.2); }
 .project-meta label { display: block; margin-bottom: 4px; color: #806334; font: 700 .65rem Arial,sans-serif; text-transform: uppercase; letter-spacing: .06em; }
 .project-meta p { margin: 0; color: #5e4b31; font: .78rem/1.35 Arial,sans-serif; }
+.project-open-button { margin: 9px 0 0 auto; padding: 4px 0; display: block; color: #6e451c; border: 0; background: transparent; cursor: pointer; font: 700 .73rem Arial,sans-serif; }
+.project-open-button:hover { text-decoration: underline; }
+.project-pilot-note { margin-top: 10px; display: block; text-align: right; color: #8a7049; font: .68rem Arial,sans-serif; }
 .island-project-list { display: grid; gap: 8px; }
-.project-row { display: grid; grid-template-columns: minmax(170px,1.15fr) 112px minmax(190px,1.3fr) minmax(190px,1.3fr); gap: 14px; align-items: center; padding: 13px 15px; color: #332715; background: linear-gradient(180deg,#fff1ca,#e7cb90); border: 1px solid #8d6431; border-radius: 8px; box-shadow: 0 8px 16px rgba(0,0,0,.18); }
+.project-row { display: grid; grid-template-columns: minmax(150px,1.15fr) 100px minmax(150px,1.2fr) minmax(160px,1.2fr) 74px; gap: 12px; align-items: center; padding: 13px 15px; color: #332715; background: linear-gradient(180deg,#fff1ca,#e7cb90); border: 1px solid #8d6431; border-radius: 8px; box-shadow: 0 8px 16px rgba(0,0,0,.18); }
 .project-row.header { padding-top: 7px; padding-bottom: 7px; color: #dfc991; background: rgba(4,29,40,.36); border-color: rgba(238,213,154,.35); box-shadow: none; font: 700 .67rem Arial,sans-serif; letter-spacing: .07em; text-transform: uppercase; }
 .project-row strong { display: block; font-size: .98rem; }
 .project-row .project-island { display: block; margin-top: 2px; color: #7a633f; font: .7rem Arial,sans-serif; }
 .project-row p { margin: 0; color: #5f4c31; font: .76rem/1.3 Arial,sans-serif; }
+.project-row .project-open-button, .project-row .project-pilot-note { margin: 0; text-align: right; }
+
+.project-world-view { height: 100%; min-height: 470px; padding: 16px 18px 20px; overflow: auto; color: #f1dca6; background: linear-gradient(160deg,#0c6175,#07384e); box-shadow: inset 0 0 0 10px rgba(62,32,12,.55); }
+.project-world-top { min-height: 34px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.back-to-islands { padding: 6px 10px; color: #f0d89f; border: 1px solid rgba(238,213,154,.42); border-radius: 6px; background: rgba(4,29,40,.34); cursor: pointer; font: 700 .72rem Arial,sans-serif; }
+.world-kicker { color: #cdbb8f; font: .72rem Arial,sans-serif; }
+.world-tabs { margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+.world-tabs button { padding: 7px 10px; color: #dfcda0; border: 1px solid rgba(238,213,154,.28); border-radius: 6px; background: rgba(4,29,40,.28); cursor: pointer; font: 700 .7rem Arial,sans-serif; }
+.world-tabs button.active { color: #26313a; background: #efd79c; border-color: #c29651; }
+.world-overview { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 11px; }
+.world-summary-card, .world-section { padding: 14px 16px; color: #332715; background: linear-gradient(180deg,#fff1ca,#e5c785); border: 1px solid #8d6431; border-radius: 9px; box-shadow: 0 10px 20px rgba(0,0,0,.22),inset 0 0 0 2px rgba(255,255,255,.36); }
+.world-summary-card.wide { grid-column: 1/-1; }
+.world-summary-card small, .world-section small { display: block; margin-bottom: 5px; color: #806334; font: 700 .65rem Arial,sans-serif; letter-spacing: .06em; text-transform: uppercase; }
+.world-summary-card h3, .world-section h3 { margin: 0 0 6px; font-size: 1.12rem; }
+.world-summary-card p, .world-section p { margin: 0; color: #5f4d34; font: .78rem/1.4 Arial,sans-serif; }
+.world-map { margin-top: 10px; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 7px; }
+.world-map button { padding: 9px 7px; color: #5b452b; border: 1px solid rgba(112,75,28,.24); border-radius: 6px; background: rgba(255,255,255,.2); cursor: pointer; font: 700 .68rem Arial,sans-serif; }
+.world-section-header { margin-bottom: 12px; }
+.world-section-header span { color: #79613f; font: .75rem Arial,sans-serif; }
+.world-items { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.world-item { padding: 12px 13px; border: 1px solid rgba(112,75,28,.22); border-radius: 7px; background: rgba(255,255,255,.18); }
+.world-item strong { display: block; margin-bottom: 4px; font-size: .94rem; }
+.world-item span { color: #675438; font: .74rem/1.4 Arial,sans-serif; }
 
 .log-pose { min-height: 0; padding: 22px 25px 16px; display: flex; flex-direction: column; overflow: hidden; color: #372916; background: linear-gradient(rgba(255,255,255,.24),rgba(255,255,255,.04)),repeating-linear-gradient(0deg,rgba(112,75,28,.035) 0 1px,transparent 2px 6px),#ead7aa; box-shadow: inset 18px 0 34px rgba(80,48,14,.13); }
 .log-pose h2 { margin: 0; text-align: center; font-size: 2rem; font-weight: 500; }
@@ -316,7 +411,8 @@ button { font: inherit; }
   .log-section { border-top: 0; border-left: 1px solid rgba(112,75,28,.25); }
   .log-button { margin-top: 0; }
   .project-row { grid-template-columns: minmax(160px,1fr) 100px minmax(180px,1.2fr); }
-  .project-row > :last-child { display: none; }
+  .project-row > :nth-child(4) { display: none; }
+  .project-row > :last-child { display: block; }
 }
 @media (max-width: 820px) {
   .vogue-shell { display: block; border-width: 6px; }
@@ -332,12 +428,14 @@ button { font: inherit; }
   .header-title span { font-size: .85rem; }
   .pont-view { height: auto; min-height: 680px; overflow: visible; }
   .priorities-grid { grid-template-columns: 1fr; }
-  .sea-map, .generic-view, .islands-view { min-height: 680px; }
-  .generic-grid, .island-project-grid { grid-template-columns: 1fr; }
+  .sea-map, .generic-view, .islands-view, .project-world-view { min-height: 680px; }
+  .generic-grid, .island-project-grid, .world-overview, .world-items { grid-template-columns: 1fr; }
+  .world-summary-card.wide { grid-column: auto; }
+  .world-map { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .islands-toolbar { align-items: flex-start; flex-direction: column; }
   .project-row, .project-row.header { grid-template-columns: 1fr; }
   .project-row.header { display: none; }
-  .project-row > :last-child { display: block; }
+  .project-row > :nth-child(4), .project-row > :last-child { display: block; }
   .log-pose { display: block; padding: 25px; overflow: auto; }
   .log-pose h2 { display: block; }
   .log-compass { margin: 20px auto; }
@@ -376,7 +474,7 @@ function Sidebar({ active, onChange }) {
   );
 }
 
-function StageHeader({ active }) {
+function StageHeader({ active, project }) {
   const current = MENU.find((item) => item.id === active) || MENU[0];
   const titles = {
     pont: ["Pont du navire", "Reprendre le cap sur vos projets actifs"],
@@ -388,12 +486,14 @@ function StageHeader({ active }) {
     manoeuvres: ["Manœuvres", "Voir les actions à mener et les prochaines relances"],
     caps: ["Caps validés", "Retrouver les décisions déjà actées"]
   };
-  const [title, subtitle] = titles[current.id];
+  const [title, subtitle] = project
+    ? [project.name, "Tout le monde du projet au même endroit"]
+    : titles[current.id];
   return (
-    <header className="stage-header">
+    <header className={`stage-header${project ? " project-mode" : ""}`}>
       <div className="lantern-mark"><Compass size={26} /></div>
       <div className="header-title">
-        <p>Vogue Marry · {current.label}</p>
+        <p>Vogue Marry · {project ? project.island : current.label}</p>
         <h2>{title}</h2>
         <div className="header-rule" />
         <span>{subtitle}</span>
@@ -476,8 +576,14 @@ function PontView() {
   );
 }
 
-function IslandsView() {
+function IslandsView({ onOpenProject }) {
   const [mode, setMode] = useState("cards");
+
+  const projectAction = (project) => project.name === "Forecast grand compte" ? (
+    <button type="button" className="project-open-button" onClick={() => onOpenProject(project)}>Ouvrir →</button>
+  ) : (
+    <span className="project-pilot-note">Après validation du pilote</span>
+  );
 
   return (
     <section className="islands-view">
@@ -504,13 +610,14 @@ function IslandsView() {
                 <div><label>Cap actuel</label><p>{project.cap}</p></div>
                 <div><label>Prochaine reprise</label><p>{project.next}</p></div>
               </div>
+              {projectAction(project)}
             </article>
           ))}
         </div>
       ) : (
         <div className="island-project-list">
           <div className="project-row header" aria-hidden="true">
-            <span>Projet</span><span>État</span><span>Cap actuel</span><span>Prochaine reprise</span>
+            <span>Projet</span><span>État</span><span>Cap actuel</span><span>Prochaine reprise</span><span />
           </div>
           {ISLAND_PROJECTS.map((project) => (
             <article className="project-row" key={project.name}>
@@ -518,9 +625,80 @@ function IslandsView() {
               <span className={`project-status ${project.tone}`}>{project.status}</span>
               <p>{project.cap}</p>
               <p>{project.next}</p>
+              {projectAction(project)}
             </article>
           ))}
         </div>
+      )}
+    </section>
+  );
+}
+
+function IslandProjectView({ project, onBack }) {
+  const [section, setSection] = useState("overview");
+  const tabs = [
+    ["overview", "Vue d’ensemble"],
+    ["escales", "Escales"],
+    ["journal", "Journal"],
+    ["coffre", "Coffre"],
+    ["audio", "Traces audio"],
+    ["equipage", "Équipage"],
+    ["manoeuvres", "Manœuvres"],
+    ["caps", "Caps validés"],
+    ["longuevue", "Longue-vue"]
+  ];
+  const currentSection = section === "overview" ? null : PILOT_WORLD[section];
+
+  return (
+    <section className="project-world-view">
+      <div className="project-world-top">
+        <button type="button" className="back-to-islands" onClick={onBack}>← Mes îles</button>
+        <span className="world-kicker">Île pilote · tout ce qui concerne ce projet reste ici</span>
+      </div>
+      <nav className="world-tabs" aria-label="Espaces de l’île">
+        {tabs.map(([id, label]) => (
+          <button type="button" key={id} className={section === id ? "active" : ""} onClick={() => setSection(id)}>{label}</button>
+        ))}
+      </nav>
+
+      {section === "overview" ? (
+        <div className="world-overview">
+          <article className="world-summary-card">
+            <small>Cap actuel</small>
+            <h3>{project.cap}</h3>
+            <p>Le projet conserve ici son cap, sans se mélanger avec les autres îles.</p>
+          </article>
+          <article className="world-summary-card">
+            <small>Prochaine reprise</small>
+            <h3>{project.next}</h3>
+            <p>Le point de reprise doit permettre de revenir dans le projet sans reconstruire le contexte.</p>
+          </article>
+          <article className="world-summary-card wide">
+            <small>Tout son monde</small>
+            <h3>Réunions, comptes rendus, documents, traces et décisions vivent dans cette île.</h3>
+            <div className="world-map">
+              {tabs.slice(1).map(([id, label]) => (
+                <button type="button" key={id} onClick={() => setSection(id)}>{label}</button>
+              ))}
+            </div>
+          </article>
+        </div>
+      ) : (
+        <article className="world-section">
+          <div className="world-section-header">
+            <small>{project.island}</small>
+            <h3>{currentSection.label}</h3>
+            <span>{currentSection.subtitle}</span>
+          </div>
+          <div className="world-items">
+            {currentSection.items.map(([title, text]) => (
+              <div className="world-item" key={title}>
+                <strong>{title}</strong>
+                <span>{text}</span>
+              </div>
+            ))}
+          </div>
+        </article>
       )}
     </section>
   );
@@ -543,7 +721,7 @@ function GenericView({ active }) {
   );
 }
 
-function LogPose({ active }) {
+function LogPose({ active, project }) {
   const current = MENU.find((item) => item.id === active) || MENU[0];
   const nextDirections = {
     pont: "Stabiliser le Pont et rendre les îles réellement ouvrables",
@@ -562,18 +740,18 @@ function LogPose({ active }) {
       <div className="log-compass"><Compass size={82} /></div>
       <section className="log-section">
         <label>Cap actuel</label>
-        <strong>Nord-Est</strong>
-        <p>Lisibilité, cohérence et efficacité.</p>
+        <strong>{project ? "Consolider" : "Nord-Est"}</strong>
+        <p>{project ? project.cap : "Lisibilité, cohérence et efficacité."}</p>
       </section>
       <section className="log-section">
         <label>Zone active</label>
-        <strong>{current.label}</strong>
-        <p>{current.sublabel}</p>
+        <strong>{project ? project.name : current.label}</strong>
+        <p>{project ? project.island : current.sublabel}</p>
       </section>
       <section className="log-section">
         <label>Prochaine direction</label>
-        <strong>{nextDirections[active]}</strong>
-        <p>Une seule étape validée à la fois.</p>
+        <strong>{project ? project.next : nextDirections[active]}</strong>
+        <p>{project ? "Le Log Pose suit maintenant cette île uniquement." : "Une seule étape validée à la fois."}</p>
       </section>
       <button className="log-button">Voir le détail <ChevronRight size={18} /></button>
     </aside>
@@ -582,22 +760,30 @@ function LogPose({ active }) {
 
 export default function App() {
   const [active, setActive] = useState("pont");
+  const [selectedProject, setSelectedProject] = useState(null);
+
+  const handleSectionChange = (id) => {
+    setSelectedProject(null);
+    setActive(id);
+  };
+
   const centralView = useMemo(() => {
+    if (selectedProject) return <IslandProjectView project={selectedProject} onBack={() => setSelectedProject(null)} />;
     if (active === "pont") return <PontView />;
-    if (active === "iles") return <IslandsView />;
+    if (active === "iles") return <IslandsView onOpenProject={setSelectedProject} />;
     return <GenericView active={active} />;
-  }, [active]);
+  }, [active, selectedProject]);
 
   return (
     <>
       <style>{APP_CSS}</style>
       <main className="vogue-shell">
-        <Sidebar active={active} onChange={setActive} />
+        <Sidebar active={active} onChange={handleSectionChange} />
         <section className="main-stage">
-          <StageHeader active={active} />
+          <StageHeader active={active} project={selectedProject} />
           <div className="stage-content">{centralView}</div>
         </section>
-        <LogPose active={active} />
+        <LogPose active={active} project={selectedProject} />
       </main>
     </>
   );
