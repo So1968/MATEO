@@ -681,15 +681,15 @@ function GenericView({ active }) {
 
 function LogPose({ active, project }) {
   const current = MENU.find((item) => item.id === active) || MENU[0];
-  const nextDirections = {
-    pont: "Stabiliser le Pont et rendre les îles réellement ouvrables",
-    iles: "Transformer chaque île en vraie page projet",
-    escales: "Créer une escale depuis un audio ou des notes",
-    journal: "Produire le premier Log Pose de reprise",
-    coffre: "Brancher le dépôt documentaire réel",
-    longuevue: "Connecter la recherche à la mémoire",
-    manoeuvres: "Attribuer les actions et les échéances",
-    caps: "Relier chaque décision à son contexte"
+  const resumeDirections = {
+    pont: "Regarder les trois priorités du Pont",
+    iles: "Choisir l’île à reprendre",
+    escales: "Consigner la prochaine escale dans le Journal",
+    journal: "Relire la dernière escale utile",
+    coffre: "Retrouver le document de référence",
+    longuevue: "Lancer la recherche utile au contexte",
+    manoeuvres: "Reprendre la prochaine manœuvre ouverte",
+    caps: "Relire la dernière décision actée"
   };
   return (
     <aside className="log-pose">
@@ -697,21 +697,21 @@ function LogPose({ active, project }) {
       <div className="log-ornament" />
       <div className="log-compass"><Compass size={82} /></div>
       <section className="log-section">
-        <label>Cap actuel</label>
-        <strong>{project ? "Cadrage EPM" : "Nord-Est"}</strong>
-        <p>{project ? project.cap : "Lisibilité, cohérence et efficacité."}</p>
+        <label>Dernière position</label>
+        <strong>{project ? "Cadrage fonctionnel avancé" : current.label}</strong>
+        <p>{project ? "Le modèle Budget / Forecast est cadré. La recette métier se prépare." : current.sublabel}</p>
       </section>
       <section className="log-section">
-        <label>Zone active</label>
-        <strong>{project ? project.name : current.label}</strong>
-        <p>{project ? "Mission client · Budget / Forecast" : current.sublabel}</p>
+        <label>Point d’arrêt</label>
+        <strong>{project ? "Mapping analytique à finaliser" : "Navigation en cours"}</strong>
+        <p>{project ? "12 correspondances comptes / centres de coûts restent à valider avec le contrôle de gestion." : "Aucun point d’arrêt précis n’est encore enregistré dans cette zone."}</p>
       </section>
       <section className="log-section">
-        <label>Prochaine direction</label>
-        <strong>{project ? project.next : nextDirections[active]}</strong>
-        <p>{project ? "Reprendre avec les décisions, données et actions de cette île uniquement." : "Une seule étape validée à la fois."}</p>
+        <label>Reprendre ici</label>
+        <strong>{project ? "Ouvrir le mapping ERP → EPM" : resumeDirections[active]}</strong>
+        <p>{project ? "Valider les correspondances restantes, puis préparer l’atelier DAF." : "Repartir de ce point sans devoir reconstruire tout le contexte."}</p>
       </section>
-      <button className="log-button">Voir le détail <ChevronRight size={18} /></button>
+      <button className="log-button">Voir le point de reprise <ChevronRight size={18} /></button>
     </aside>
   );
 }
