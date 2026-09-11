@@ -25,71 +25,71 @@ const MENU = [
 ];
 
 const PROJECTS = [
-  { name: "Phare d’Émeraude", detail: "Réunions & escales", status: "En cours", tone: "green", kind: "lighthouse", x: 19, y: 31 },
-  { name: "Baie des Alizés", detail: "Cœur du navire", status: "En construction", tone: "green", kind: "palms", x: 51, y: 27 },
-  { name: "Atoll des Brumes", detail: "Traces audio", status: "À reprendre", tone: "blue", kind: "mountain", x: 82, y: 49 },
-  { name: "Île des Courants", detail: "Longue-vue recherche", status: "Priorité", tone: "red", kind: "fortress", x: 54, y: 68 },
-  { name: "Lagune des Archives", detail: "Coffre documentaire", status: "En cours", tone: "gold", kind: "lagoon", x: 22, y: 67 }
+  { name: "Phare d’Émeraude", detail: "Déploiement EPM", status: "En cours", tone: "green", kind: "lighthouse", x: 19, y: 31 },
+  { name: "Baie des Alizés", detail: "Reporting P&L", status: "En cours", tone: "green", kind: "palms", x: 51, y: 27 },
+  { name: "Atoll des Brumes", detail: "Migration modèle", status: "À reprendre", tone: "blue", kind: "mountain", x: 82, y: 49 },
+  { name: "Île des Courants", detail: "Budget & Forecast", status: "Priorité", tone: "red", kind: "fortress", x: 54, y: 68 },
+  { name: "Lagune des Archives", detail: "Référentiels & données", status: "En cours", tone: "gold", kind: "lagoon", x: 22, y: 67 }
 ];
 
 const ISLAND_PROJECTS = [
   {
     island: "Phare d’Émeraude",
-    name: "Forecast grand compte",
+    name: "Déploiement EPM — Client Horizon",
     status: "En cours",
     tone: "green",
-    cap: "Consolider les hypothèses de prévision.",
-    next: "Reprendre la dernière escale."
+    cap: "Cadrer et sécuriser le modèle Budget / Forecast avant la recette métier.",
+    next: "Préparer l’atelier DAF sur les règles de gestion et le workflow de validation."
   },
   {
     island: "Baie des Alizés",
-    name: "Campagne budget",
+    name: "Refonte reporting P&L",
     status: "En cours",
     tone: "green",
-    cap: "Stabiliser les arbitrages et l’enveloppe.",
-    next: "Rassembler les décisions à valider."
+    cap: "Aligner le reporting réel, budget et forecast sur un référentiel commun.",
+    next: "Valider la structure du P&L avec le contrôle de gestion."
   },
   {
     island: "Atoll des Brumes",
-    name: "Marge & chiffre d’affaires",
+    name: "Migration modèle Planning",
     status: "À reprendre",
     tone: "blue",
-    cap: "Clarifier les indicateurs réellement utiles.",
-    next: "Reprendre les traces disponibles."
+    cap: "Reprendre les règles de calcul et fiabiliser les flux de données entrants.",
+    next: "Identifier les écarts entre l’ancien modèle et la cible."
   },
   {
     island: "Île des Courants",
-    name: "Reporting performance",
+    name: "Campagne Budget 2027",
     status: "Priorité",
     tone: "red",
-    cap: "Rendre le reporting lisible et fiable.",
-    next: "Valider les données de départ."
+    cap: "Sécuriser le calendrier budgétaire, les hypothèses et les contributeurs.",
+    next: "Arbitrer les règles de saisie avant ouverture de la campagne."
   }
 ];
 
 const GLOBAL_PRIORITIES = [
   {
     rank: 1,
-    project: "Reporting performance",
+    project: "Campagne Budget 2027",
     island: "Île des Courants",
-    reason: "Données de départ à valider",
-    action: "Valider les données de départ.",
+    reason: "Ouverture de campagne à sécuriser",
+    action: "Arbitrer les règles de saisie et de validation.",
     tone: "red"
   },
   {
     rank: 2,
-    project: "Marge & chiffre d’affaires",
+    project: "Migration modèle Planning",
     island: "Atoll des Brumes",
-    reason: "Projet à reprendre",
-    action: "Reprendre les traces disponibles.",
+    reason: "Écarts de calcul à qualifier",
+    action: "Comparer les règles source et cible.",
     tone: "blue"
   },
   {
     rank: 3,
-    project: "Forecast grand compte",
+    project: "Déploiement EPM — Client Horizon",
     island: "Phare d’Émeraude",
-    reason: "Dernière escale à reprendre",
-    action: "Reprendre la dernière escale.",
+    reason: "Atelier DAF à préparer",
+    action: "Consolider les règles de gestion Budget / Forecast.",
     tone: "green"
   }
 ];
@@ -97,66 +97,82 @@ const GLOBAL_PRIORITIES = [
 const PILOT_WORLD = {
   escales: {
     label: "Escales",
-    subtitle: "Toutes les réunions rattachées à cette île",
+    subtitle: "Toutes les réunions et ateliers du projet EPM",
     items: [
-      ["Dernière escale", "Réunion du projet prête à être reprise avec ses notes et décisions."],
-      ["Prochaine escale", "Préparation à construire à partir du cap actuel et des éléments en attente."]
+      ["Comité projet — DAF / Kiwika", "09 sept. · Avancement du cadrage, points de vigilance sur les données sources et validation du planning de recette."],
+      ["Atelier Budget & Forecast", "12 sept. · Règles de gestion, granularité de saisie, fréquence de reforecast et circuit de validation à arbitrer."],
+      ["Atelier Data / SI", "16 sept. · Mapping ERP → EPM, contrôles de cohérence et stratégie de reprise des historiques."],
+      ["Comité de recette", "23 sept. · Préparer les scénarios UAT, les jeux de données et la liste des utilisateurs pilotes."]
     ]
   },
   journal: {
     label: "Journal",
     subtitle: "Les comptes rendus et la mémoire longue du projet",
     items: [
-      ["Compte rendu de la dernière escale", "Synthèse, décisions et points à reprendre au même endroit."],
-      ["Fil de reprise", "Ce qu’il faut relire pour revenir dans le projet sans repartir de zéro."]
+      ["CR Comité projet — 09/09", "Décision : conserver un forecast glissant 12 mois. Risque identifié : qualité hétérogène des axes analytiques dans l’ERP."],
+      ["CR Atelier métier — Budget", "Les responsables de BU saisiront les hypothèses opérationnelles ; le contrôle de gestion gardera la validation finale."],
+      ["Note de reprise — avant recette", "Relire le mapping comptes / centres de coûts, vérifier les règles d’allocation et reprendre les trois anomalies encore ouvertes."],
+      ["Historique des arbitrages", "Trace des décisions métier qui expliquent pourquoi le modèle cible a été construit ainsi."]
     ]
   },
   coffre: {
     label: "Coffre",
-    subtitle: "Les documents qui appartiennent à Forecast grand compte",
+    subtitle: "Les documents de référence du projet Client Horizon",
     items: [
-      ["Hypothèses de prévision", "Document de travail rattaché à cette île."],
-      ["Version de référence", "Pièce utile conservée avec son contexte et sa version."]
+      ["Cadrage fonctionnel v1.4", "Périmètre Budget, Forecast, reporting P&L, utilisateurs et jalons du projet."],
+      ["Mapping ERP → EPM", "Correspondance comptes, centres de coûts, BU, produits et axes analytiques."],
+      ["Dictionnaire des données", "Définition des indicateurs, sources, fréquence de mise à jour et responsable de chaque donnée."],
+      ["Plan de recette UAT", "Scénarios de test métier, résultats attendus, anomalies et critères de validation."]
     ]
   },
   audio: {
     label: "Traces audio",
-    subtitle: "Les enregistrements et transcriptions de cette île",
+    subtitle: "Les enregistrements et passages utiles des ateliers",
     items: [
-      ["Trace de la dernière escale", "Audio à écouter, transcrire ou rattacher au compte rendu."],
-      ["Extrait à reprendre", "Passage marqué pour retrouver rapidement un point important."]
+      ["Atelier règles de gestion — 41 min", "Transcription disponible. Marqueurs sur la saisonnalité, les allocations et les hypothèses commerciales."],
+      ["Décision à 24:18", "La DAF confirme le forecast glissant 12 mois et demande une comparaison systématique Réel / Budget / Forecast."],
+      ["Point sensible à 33:05", "Doute sur la fiabilité de l’axe produit dans l’ERP ; contrôle complémentaire demandé au SI."],
+      ["Résumé audio comité projet", "Synthèse de 4 minutes générée pour reprendre le contexte avant le prochain rendez-vous."]
     ]
   },
   equipage: {
     label: "Équipage",
-    subtitle: "Les personnes qui font partie du monde de ce projet",
+    subtitle: "Les acteurs du projet et leur rôle",
     items: [
-      ["Mateo", "Pilote du projet et gardien du cap."],
-      ["Contributeurs", "Interlocuteurs et rôles rattachés à l’île."]
+      ["Matéo — Chef de projet / Consultant", "Pilotage du projet, cadrage fonctionnel, animation des ateliers et coordination entre métier et intégration."],
+      ["Claire — Directrice financière", "Sponsor métier. Arbitre les règles de gestion, les priorités et les critères de succès."],
+      ["Nicolas — Contrôle de gestion", "Référent Budget / Forecast. Porte les besoins utilisateurs et prépare la recette métier."],
+      ["Samir — Référent SI", "Sécurise les sources ERP, les flux, les accès et la qualité des données alimentant la solution EPM."]
     ]
   },
   manoeuvres: {
     label: "Manœuvres",
-    subtitle: "Les actions à mener dans cette île",
+    subtitle: "Les actions concrètes à mener dans ce projet",
     items: [
-      ["Consolider les hypothèses", "Action directement liée au cap actuel."],
-      ["Préparer la prochaine escale", "Reprendre les éléments utiles avant la prochaine réunion."]
+      ["Finaliser le mapping analytique", "Responsable : Matéo · Échéance : 13/09 · 12 correspondances restent à valider avec le contrôle de gestion."],
+      ["Arbitrer la granularité du Forecast", "Décider si la saisie se fait au niveau BU × Produit ou uniquement BU pour la première mise en production."],
+      ["Préparer la recette UAT", "Constituer 8 scénarios de test : import réel, saisie budget, reforecast, allocation, validation, restitution et export."],
+      ["Sécuriser le planning", "Vérifier que la recette, les corrections et la formation tiennent avant l’ouverture de la campagne budgétaire."]
     ]
   },
   caps: {
     label: "Caps validés",
-    subtitle: "Les décisions déjà actées pour ne pas les rediscuter",
+    subtitle: "Les décisions actées pour éviter de rouvrir les mêmes débats",
     items: [
-      ["Périmètre du forecast", "Décision conservée avec son contexte."],
-      ["Version de référence", "Cap validé et relié aux documents concernés."]
+      ["Forecast glissant sur 12 mois", "Validé par la DAF le 09/09. Actualisation mensuelle avec conservation de l’historique des versions."],
+      ["Comparatif Réel / Budget / Forecast", "Les trois scénarios seront visibles dans les restitutions principales et partageables par BU."],
+      ["ERP = source du Réel", "Les données réalisées proviennent du SI financier ; les corrections manuelles devront être tracées dans l’EPM."],
+      ["Workflow de validation à 2 niveaux", "Responsable de BU puis contrôle de gestion avant consolidation finale."]
     ]
   },
   longuevue: {
     label: "Longue-vue",
-    subtitle: "Chercher uniquement dans le monde de cette île",
+    subtitle: "Chercher uniquement dans le monde de cette mission EPM",
     items: [
-      ["Recherche Forecast grand compte", "Réunions, comptes rendus, documents, audios et décisions de cette île seulement."],
-      ["Filtres de l’île", "Date, personne, type de trace, statut et provenance."]
+      ["“règle allocation marge”", "Retrouve la décision du comité, le passage audio associé et la section correspondante du cadrage fonctionnel."],
+      ["“écart Réel / Forecast”", "Recherche dans les comptes rendus, anomalies de recette, documents et décisions de l’île."],
+      ["Filtre : DAF + décisions", "Affiche uniquement les arbitrages validés par la direction financière."],
+      ["Filtre : recette + ouvert", "Retrouve les scénarios UAT et les anomalies encore non résolues."]
     ]
   }
 };
@@ -487,7 +503,7 @@ function StageHeader({ active, project }) {
     caps: ["Caps validés", "Retrouver les décisions déjà actées"]
   };
   const [title, subtitle] = project
-    ? [project.name, "Tout le monde du projet au même endroit"]
+    ? [project.name, "Pilotage EPM · Budget, Forecast, reporting et données"]
     : titles[current.id];
   return (
     <header className={`stage-header${project ? " project-mode" : ""}`}>
@@ -579,7 +595,7 @@ function PontView() {
 function IslandsView({ onOpenProject }) {
   const [mode, setMode] = useState("cards");
 
-  const projectAction = (project) => project.name === "Forecast grand compte" ? (
+  const projectAction = (project) => project.name === "Déploiement EPM — Client Horizon" ? (
     <button type="button" className="project-open-button" onClick={() => onOpenProject(project)}>Ouvrir →</button>
   ) : (
     <span className="project-pilot-note">Après validation du pilote</span>
@@ -653,7 +669,7 @@ function IslandProjectView({ project, onBack }) {
     <section className="project-world-view">
       <div className="project-world-top">
         <button type="button" className="back-to-islands" onClick={onBack}>← Mes îles</button>
-        <span className="world-kicker">Île pilote · tout ce qui concerne ce projet reste ici</span>
+        <span className="world-kicker">Démo métier EPM · données fictives · mission de transformation Finance</span>
       </div>
       <nav className="world-tabs" aria-label="Espaces de l’île">
         {tabs.map(([id, label]) => (
@@ -666,16 +682,16 @@ function IslandProjectView({ project, onBack }) {
           <article className="world-summary-card">
             <small>Cap actuel</small>
             <h3>{project.cap}</h3>
-            <p>Le projet conserve ici son cap, sans se mélanger avec les autres îles.</p>
+            <p>Objectif : transformer les besoins Finance en un modèle EPM fiable, compréhensible et exploitable par les équipes métier.</p>
           </article>
           <article className="world-summary-card">
             <small>Prochaine reprise</small>
             <h3>{project.next}</h3>
-            <p>Le point de reprise doit permettre de revenir dans le projet sans reconstruire le contexte.</p>
+            <p>À reprendre avec le dernier compte rendu, les règles de gestion encore ouvertes et les décisions déjà actées.</p>
           </article>
           <article className="world-summary-card wide">
-            <small>Tout son monde</small>
-            <h3>Réunions, comptes rendus, documents, traces et décisions vivent dans cette île.</h3>
+            <small>Tout le monde du projet</small>
+            <h3>Ateliers métier, comptes rendus, données, recette, décisions et actions restent rattachés à cette mission.</h3>
             <div className="world-map">
               {tabs.slice(1).map(([id, label]) => (
                 <button type="button" key={id} onClick={() => setSection(id)}>{label}</button>
@@ -740,18 +756,18 @@ function LogPose({ active, project }) {
       <div className="log-compass"><Compass size={82} /></div>
       <section className="log-section">
         <label>Cap actuel</label>
-        <strong>{project ? "Consolider" : "Nord-Est"}</strong>
+        <strong>{project ? "Cadrage EPM" : "Nord-Est"}</strong>
         <p>{project ? project.cap : "Lisibilité, cohérence et efficacité."}</p>
       </section>
       <section className="log-section">
         <label>Zone active</label>
         <strong>{project ? project.name : current.label}</strong>
-        <p>{project ? project.island : current.sublabel}</p>
+        <p>{project ? "Mission client · Budget / Forecast" : current.sublabel}</p>
       </section>
       <section className="log-section">
         <label>Prochaine direction</label>
         <strong>{project ? project.next : nextDirections[active]}</strong>
-        <p>{project ? "Le Log Pose suit maintenant cette île uniquement." : "Une seule étape validée à la fois."}</p>
+        <p>{project ? "Reprendre avec les décisions, données et actions de cette île uniquement." : "Une seule étape validée à la fois."}</p>
       </section>
       <button className="log-button">Voir le détail <ChevronRight size={18} /></button>
     </aside>
