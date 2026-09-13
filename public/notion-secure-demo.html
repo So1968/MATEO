@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Démo Notion — méthode visuelle sécurisée</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --sidebar: #fbfbfa;
+      --surface: #ffffff;
+      --surface-soft: #f7f7f5;
+      --surface-warm: #f8f6f0;
+      --border: #e7e7e3;
+      --border-strong: #d8d8d3;
+      --text: #2f3437;
+      --muted: #787774;
+      --accent: #9b7a52;
+      --success: #2f7d56;
+      --warning: #a36b2c;
+      --radius: 8px;
+      --sidebar-width: 244px;
+      --page-width: 920px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); }
+    body { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input { font: inherit; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+      background: var(--bg);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 12px 10px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      overflow: auto;
+    }
+
+    .workspace {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px 14px;
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .workspace-mark {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      background: #fff;
+      font-weight: 700;
+    }
+
+    .nav-group { margin-top: 6px; }
+    .nav-title {
+      padding: 10px 10px 6px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 10px;
+      color: var(--text);
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .nav-item:hover,
+    .nav-item.active { background: #efefec; }
+
+    .nav-icon {
+      width: 20px;
+      color: var(--muted);
+      text-align: center;
+      flex: 0 0 20px;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 0 32px 80px;
+    }
+
+    .topbar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(255,255,255,.94);
+      border-bottom: 1px solid rgba(231,231,227,.7);
+      backdrop-filter: blur(10px);
+    }
+
+    .crumbs { color: var(--muted); font-size: 13px; }
+    .top-actions { display: flex; gap: 8px; }
+    .icon-button {
+      height: 30px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .page {
+      width: min(100%, var(--page-width));
+      margin: 0 auto;
+      padding-top: 54px;
+    }
+
+    .page-icon {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-warm);
+      font-size: 28px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: ui-serif, Georgia, serif;
+      font-size: clamp(42px, 6vw, 68px);
+      line-height: .98;
+      letter-spacing: -.03em;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      max-width: 700px;
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    .properties {
+      margin-top: 28px;
+      padding: 14px 0;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .property { min-width: 0; }
+    .property label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .property strong {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .section { margin-top: 42px; }
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    h2 {
+      margin: 0;
+      font-family: ui-serif, Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .section-note { color: var(--muted); font-size: 12px; }
+
+    .callout {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 12px;
+      padding: 16px 18px;
+      border: 1px solid #e6dfcf;
+      border-radius: var(--radius);
+      background: var(--surface-warm);
+    }
+
+    .callout-icon {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid #e6dfcf;
+    }
+
+    .callout strong { display: block; margin-bottom: 4px; }
+    .callout p { margin: 0; color: var(--muted); line-height: 1.5; font-size: 14px; }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 12px;
+    }
+
+    .card {
+      min-height: 132px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 1px 1px rgba(15,15,15,.03);
+    }
+
+    .card small {
+      display: block;
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .card strong { display: block; margin-bottom: 6px; font-size: 15px; }
+    .card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+    .table-wrap {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; background: var(--surface-soft); }
+    tbody tr:last-child td { border-bottom: 0; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #eef6f1;
+      color: var(--success);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .status.todo { background: #f7f3ea; color: var(--warning); }
+
+    .guardrail {
+      margin-top: 44px;
+      padding: 18px 20px;
+      border-left: 3px solid var(--accent);
+      background: #faf9f6;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .guardrail strong { color: var(--text); }
+
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main { padding-inline: 20px; }
+      .properties, .cards { grid-template-columns: 1fr; }
+      .topbar { margin-inline: -20px; padding-inline: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="workspace">
+        <div class="workspace-mark">A</div>
+        <span>Azoth Studio</span>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-title">Espace</div>
+        <button class="nav-item active"><span class="nav-icon">▣</span><span>Projet Horizon</span></button>
+        <button class="nav-item"><span class="nav-icon">◫</span><span>Notes</span></button>
+        <button class="nav-item"><span class="nav-icon">✓</span><span>Tâches</span></button>
+        <button class="nav-item"><span class="nav-icon">⌕</span><span>Recherche</span></button>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-title">Récents</div>
+        <button class="nav-item"><span class="nav-icon">·</span><span>Réunion DAF</span></button>
+        <button class="nav-item"><span class="nav-icon">·</span><span>Mapping ERP → EPM</span></button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="crumbs">Projets / Horizon</div>
+        <div class="top-actions">
+          <button class="icon-button">Partager</button>
+          <button class="icon-button">•••</button>
+        </div>
+      </div>
+
+      <article class="page">
+        <div class="page-icon">◈</div>
+        <h1>Projet Horizon</h1>
+        <p class="subtitle">Un écran de travail sobre, lisible et respirant. Aucun décor ne traverse le contenu. Le code gère uniquement la structure, le rythme, les couleurs et les états.</p>
+
+        <section class="properties" aria-label="Propriétés du projet">
+          <div class="property"><label>Statut</label><strong><span class="dot"></span> En cours</strong></div>
+          <div class="property"><label>Responsable</label><strong>Matéo</strong></div>
+          <div class="property"><label>Prochaine étape</label><strong>Atelier DAF</strong></div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2>À reprendre maintenant</h2>
+            <span class="section-note">Une seule priorité visible</span>
+          </div>
+          <div class="callout">
+            <div class="callout-icon">→</div>
+            <div>
+              <strong>Finaliser le mapping ERP → EPM</strong>
+              <p>12 correspondances comptes / centres de coûts restent à valider avant l’atelier DAF.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2>Espaces du projet</h2>
+            <span class="section-note">UI uniquement — aucun dessin décoratif</span>
+          </div>
+          <div class="cards">
+            <article class="card"><small>Cap</small><strong>Direction du projet</strong><p>Sécuriser le modèle Budget / Forecast avant la recette métier.</p></article>
+            <article class="card"><small>Journal</small><strong>Décisions & traces</strong><p>Retrouver les étapes déjà franchies sans reconstruire le contexte.</p></article>
+            <article class="card"><small>Arsenal</small><strong>Documents utiles</strong><p>Mapping, cadrage, dictionnaire des données et plan UAT.</p></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2>Manœuvres</h2>
+            <span class="section-note">Une vraie table, pas une illustration déguisée</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Tâche</th><th>Statut</th><th>Responsable</th></tr></thead>
+              <tbody>
+                <tr><td>Valider le mapping analytique</td><td><span class="status todo">À faire</span></td><td>Matéo</td></tr>
+                <tr><td>Préparer l’atelier DAF</td><td><span class="status">Prêt</span></td><td>Équipe projet</td></tr>
+                <tr><td>Construire les scénarios UAT</td><td><span class="status todo">À faire</span></td><td>Consultant EPM</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="guardrail">
+          <strong>Démonstration du garde-fou :</strong> si ce projet devait recevoir une illustration, elle ne serait jamais dessinée ici avec des pseudo-éléments CSS, des clip-path ou un SVG improvisé. On réserverait une zone dédiée, puis on y intégrerait un asset graphique séparé et validé. Sans asset valable, cette page reste telle quelle.
+        </div>
+      </article>
+    </main>
+  </div>
+</body>
+</html>
