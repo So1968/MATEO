@@ -709,9 +709,9 @@ function IslandProjectView({ project, onBack }) {
             <span className="mind-link west" aria-hidden="true" />
 
             <article className="mind-center">
-              <small>Projet</small>
-              <strong>{project.name}</strong>
-              <p>Budget / Forecast · mission EPM</p>
+              <small>Projet · {project.status}</small>
+              <strong>{project.name.split("—")[0].trim()}</strong>
+              <p>Budget / Forecast</p>
               <div className="mind-center-meta">
                 <span>4 acteurs clés</span>
                 <span>2 risques ouverts</span>
