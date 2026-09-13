@@ -26,10 +26,9 @@
     border-radius: 10px 15px 9px 14px / 14px 9px 15px 10px !important;
     opacity: 1 !important;
     background:
-      /* traits d'encre en haut à gauche */
-      linear-gradient(112deg, transparent 0 42%, rgba(75, 38, 20, .58) 43% 48%, transparent 49%) 27px 24px / 72px 19px no-repeat,
-      linear-gradient(112deg, transparent 0 42%, rgba(151, 47, 35, .56) 43% 48%, transparent 49%) 40px 40px / 48px 14px no-repeat,
-      linear-gradient(112deg, transparent 0 42%, rgba(75, 38, 20, .28) 43% 47%, transparent 48%) 57px 25px / 34px 10px no-repeat,
+      /* traits d'encre en haut à gauche : plus discrets */
+      linear-gradient(112deg, transparent 0 42%, rgba(75, 38, 20, .34) 43% 48%, transparent 49%) 30px 26px / 60px 16px no-repeat,
+      linear-gradient(112deg, transparent 0 42%, rgba(151, 47, 35, .32) 43% 48%, transparent 49%) 43px 40px / 38px 12px no-repeat,
 
       /* route maritime pointillée */
       radial-gradient(circle, rgba(83, 47, 24, .55) 0 2px, transparent 2.7px) 73% 15% / 16px 16px no-repeat,
@@ -43,10 +42,8 @@
       radial-gradient(120px 34px at 132px calc(100% - 15px), transparent 0 67%, rgba(33, 87, 108, .24) 68% 71%, transparent 72%),
       radial-gradient(154px 38px at 210px calc(100% - 8px), transparent 0 72%, rgba(33, 87, 108, .15) 73% 76%, transparent 77%),
 
-      /* petite falaise / îlot, bas droite */
-      linear-gradient(120deg, transparent 0 36%, rgba(71, 52, 27, .24) 37% 48%, transparent 49%) calc(100% - 90px) calc(100% - 22px) / 88px 62px no-repeat,
-      linear-gradient(72deg, transparent 0 42%, rgba(71, 52, 27, .18) 43% 52%, transparent 53%) calc(100% - 55px) calc(100% - 17px) / 56px 48px no-repeat,
-      radial-gradient(44px 10px at calc(100% - 51px) calc(100% - 13px), transparent 0 64%, rgba(33, 87, 108, .20) 65% 69%, transparent 70%),
+      /* petite île / falaise dessinée, bas droite */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 80'%3E%3Cpath d='M18 67 C36 62 51 63 66 67' fill='none' stroke='%2321576c' stroke-opacity='.38' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M30 72 C48 68 65 69 82 72' fill='none' stroke='%2321576c' stroke-opacity='.22' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M55 66 C64 59 68 50 78 44 C88 38 98 37 109 29 C116 36 119 43 128 48 C121 51 117 57 114 66 Z' fill='%236a4b25' fill-opacity='.26' stroke='%235b3a1d' stroke-opacity='.52' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M76 45 C85 47 96 47 108 42' fill='none' stroke='%235b3a1d' stroke-opacity='.34' stroke-width='1.5' stroke-linecap='round'/%3E%3Cpath d='M95 38 C97 34 98 31 97 27' fill='none' stroke='%235b3a1d' stroke-opacity='.48' stroke-width='1.6' stroke-linecap='round'/%3E%3Cpath d='M88 29 C92 25 97 24 101 27 C98 30 93 32 88 29 Z' fill='%235b3a1d' fill-opacity='.30'/%3E%3C/svg%3E") calc(100% - 158px) calc(100% - 74px) / 150px 80px no-repeat,
 
       /* filets irréguliers de carte */
       linear-gradient(90deg, rgba(78, 42, 19, .35), transparent) 12px 12px / 106px 1px no-repeat,
