@@ -1,6 +1,5 @@
-/* Vogue Marry — Carte mentale, scène de navigation.
-   Une seule composition forte : carte, routes, centre projet et Log Pose.
-   Aucun petit dessin décoratif isolé. */
+/* Vogue Marry — Carte mentale, scène de navigation complète.
+   Une vraie cartographie unique en fond, centre projet et Log Pose au premier plan. */
 
 @media (min-width: 821px) {
   .mind-map-shell {
@@ -9,11 +8,7 @@
     border: 3px solid #6f431f !important;
     border-radius: 18px 14px 20px 15px / 14px 19px 13px 18px !important;
     background:
-      radial-gradient(ellipse at 17% 31%, transparent 0 74px, rgba(104, 65, 29, .08) 75px 76px, transparent 77px 109px, rgba(104, 65, 29, .055) 110px 111px, transparent 112px),
-      radial-gradient(ellipse at 82% 74%, transparent 0 86px, rgba(104, 65, 29, .07) 87px 88px, transparent 89px 126px, rgba(104, 65, 29, .045) 127px 128px, transparent 129px),
-      radial-gradient(circle at 50% 43%, rgba(112, 72, 31, .07) 0 2px, transparent 3px),
-      radial-gradient(circle at 50% 43%, transparent 0 116px, rgba(112, 72, 31, .14) 117px 118px, transparent 119px 158px, rgba(112, 72, 31, .08) 159px 160px, transparent 161px),
-      repeating-linear-gradient(0deg, transparent 0 73px, rgba(106, 66, 28, .045) 74px 75px),
+      url("./assets/carte-navigation.svg") center / cover no-repeat,
       repeating-linear-gradient(7deg, rgba(106, 66, 28, .022) 0 1px, transparent 1px 18px),
       linear-gradient(180deg, #f7dfa3 0%, #efd08a 48%, #e2b968 100%) !important;
     box-shadow:
@@ -22,51 +17,33 @@
       0 14px 30px rgba(33, 20, 9, .20) !important;
   }
 
-  /* Grand cadre intérieur : un tracé de carte un peu irrégulier, pas un cadre UI parfait. */
   .mind-map-shell::before {
     content: "";
     position: absolute;
     inset: 11px 12px 12px 11px !important;
     z-index: 0;
     pointer-events: none;
-    border: 1px solid rgba(86, 48, 22, .38) !important;
+    border: 1px solid rgba(86, 48, 22, .40) !important;
     border-radius: 12px 9px 14px 10px / 9px 14px 10px 13px !important;
     box-shadow:
-      inset 0 0 0 1px rgba(255, 244, 208, .34),
-      0 0 0 6px rgba(122, 73, 28, .025) !important;
+      inset 0 0 0 1px rgba(255, 244, 208, .28),
+      0 0 0 6px rgba(122, 73, 28, .02) !important;
     background:
       linear-gradient(90deg, rgba(74, 38, 18, .46), transparent) 14px 14px / 138px 2px no-repeat,
       linear-gradient(180deg, rgba(74, 38, 18, .42), transparent) 14px 14px / 2px 102px no-repeat,
       linear-gradient(270deg, rgba(74, 38, 18, .36), transparent) calc(100% - 14px) calc(100% - 14px) / 130px 2px no-repeat,
-      linear-gradient(0deg, rgba(74, 38, 18, .34), transparent) calc(100% - 14px) calc(100% - 14px) / 2px 96px no-repeat,
-      linear-gradient(108deg, transparent 0 47%, rgba(143, 52, 42, .22) 48% 52%, transparent 53%) 54px calc(100% - 38px) / 52px 14px no-repeat,
-      linear-gradient(72deg, transparent 0 47%, rgba(143, 52, 42, .18) 48% 52%, transparent 53%) calc(100% - 92px) 48px / 46px 12px no-repeat;
+      linear-gradient(0deg, rgba(74, 38, 18, .34), transparent) calc(100% - 14px) calc(100% - 14px) / 2px 96px no-repeat;
   }
 
-  /* Une seule rose des vents, grande et en filigrane. */
   .mind-map-shell::after {
     content: "";
     position: absolute;
-    top: 18px !important;
-    right: 24px !important;
-    width: 112px !important;
-    height: 112px !important;
+    inset: 0;
     z-index: 0;
     pointer-events: none;
-    border: 1px solid rgba(77, 42, 20, .26) !important;
-    border-radius: 50% !important;
-    opacity: .42 !important;
     background:
-      linear-gradient(90deg, transparent 49.2%, rgba(75, 40, 19, .60) 49.2% 50.8%, transparent 50.8%),
-      linear-gradient(0deg, transparent 49.2%, rgba(75, 40, 19, .60) 49.2% 50.8%, transparent 50.8%),
-      linear-gradient(45deg, transparent 49.4%, rgba(141, 47, 36, .34) 49.4% 50.6%, transparent 50.6%),
-      linear-gradient(-45deg, transparent 49.4%, rgba(141, 47, 36, .34) 49.4% 50.6%, transparent 50.6%),
-      conic-gradient(from 0deg, rgba(84, 45, 20, .30) 0 5deg, transparent 5deg 40deg, rgba(84, 45, 20, .22) 40deg 50deg, transparent 50deg 85deg, rgba(84, 45, 20, .30) 85deg 95deg, transparent 95deg 130deg, rgba(84, 45, 20, .22) 130deg 140deg, transparent 140deg 175deg, rgba(84, 45, 20, .30) 175deg 185deg, transparent 185deg 220deg, rgba(84, 45, 20, .22) 220deg 230deg, transparent 230deg 265deg, rgba(84, 45, 20, .30) 265deg 275deg, transparent 275deg 310deg, rgba(84, 45, 20, .22) 310deg 320deg, transparent 320deg 355deg, rgba(84, 45, 20, .30) 355deg 360deg),
-      radial-gradient(circle, #8f3429 0 4px, transparent 5px),
-      radial-gradient(circle, transparent 0 31px, rgba(82, 44, 21, .24) 32px 33px, transparent 34px),
-      radial-gradient(circle, transparent 0 47px, rgba(82, 44, 21, .14) 48px 49px, transparent 50px) !important;
-    box-shadow: inset 0 0 0 5px rgba(255, 239, 192, .18) !important;
-    transform: rotate(8deg) !important;
+      radial-gradient(circle at 50% 42%, transparent 0 145px, rgba(84, 45, 20, .05) 146px 147px, transparent 148px),
+      radial-gradient(ellipse at center, transparent 0 63%, rgba(84, 45, 20, .055) 100%);
   }
 
   .mind-map-shell .mind-branch,
@@ -77,13 +54,13 @@
     z-index: 2;
   }
 
-  /* Les branches sont des annotations de carte, pas des cartes UI. */
+  /* Les quatre branches sont des annotations de carte. */
   .mind-branch {
     padding: 7px 12px 10px !important;
     border: 0 !important;
     border-radius: 0 !important;
     color: #4a2c17 !important;
-    background: transparent !important;
+    background: rgba(247, 223, 163, .10) !important;
     box-shadow: none !important;
     clip-path: none !important;
     text-shadow: 0 1px 0 rgba(255, 239, 196, .82) !important;
@@ -105,21 +82,10 @@
       linear-gradient(102deg, transparent 0 44%, rgba(145, 52, 42, .48) 45% 51%, transparent 52%) 16% 4px / 28px 3px no-repeat;
   }
 
-  .mind-branch-cap {
-    transform: translateX(-5px) rotate(-.65deg) !important;
-  }
-
-  .mind-branch-journal {
-    transform: translateY(3px) rotate(-.45deg) !important;
-  }
-
-  .mind-branch-manoeuvres {
-    transform: translateY(-2px) rotate(.55deg) !important;
-  }
-
-  .mind-branch-arsenal {
-    transform: translateX(6px) rotate(.4deg) !important;
-  }
+  .mind-branch-cap { transform: translateX(-5px) rotate(-.65deg) !important; }
+  .mind-branch-journal { transform: translateY(3px) rotate(-.45deg) !important; }
+  .mind-branch-manoeuvres { transform: translateY(-2px) rotate(.55deg) !important; }
+  .mind-branch-arsenal { transform: translateX(6px) rotate(.4deg) !important; }
 
   .mind-branch strong {
     color: #432715 !important;
@@ -128,9 +94,7 @@
     letter-spacing: .014em !important;
   }
 
-  .mind-branch-cap strong {
-    color: #92362c !important;
-  }
+  .mind-branch-cap strong { color: #92362c !important; }
 
   .mind-branch::after {
     margin-top: 5px !important;
@@ -154,28 +118,20 @@
   }
 
   .mind-branch-cap:hover,
-  .mind-branch-cap.active {
-    transform: translate(-5px, -2px) rotate(-.65deg) !important;
-  }
+  .mind-branch-cap.active { transform: translate(-5px, -2px) rotate(-.65deg) !important; }
 
   .mind-branch-journal:hover,
-  .mind-branch-journal.active {
-    transform: translateY(1px) rotate(-.45deg) !important;
-  }
+  .mind-branch-journal.active { transform: translateY(1px) rotate(-.45deg) !important; }
 
   .mind-branch-manoeuvres:hover,
-  .mind-branch-manoeuvres.active {
-    transform: translateY(-4px) rotate(.55deg) !important;
-  }
+  .mind-branch-manoeuvres.active { transform: translateY(-4px) rotate(.55deg) !important; }
 
   .mind-branch-arsenal:hover,
-  .mind-branch-arsenal.active {
-    transform: translate(6px, -2px) rotate(.4deg) !important;
-  }
+  .mind-branch-arsenal.active { transform: translate(6px, -2px) rotate(.4deg) !important; }
 
-  /* Routes de navigation : elles courbent légèrement au lieu de tirer quatre traits parfaits. */
+  /* Les routes HTML restent lisibles mais secondaires par rapport à la grande cartographie du fond. */
   .mind-link {
-    opacity: 1 !important;
+    opacity: .88 !important;
     background: none !important;
     border-radius: 0 !important;
     overflow: visible !important;
@@ -185,33 +141,23 @@
   .mind-link.east {
     height: 24px !important;
     background: none !important;
-    border-top: 2px dashed #6d4422 !important;
+    border-top: 2px dashed rgba(109, 68, 34, .86) !important;
     border-radius: 50% 50% 0 0 !important;
   }
 
-  .mind-link.west {
-    transform: translateY(7px) rotate(5deg) !important;
-  }
-
-  .mind-link.east {
-    transform: translateY(-5px) rotate(-5deg) !important;
-  }
+  .mind-link.west { transform: translateY(7px) rotate(5deg) !important; }
+  .mind-link.east { transform: translateY(-5px) rotate(-5deg) !important; }
 
   .mind-link.north,
   .mind-link.south {
     width: 26px !important;
     background: none !important;
-    border-left: 2px dashed #6d4422 !important;
+    border-left: 2px dashed rgba(109, 68, 34, .86) !important;
     border-radius: 50% 0 0 50% !important;
   }
 
-  .mind-link.north {
-    transform: translateX(8px) rotate(-5deg) !important;
-  }
-
-  .mind-link.south {
-    transform: translateX(-7px) rotate(5deg) !important;
-  }
+  .mind-link.north { transform: translateX(8px) rotate(-5deg) !important; }
+  .mind-link.south { transform: translateX(-7px) rotate(5deg) !important; }
 
   .mind-link::after {
     content: "";
@@ -228,15 +174,14 @@
   .mind-link.north::after { left: -5px; bottom: -3px; }
   .mind-link.south::after { left: -5px; top: -3px; }
 
-  /* Le projet reste exactement la pièce maîtresse validée. */
+  /* Le projet reste la pièce maîtresse. */
   .mind-center {
     min-height: 132px !important;
     padding: 21px 28px !important;
     overflow: visible !important;
     border: 3px solid #b87528 !important;
     border-radius: 12px 8px 13px 9px / 8px 13px 9px 12px !important;
-    background:
-      linear-gradient(180deg, rgba(12, 70, 89, .98), rgba(5, 43, 58, .99)) !important;
+    background: linear-gradient(180deg, rgba(12, 70, 89, .98), rgba(5, 43, 58, .99)) !important;
     box-shadow:
       inset 0 0 0 1px rgba(255, 221, 142, .30),
       inset 0 -12px 28px rgba(0, 0, 0, .14),
@@ -281,7 +226,7 @@
     font-weight: 700 !important;
   }
 
-  /* Le Log Pose reste exactement tel qu'il a été validé. */
+  /* Le Log Pose reste l’instrument de reprise. */
   .mind-resume {
     grid-column: 2 / 5 !important;
     grid-row: 8 !important;
@@ -295,8 +240,7 @@
     color: #f6dfaa !important;
     border: 2px solid #b87428 !important;
     border-radius: 12px 9px 13px 8px / 8px 13px 9px 12px !important;
-    background:
-      linear-gradient(180deg, rgba(7, 58, 76, .98), rgba(4, 38, 52, .99)) !important;
+    background: linear-gradient(180deg, rgba(7, 58, 76, .98), rgba(4, 38, 52, .99)) !important;
     box-shadow:
       inset 0 0 0 1px rgba(255, 219, 133, .22),
       0 7px 14px rgba(50, 29, 11, .18) !important;
@@ -320,13 +264,8 @@
     white-space: nowrap;
   }
 
-  .mind-resume > div {
-    padding: 10px 18px 7px !important;
-  }
-
-  .mind-resume > div + div {
-    border-left: 1px solid rgba(238, 184, 96, .36) !important;
-  }
+  .mind-resume > div { padding: 10px 18px 7px !important; }
+  .mind-resume > div + div { border-left: 1px solid rgba(238, 184, 96, .36) !important; }
 
   .mind-resume small {
     margin-bottom: 6px !important;
