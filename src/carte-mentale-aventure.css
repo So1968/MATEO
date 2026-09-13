@@ -1,0 +1,91 @@
+/* Vogue Marry — pourtour aventure de la Carte mentale.
+   Cette couche ne touche ni à la structure, ni aux branches, ni au contenu. */
+
+@media (min-width: 821px) {
+  .mind-map-shell {
+    border: 1px solid rgba(90, 49, 22, .72) !important;
+    border-radius: 13px 17px 12px 16px / 16px 11px 17px 12px !important;
+    background:
+      radial-gradient(circle at 92% 12%, rgba(157, 47, 35, .08), transparent 10%),
+      radial-gradient(ellipse at 8% 91%, rgba(41, 94, 113, .10), transparent 19%),
+      linear-gradient(180deg, #f8e2a6 0%, #f1d391 48%, #e6bf70 100%) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 245, 211, .68),
+      inset 0 0 46px rgba(91, 50, 16, .10),
+      0 13px 30px rgba(48, 28, 10, .18) !important;
+  }
+
+  /* Le calque de décor périphérique : encrage, route, vagues et îlot. */
+  .mind-map-shell::before {
+    content: "";
+    position: absolute;
+    inset: 9px 10px 10px 8px !important;
+    z-index: 0;
+    pointer-events: none;
+    border: 1px solid rgba(83, 45, 20, .30) !important;
+    border-radius: 10px 15px 9px 14px / 14px 9px 15px 10px !important;
+    opacity: 1 !important;
+    background:
+      /* traits d'encre en haut à gauche */
+      linear-gradient(112deg, transparent 0 42%, rgba(75, 38, 20, .58) 43% 48%, transparent 49%) 27px 24px / 72px 19px no-repeat,
+      linear-gradient(112deg, transparent 0 42%, rgba(151, 47, 35, .56) 43% 48%, transparent 49%) 40px 40px / 48px 14px no-repeat,
+      linear-gradient(112deg, transparent 0 42%, rgba(75, 38, 20, .28) 43% 47%, transparent 48%) 57px 25px / 34px 10px no-repeat,
+
+      /* route maritime pointillée */
+      radial-gradient(circle, rgba(83, 47, 24, .55) 0 2px, transparent 2.7px) 73% 15% / 16px 16px no-repeat,
+      radial-gradient(circle, rgba(83, 47, 24, .48) 0 2px, transparent 2.7px) 76% 18% / 16px 16px no-repeat,
+      radial-gradient(circle, rgba(83, 47, 24, .42) 0 2px, transparent 2.7px) 79% 22% / 16px 16px no-repeat,
+      radial-gradient(circle, rgba(83, 47, 24, .38) 0 2px, transparent 2.7px) 82% 27% / 16px 16px no-repeat,
+      radial-gradient(circle, rgba(83, 47, 24, .34) 0 2px, transparent 2.7px) 85% 33% / 16px 16px no-repeat,
+
+      /* vague manga, bas gauche */
+      radial-gradient(90px 30px at 72px calc(100% - 23px), transparent 0 61%, rgba(33, 87, 108, .34) 62% 65%, transparent 66%),
+      radial-gradient(120px 34px at 132px calc(100% - 15px), transparent 0 67%, rgba(33, 87, 108, .24) 68% 71%, transparent 72%),
+      radial-gradient(154px 38px at 210px calc(100% - 8px), transparent 0 72%, rgba(33, 87, 108, .15) 73% 76%, transparent 77%),
+
+      /* petite falaise / îlot, bas droite */
+      linear-gradient(120deg, transparent 0 36%, rgba(71, 52, 27, .24) 37% 48%, transparent 49%) calc(100% - 90px) calc(100% - 22px) / 88px 62px no-repeat,
+      linear-gradient(72deg, transparent 0 42%, rgba(71, 52, 27, .18) 43% 52%, transparent 53%) calc(100% - 55px) calc(100% - 17px) / 56px 48px no-repeat,
+      radial-gradient(44px 10px at calc(100% - 51px) calc(100% - 13px), transparent 0 64%, rgba(33, 87, 108, .20) 65% 69%, transparent 70%),
+
+      /* filets irréguliers de carte */
+      linear-gradient(90deg, rgba(78, 42, 19, .35), transparent) 12px 12px / 106px 1px no-repeat,
+      linear-gradient(180deg, rgba(78, 42, 19, .35), transparent) 12px 12px / 1px 76px no-repeat,
+      linear-gradient(270deg, rgba(78, 42, 19, .28), transparent) calc(100% - 12px) calc(100% - 12px) / 92px 1px no-repeat,
+      linear-gradient(0deg, rgba(78, 42, 19, .28), transparent) calc(100% - 12px) calc(100% - 12px) / 1px 70px no-repeat !important;
+  }
+
+  /* Rose des vents plus expressive, toujours secondaire. */
+  .mind-map-shell::after {
+    content: "";
+    position: absolute;
+    top: 17px !important;
+    right: 21px !important;
+    width: 78px !important;
+    height: 78px !important;
+    z-index: 0;
+    pointer-events: none;
+    border: 1px solid rgba(84, 45, 21, .48) !important;
+    border-radius: 50% !important;
+    opacity: .72 !important;
+    background:
+      linear-gradient(90deg, transparent 48.5%, rgba(74, 39, 20, .62) 48.5% 51.5%, transparent 51.5%),
+      linear-gradient(0deg, transparent 48.5%, rgba(74, 39, 20, .62) 48.5% 51.5%, transparent 51.5%),
+      linear-gradient(45deg, transparent 49%, rgba(147, 45, 35, .42) 49% 51%, transparent 51%),
+      linear-gradient(-45deg, transparent 49%, rgba(147, 45, 35, .42) 49% 51%, transparent 51%),
+      conic-gradient(from 0deg, transparent 0 10deg, rgba(76, 42, 22, .34) 10deg 16deg, transparent 16deg 74deg, rgba(76, 42, 22, .34) 74deg 80deg, transparent 80deg 100deg, rgba(76, 42, 22, .34) 100deg 106deg, transparent 106deg 164deg, rgba(76, 42, 22, .34) 164deg 170deg, transparent 170deg 190deg, rgba(76, 42, 22, .34) 190deg 196deg, transparent 196deg 254deg, rgba(76, 42, 22, .34) 254deg 260deg, transparent 260deg 280deg, rgba(76, 42, 22, .34) 280deg 286deg, transparent 286deg 344deg, rgba(76, 42, 22, .34) 344deg 350deg, transparent 350deg),
+      radial-gradient(circle, #913329 0 3px, transparent 4px),
+      radial-gradient(circle, transparent 0 21px, rgba(91, 50, 24, .30) 22px 23px, transparent 24px),
+      radial-gradient(circle, transparent 0 31px, rgba(91, 50, 24, .18) 32px 33px, transparent 34px) !important;
+    box-shadow: inset 0 0 0 4px rgba(255, 239, 192, .22) !important;
+    transform: rotate(8deg) !important;
+  }
+
+  .mind-map-shell .mind-branch,
+  .mind-map-shell .mind-center,
+  .mind-map-shell .mind-link,
+  .mind-map-shell .mind-resume {
+    position: relative;
+    z-index: 1;
+  }
+}
