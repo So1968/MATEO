@@ -97,6 +97,125 @@ Un visuel n’est ajouté que s’il est :
 - lisible à la taille réelle de l’application ;
 - meilleur que l’espace vide qu’il remplace.
 
+## PROTOCOLE OBLIGATOIRE DE CODAGE VISUEL
+
+Cette section est une contrainte d’exécution. Elle doit être suivie avant toute modification graphique importante.
+
+### 1. Pré-vol
+
+Avant de coder, définir explicitement :
+- la zone fonctionnelle concernée ;
+- la zone de lecture à protéger ;
+- les éléments UI nécessaires ;
+- les éléments décoratifs éventuels ;
+- la référence visuelle validée ;
+- ce qui doit rester inchangé.
+
+Si ces six points ne sont pas clairs, ne pas commencer à décorer.
+
+### 2. Construire d’abord une version sans décoration
+
+La première version doit être complète et agréable avec seulement :
+- grille ;
+- dimensions ;
+- marges ;
+- typographie ;
+- couleurs ;
+- fonds simples ;
+- bordures ;
+- ombres discrètes ;
+- états interactifs.
+
+Cette version doit déjà être utilisable et équilibrée.
+
+### 3. Une seule couche décorative
+
+Une zone ne doit pas accumuler plusieurs systèmes décoratifs concurrents.
+
+Interdit par défaut :
+- fond illustré + pseudo-éléments + gradients décoratifs + traits décoratifs + SVG dessinés à la main ;
+- plusieurs assets décoratifs empilés au même endroit ;
+- ornements rajoutés successivement pour « remplir ».
+
+Choisir au maximum **une couche décorative principale** par zone.
+
+### 4. Les assets ont une zone réservée
+
+Toute illustration doit avoir :
+- une position prévue dans le layout ;
+- une taille maximale ;
+- une zone qui ne chevauche aucun texte ;
+- un comportement responsive défini ;
+- la possibilité d’être supprimée sans casser la mise en page.
+
+Une illustration ne doit jamais être nécessaire au fonctionnement de la structure.
+
+### 5. Interdiction des corrections décoratives en cascade
+
+Si trois corrections visuelles successives sont nécessaires sur le même décor, considérer que la direction est mauvaise.
+
+Dans ce cas :
+- supprimer la couche décorative ;
+- revenir à la dernière version propre ;
+- repenser la composition ;
+- ne pas ajouter une quatrième rustine.
+
+### 6. Fidélité à la référence
+
+Quand une référence visuelle a été approuvée, reproduire en priorité :
+- le ratio des masses ;
+- les zones vides ;
+- la luminosité ;
+- le contraste ;
+- la densité visuelle ;
+- la position des éléments principaux.
+
+Ne pas se contenter de reprendre quelques couleurs ou quelques symboles.
+
+### 7. Test de bruit visuel
+
+Avant validation, regarder l’écran à taille réelle et vérifier :
+- le regard trouve immédiatement le titre ou l’action principale ;
+- aucun décor ne passe derrière du texte ;
+- aucun élément décoratif ne ressemble à une fonction ;
+- aucun motif ne coupe une ligne de lecture ;
+- les éléments secondaires restent secondaires ;
+- la page reste claire si les décorations disparaissent.
+
+Si un seul de ces tests échoue, simplifier.
+
+### 8. Test de suppression
+
+Pour chaque élément décoratif, poser la question :
+**« Si je le retire, est-ce que l’écran devient plus clair sans perdre d’identité ? »**
+
+Si oui, le retirer.
+
+### 9. Règle de comparaison
+
+Après une passe importante, comparer la nouvelle version à la dernière version propre.
+
+Une modification n’est conservée que si elle améliore au moins deux critères parmi :
+- lisibilité ;
+- hiérarchie ;
+- cohérence ;
+- identité ;
+- confort visuel ;
+- compréhension immédiate.
+
+Si elle n’améliore qu’un décor mais dégrade la lisibilité, elle est rejetée.
+
+### 10. Démonstrateur de référence
+
+Le fichier `public/notion-secure-demo.html` sert de démonstration minimale de la méthode :
+- structure claire ;
+- zones respirantes ;
+- pas de dessin bricolé ;
+- aucune décoration derrière les textes ;
+- le code ne fait que l’interface.
+
+Il ne définit pas le style graphique de tous les produits, mais il définit le **niveau de discipline attendu dans le code**.
+
 ## Règle de sécurité finale
 
 En cas de doute entre :
