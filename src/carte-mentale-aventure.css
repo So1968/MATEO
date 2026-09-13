@@ -9,9 +9,12 @@
     border: 3px solid #6f431f !important;
     border-radius: 18px 14px 20px 15px / 14px 19px 13px 18px !important;
     background:
+      radial-gradient(ellipse at 17% 31%, transparent 0 74px, rgba(104, 65, 29, .08) 75px 76px, transparent 77px 109px, rgba(104, 65, 29, .055) 110px 111px, transparent 112px),
+      radial-gradient(ellipse at 82% 74%, transparent 0 86px, rgba(104, 65, 29, .07) 87px 88px, transparent 89px 126px, rgba(104, 65, 29, .045) 127px 128px, transparent 129px),
       radial-gradient(circle at 50% 43%, rgba(112, 72, 31, .07) 0 2px, transparent 3px),
-      radial-gradient(circle at 50% 43%, transparent 0 116px, rgba(112, 72, 31, .15) 117px 118px, transparent 119px 158px, rgba(112, 72, 31, .09) 159px 160px, transparent 161px),
-      repeating-linear-gradient(7deg, rgba(106, 66, 28, .025) 0 1px, transparent 1px 18px),
+      radial-gradient(circle at 50% 43%, transparent 0 116px, rgba(112, 72, 31, .14) 117px 118px, transparent 119px 158px, rgba(112, 72, 31, .08) 159px 160px, transparent 161px),
+      repeating-linear-gradient(0deg, transparent 0 73px, rgba(106, 66, 28, .045) 74px 75px),
+      repeating-linear-gradient(7deg, rgba(106, 66, 28, .022) 0 1px, transparent 1px 18px),
       linear-gradient(180deg, #f7dfa3 0%, #efd08a 48%, #e2b968 100%) !important;
     box-shadow:
       inset 0 0 0 2px rgba(255, 243, 204, .72),
@@ -19,7 +22,7 @@
       0 14px 30px rgba(33, 20, 9, .20) !important;
   }
 
-  /* Grand cadre intérieur : la carte appartient à un monde, pas à une collection de pictos. */
+  /* Grand cadre intérieur : un tracé de carte un peu irrégulier, pas un cadre UI parfait. */
   .mind-map-shell::before {
     content: "";
     position: absolute;
@@ -32,10 +35,12 @@
       inset 0 0 0 1px rgba(255, 244, 208, .34),
       0 0 0 6px rgba(122, 73, 28, .025) !important;
     background:
-      linear-gradient(90deg, rgba(74, 38, 18, .42), transparent) 14px 14px / 122px 2px no-repeat,
-      linear-gradient(180deg, rgba(74, 38, 18, .42), transparent) 14px 14px / 2px 92px no-repeat,
-      linear-gradient(270deg, rgba(74, 38, 18, .34), transparent) calc(100% - 14px) calc(100% - 14px) / 122px 2px no-repeat,
-      linear-gradient(0deg, rgba(74, 38, 18, .34), transparent) calc(100% - 14px) calc(100% - 14px) / 2px 92px no-repeat;
+      linear-gradient(90deg, rgba(74, 38, 18, .46), transparent) 14px 14px / 138px 2px no-repeat,
+      linear-gradient(180deg, rgba(74, 38, 18, .42), transparent) 14px 14px / 2px 102px no-repeat,
+      linear-gradient(270deg, rgba(74, 38, 18, .36), transparent) calc(100% - 14px) calc(100% - 14px) / 130px 2px no-repeat,
+      linear-gradient(0deg, rgba(74, 38, 18, .34), transparent) calc(100% - 14px) calc(100% - 14px) / 2px 96px no-repeat,
+      linear-gradient(108deg, transparent 0 47%, rgba(143, 52, 42, .22) 48% 52%, transparent 53%) 54px calc(100% - 38px) / 52px 14px no-repeat,
+      linear-gradient(72deg, transparent 0 47%, rgba(143, 52, 42, .18) 48% 52%, transparent 53%) calc(100% - 92px) 48px / 46px 12px no-repeat;
   }
 
   /* Une seule rose des vents, grande et en filigrane. */
@@ -72,27 +77,36 @@
     z-index: 2;
   }
 
-  /* Les branches deviennent quatre repères de carte, pas quatre cartes UI. */
+  /* Les branches deviennent de vrais cartouches de carte, tous légèrement différents. */
   .mind-branch {
-    padding: 12px 16px 13px !important;
-    border: 0 !important;
+    padding: 13px 18px 14px !important;
+    border: 1px solid rgba(94, 53, 24, .30) !important;
     border-radius: 0 !important;
     color: #4a2c17 !important;
     background:
-      linear-gradient(90deg, transparent, rgba(255, 240, 193, .48) 16%, rgba(255, 240, 193, .48) 84%, transparent) !important;
-    box-shadow: none !important;
+      linear-gradient(180deg, rgba(255, 239, 190, .72), rgba(239, 205, 137, .48)) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 247, 215, .70),
+      0 4px 0 rgba(94, 53, 24, .05) !important;
+    clip-path: polygon(2% 8%, 96% 0, 100% 19%, 98% 91%, 92% 100%, 4% 95%, 0 80%, 1% 18%);
     text-shadow: 0 1px 0 rgba(255, 239, 196, .82) !important;
+    transition: transform .16s ease, filter .16s ease !important;
   }
 
-  .mind-branch::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: 1px;
-    width: 72%;
-    height: 2px;
-    transform: translateX(-50%);
-    background: linear-gradient(90deg, transparent, rgba(91, 50, 23, .48) 18%, rgba(91, 50, 23, .48) 82%, transparent);
+  .mind-branch-cap {
+    transform: translateX(-9px) rotate(-1.25deg) !important;
+  }
+
+  .mind-branch-journal {
+    transform: translateY(5px) rotate(-1.05deg) !important;
+  }
+
+  .mind-branch-manoeuvres {
+    transform: translateY(-4px) rotate(1.15deg) !important;
+  }
+
+  .mind-branch-arsenal {
+    transform: translateX(10px) rotate(.85deg) !important;
   }
 
   .mind-branch strong {
@@ -114,18 +128,30 @@
 
   .mind-branch:hover,
   .mind-branch.active {
-    transform: translateY(-2px) !important;
-    background:
-      linear-gradient(90deg, transparent, rgba(255, 240, 193, .72) 14%, rgba(255, 240, 193, .72) 86%, transparent) !important;
+    filter: brightness(1.035) saturate(1.03) !important;
   }
 
-  .mind-branch:hover::before,
-  .mind-branch.active::before {
-    height: 3px;
-    background: linear-gradient(90deg, transparent, rgba(145, 52, 42, .72) 18%, rgba(145, 52, 42, .72) 82%, transparent);
+  .mind-branch-cap:hover,
+  .mind-branch-cap.active {
+    transform: translate(-9px, -2px) rotate(-1.25deg) !important;
   }
 
-  /* Routes de navigation : encrées, rythmiques, visibles. */
+  .mind-branch-journal:hover,
+  .mind-branch-journal.active {
+    transform: translateY(3px) rotate(-1.05deg) !important;
+  }
+
+  .mind-branch-manoeuvres:hover,
+  .mind-branch-manoeuvres.active {
+    transform: translateY(-6px) rotate(1.15deg) !important;
+  }
+
+  .mind-branch-arsenal:hover,
+  .mind-branch-arsenal.active {
+    transform: translate(10px, -2px) rotate(.85deg) !important;
+  }
+
+  /* Routes de navigation : elles courbent légèrement au lieu de tirer quatre traits parfaits. */
   .mind-link {
     opacity: 1 !important;
     background: none !important;
@@ -135,14 +161,34 @@
 
   .mind-link.west,
   .mind-link.east {
-    height: 2px !important;
-    background: repeating-linear-gradient(90deg, #6d4422 0 9px, transparent 9px 16px) !important;
+    height: 24px !important;
+    background: none !important;
+    border-top: 2px dashed #6d4422 !important;
+    border-radius: 50% 50% 0 0 !important;
+  }
+
+  .mind-link.west {
+    transform: translateY(7px) rotate(5deg) !important;
+  }
+
+  .mind-link.east {
+    transform: translateY(-5px) rotate(-5deg) !important;
   }
 
   .mind-link.north,
   .mind-link.south {
-    width: 2px !important;
-    background: repeating-linear-gradient(180deg, #6d4422 0 9px, transparent 9px 16px) !important;
+    width: 26px !important;
+    background: none !important;
+    border-left: 2px dashed #6d4422 !important;
+    border-radius: 50% 0 0 50% !important;
+  }
+
+  .mind-link.north {
+    transform: translateX(8px) rotate(-5deg) !important;
+  }
+
+  .mind-link.south {
+    transform: translateX(-7px) rotate(5deg) !important;
   }
 
   .mind-link::after {
@@ -155,12 +201,12 @@
     background: #efd08a;
   }
 
-  .mind-link.west::after { right: -3px; top: 50%; transform: translateY(-50%); }
-  .mind-link.east::after { left: -3px; top: 50%; transform: translateY(-50%); }
-  .mind-link.north::after { left: 50%; bottom: -3px; transform: translateX(-50%); }
-  .mind-link.south::after { left: 50%; top: -3px; transform: translateX(-50%); }
+  .mind-link.west::after { right: -3px; top: -5px; }
+  .mind-link.east::after { left: -3px; top: -5px; }
+  .mind-link.north::after { left: -5px; bottom: -3px; }
+  .mind-link.south::after { left: -5px; top: -3px; }
 
-  /* Le projet devient la pièce maîtresse, comme une plaque de commandement du navire. */
+  /* Le projet reste exactement la pièce maîtresse validée. */
   .mind-center {
     min-height: 132px !important;
     padding: 21px 28px !important;
@@ -213,7 +259,7 @@
     font-weight: 700 !important;
   }
 
-  /* Le bloc de reprise devient le Log Pose : instrument de navigation, pas simple footer. */
+  /* Le Log Pose reste exactement tel qu'il a été validé. */
   .mind-resume {
     grid-column: 2 / 5 !important;
     grid-row: 8 !important;
