@@ -406,7 +406,12 @@ button { font: inherit; }
 .mind-center p { margin: 5px 0 0; color: #655236; font: .73rem/1.3 Arial,sans-serif; }
 .mind-center-meta { margin-top: 9px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
 .mind-center-meta span { padding: 4px 7px; color: #604b2e; border: 1px solid rgba(112,75,28,.2); border-radius: 999px; background: rgba(255,255,255,.28); font: .62rem Arial,sans-serif; }
-.mind-position { margin-top: 9px; padding-top: 8px; display: block; color: #734d21; border-top: 1px solid rgba(112,75,28,.22); font: 700 .68rem/1.3 Arial,sans-serif; }
+.mind-resume { grid-column: 2 / 5; grid-row: 6; margin-top: 14px; display: grid; grid-template-columns: .9fr 1.1fr; overflow: hidden; color: #493820; border: 1px solid rgba(112,75,28,.34); border-radius: 9px; background: rgba(255,250,232,.58); box-shadow: inset 0 0 0 1px rgba(255,255,255,.32); }
+.mind-resume > div { padding: 11px 14px; }
+.mind-resume > div + div { border-left: 1px solid rgba(112,75,28,.24); }
+.mind-resume small { display: block; margin-bottom: 4px; color: #806334; font: 700 .62rem Arial,sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.mind-resume strong { display: block; font-size: .88rem; line-height: 1.25; }
+.mind-resume span { display: block; margin-top: 3px; color: #6a573b; font: .7rem/1.3 Arial,sans-serif; }
 .mind-map-help { margin: 8px 0 0; text-align: center; color: #735d3e; font: .72rem Arial,sans-serif; }
 .mind-detail { margin-top: 10px; padding: 11px 12px; border: 1px solid rgba(112,75,28,.22); border-radius: 8px; background: rgba(255,255,255,.22); }
 .mind-detail-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -462,8 +467,10 @@ button { font: inherit; }
   .project-row.header { display: none; }
   .project-row > :nth-child(4), .project-row > :last-child { display: block; }
   .mind-map { grid-template-columns: 1fr; grid-template-rows: auto; gap: 8px; }
-  .mind-branch-cap, .mind-branch-journal, .mind-branch-manoeuvres, .mind-branch-arsenal, .mind-center { grid-column: 1; grid-row: auto; }
+  .mind-branch-cap, .mind-branch-journal, .mind-branch-manoeuvres, .mind-branch-arsenal, .mind-center, .mind-resume { grid-column: 1; grid-row: auto; }
   .mind-center { order: -1; }
+  .mind-resume { grid-template-columns: 1fr; }
+  .mind-resume > div + div { border-left: 0; border-top: 1px solid rgba(112,75,28,.24); }
   .mind-link { display: none; }
   .mind-detail-list { grid-template-columns: 1fr; }
   .log-pose { display: block; padding: 25px; overflow: auto; }
@@ -710,7 +717,6 @@ function IslandProjectView({ project, onBack }) {
                 <span>2 risques ouverts</span>
                 <span>Prochaine escale · 12 sept.</span>
               </div>
-              <span className="mind-position">Log Pose · Vous êtes ici : mapping analytique à finaliser</span>
             </article>
 
             <span className="mind-link east" aria-hidden="true" />
@@ -722,6 +728,18 @@ function IslandProjectView({ project, onBack }) {
             <button type="button" className="mind-branch mind-branch-arsenal" onClick={() => setSection("arsenal")}>
               <strong>Arsenal</strong><span>Ce qu’on a pour agir</span>
             </button>
+
+            <div className="mind-resume" aria-label="Point de reprise du projet">
+              <div>
+                <small>Position actuelle</small>
+                <strong>Mapping analytique à finaliser</strong>
+              </div>
+              <div>
+                <small>Reprendre ici</small>
+                <strong>Ouvrir le mapping ERP → EPM</strong>
+                <span>12 correspondances comptes / centres de coûts restent à valider.</span>
+              </div>
+            </div>
           </div>
         </section>
       ) : (
