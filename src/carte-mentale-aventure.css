@@ -84,6 +84,28 @@
     transform: none !important;
   }
 
+  /* Arsenal a son propre symbole fonctionnel : un vrai mousqueton, jamais un coffre. */
+  .mind-branch-arsenal {
+    min-height: 58px !important;
+    padding-left: 70px !important;
+    text-align: left !important;
+  }
+
+  .mind-branch-arsenal::before {
+    content: "" !important;
+    display: block !important;
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    width: 42px;
+    height: 42px;
+    pointer-events: none;
+    background: url("./assets/icon-arsenal-carabiner.svg") center / contain no-repeat !important;
+    transform: translateY(-50%) rotate(90deg);
+    transform-origin: center;
+    opacity: .9;
+  }
+
   .mind-branch strong {
     color: #432715 !important;
     font-size: 1.14rem !important;
