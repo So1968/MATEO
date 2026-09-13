@@ -345,10 +345,6 @@
   box-shadow: 0 7px 16px rgba(86,52,18,.16), inset 0 0 0 2px rgba(255,255,255,.36) !important;
 }
 
-.mind-center small::after {
-  content: " · EN COURS";
-}
-
 .mind-center strong {
   margin-top: 2px !important;
   font-size: 1rem !important;
