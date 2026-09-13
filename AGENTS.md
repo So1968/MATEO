@@ -28,6 +28,17 @@ Le CSS/HTML/React ne doit pas servir à fabriquer :
 - ornements illustratifs complexes ;
 - pseudo-gravures ou pseudo-manga bricolés.
 
+## Règle d’ordre absolu
+
+**L’identité graphique vient habiller une interface déjà réussie. Elle ne doit jamais servir à sauver une interface mal construite.**
+
+Conséquences obligatoires :
+- construire d’abord une interface claire, utilisable et équilibrée sans décoration ;
+- valider la hiérarchie, les espacements, la navigation et les zones de lecture avant toute illustration ;
+- n’ajouter l’identité visuelle qu’ensuite, par une couche maîtrisée et réversible ;
+- si l’écran n’est pas convaincant sans décor, corriger l’interface au lieu d’ajouter du décor ;
+- ne jamais masquer un problème de structure avec des illustrations, des ornements ou des effets.
+
 ## Si une illustration est nécessaire
 
 Utiliser un **vrai asset graphique séparé**, de qualité suffisante pour le produit : image ou SVG finalisé, créé spécifiquement, généré à un niveau professionnel, fourni par l’utilisateur, ou issu d’une source autorisée.
