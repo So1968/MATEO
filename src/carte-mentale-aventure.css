@@ -1,5 +1,5 @@
 /* Vogue Marry — Carte mentale, scène de navigation complète.
-   Une vraie cartographie unique en fond, centre projet et Log Pose au premier plan. */
+   Une vraie cartographie unique en fond, centre projet, Cap illustré et point de reprise au premier plan. */
 
 @media (min-width: 821px) {
   .mind-map-shell {
@@ -82,7 +82,17 @@
       linear-gradient(102deg, transparent 0 44%, rgba(145, 52, 42, .48) 45% 51%, transparent 52%) 16% 4px / 28px 3px no-repeat;
   }
 
-  .mind-branch-cap { transform: translateX(-5px) rotate(-.65deg) !important; }
+  /* Le Log Pose n'est pas une fonction : il illustre le Cap. */
+  .mind-branch-cap {
+    width: 88% !important;
+    justify-self: center !important;
+    padding: 8px 18px 11px 64px !important;
+    transform: translateX(-5px) rotate(-.65deg) !important;
+    background:
+      url("./assets/log-pose-cap.svg") 10px 50% / 46px 46px no-repeat,
+      rgba(247, 223, 163, .10) !important;
+  }
+
   .mind-branch-journal { transform: translateY(3px) rotate(-.45deg) !important; }
   .mind-branch-manoeuvres { transform: translateY(-2px) rotate(.55deg) !important; }
   .mind-branch-arsenal { transform: translateX(6px) rotate(.4deg) !important; }
@@ -226,7 +236,7 @@
     font-weight: 700 !important;
   }
 
-  /* Le Log Pose reste l’instrument de reprise. */
+  /* Le bloc du bas donne seulement la position et la reprise. */
   .mind-resume {
     grid-column: 2 / 5 !important;
     grid-row: 8 !important;
@@ -248,7 +258,7 @@
   }
 
   .mind-resume::before {
-    content: "LOG POSE · POINT DE REPRISE";
+    content: "POINT DE REPRISE";
     position: absolute;
     top: -13px;
     left: 50%;
