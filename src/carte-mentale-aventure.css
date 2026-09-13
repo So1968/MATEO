@@ -1,80 +1,66 @@
-/* Vogue Marry — pourtour aventure de la Carte mentale.
-   Cette couche ne touche ni à la structure, ni aux branches, ni au contenu. */
+/* Vogue Marry — Carte mentale, scène de navigation.
+   Une seule composition forte : carte, routes, centre projet et Log Pose.
+   Aucun petit dessin décoratif isolé. */
 
 @media (min-width: 821px) {
   .mind-map-shell {
-    border: 1px solid rgba(90, 49, 22, .72) !important;
-    border-radius: 13px 17px 12px 16px / 16px 11px 17px 12px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    border: 3px solid #6f431f !important;
+    border-radius: 18px 14px 20px 15px / 14px 19px 13px 18px !important;
     background:
-      radial-gradient(circle at 92% 12%, rgba(157, 47, 35, .08), transparent 10%),
-      radial-gradient(ellipse at 8% 91%, rgba(41, 94, 113, .10), transparent 19%),
-      linear-gradient(180deg, #f8e2a6 0%, #f1d391 48%, #e6bf70 100%) !important;
+      radial-gradient(circle at 50% 43%, rgba(112, 72, 31, .07) 0 2px, transparent 3px),
+      radial-gradient(circle at 50% 43%, transparent 0 116px, rgba(112, 72, 31, .15) 117px 118px, transparent 119px 158px, rgba(112, 72, 31, .09) 159px 160px, transparent 161px),
+      repeating-linear-gradient(7deg, rgba(106, 66, 28, .025) 0 1px, transparent 1px 18px),
+      linear-gradient(180deg, #f7dfa3 0%, #efd08a 48%, #e2b968 100%) !important;
     box-shadow:
-      inset 0 0 0 1px rgba(255, 245, 211, .68),
-      inset 0 0 46px rgba(91, 50, 16, .10),
-      0 13px 30px rgba(48, 28, 10, .18) !important;
+      inset 0 0 0 2px rgba(255, 243, 204, .72),
+      inset 0 0 58px rgba(74, 39, 12, .12),
+      0 14px 30px rgba(33, 20, 9, .20) !important;
   }
 
-  /* Le calque de décor périphérique : encrage, route, vagues et îlot. */
+  /* Grand cadre intérieur : la carte appartient à un monde, pas à une collection de pictos. */
   .mind-map-shell::before {
     content: "";
     position: absolute;
-    inset: 9px 10px 10px 8px !important;
+    inset: 11px 12px 12px 11px !important;
     z-index: 0;
     pointer-events: none;
-    border: 1px solid rgba(83, 45, 20, .30) !important;
-    border-radius: 10px 15px 9px 14px / 14px 9px 15px 10px !important;
-    opacity: 1 !important;
+    border: 1px solid rgba(86, 48, 22, .38) !important;
+    border-radius: 12px 9px 14px 10px / 9px 14px 10px 13px !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 244, 208, .34),
+      0 0 0 6px rgba(122, 73, 28, .025) !important;
     background:
-      /* traits d'encre en haut à gauche : plus discrets */
-      linear-gradient(112deg, transparent 0 42%, rgba(75, 38, 20, .34) 43% 48%, transparent 49%) 30px 26px / 60px 16px no-repeat,
-      linear-gradient(112deg, transparent 0 42%, rgba(151, 47, 35, .32) 43% 48%, transparent 49%) 43px 40px / 38px 12px no-repeat,
-
-      /* route maritime pointillée */
-      radial-gradient(circle, rgba(83, 47, 24, .55) 0 2px, transparent 2.7px) 73% 15% / 16px 16px no-repeat,
-      radial-gradient(circle, rgba(83, 47, 24, .48) 0 2px, transparent 2.7px) 76% 18% / 16px 16px no-repeat,
-      radial-gradient(circle, rgba(83, 47, 24, .42) 0 2px, transparent 2.7px) 79% 22% / 16px 16px no-repeat,
-      radial-gradient(circle, rgba(83, 47, 24, .38) 0 2px, transparent 2.7px) 82% 27% / 16px 16px no-repeat,
-      radial-gradient(circle, rgba(83, 47, 24, .34) 0 2px, transparent 2.7px) 85% 33% / 16px 16px no-repeat,
-
-      /* vague manga, bas gauche */
-      radial-gradient(90px 30px at 72px calc(100% - 23px), transparent 0 61%, rgba(33, 87, 108, .34) 62% 65%, transparent 66%),
-      radial-gradient(120px 34px at 132px calc(100% - 15px), transparent 0 67%, rgba(33, 87, 108, .24) 68% 71%, transparent 72%),
-      radial-gradient(154px 38px at 210px calc(100% - 8px), transparent 0 72%, rgba(33, 87, 108, .15) 73% 76%, transparent 77%),
-
-      /* vrai asset SVG pour la côte, bas droite */
-      url("./assets/cote-aventure.svg") calc(100% - 288px) calc(100% - 118px) / 280px 130px no-repeat,
-
-      /* filets irréguliers de carte */
-      linear-gradient(90deg, rgba(78, 42, 19, .35), transparent) 12px 12px / 106px 1px no-repeat,
-      linear-gradient(180deg, rgba(78, 42, 19, .35), transparent) 12px 12px / 1px 76px no-repeat,
-      linear-gradient(270deg, rgba(78, 42, 19, .28), transparent) calc(100% - 12px) calc(100% - 12px) / 92px 1px no-repeat,
-      linear-gradient(0deg, rgba(78, 42, 19, .28), transparent) calc(100% - 12px) calc(100% - 12px) / 1px 70px no-repeat !important;
+      linear-gradient(90deg, rgba(74, 38, 18, .42), transparent) 14px 14px / 122px 2px no-repeat,
+      linear-gradient(180deg, rgba(74, 38, 18, .42), transparent) 14px 14px / 2px 92px no-repeat,
+      linear-gradient(270deg, rgba(74, 38, 18, .34), transparent) calc(100% - 14px) calc(100% - 14px) / 122px 2px no-repeat,
+      linear-gradient(0deg, rgba(74, 38, 18, .34), transparent) calc(100% - 14px) calc(100% - 14px) / 2px 92px no-repeat;
   }
 
-  /* Rose des vents plus expressive, toujours secondaire. */
+  /* Une seule rose des vents, grande et en filigrane. */
   .mind-map-shell::after {
     content: "";
     position: absolute;
-    top: 17px !important;
-    right: 21px !important;
-    width: 78px !important;
-    height: 78px !important;
+    top: 18px !important;
+    right: 24px !important;
+    width: 112px !important;
+    height: 112px !important;
     z-index: 0;
     pointer-events: none;
-    border: 1px solid rgba(84, 45, 21, .48) !important;
+    border: 1px solid rgba(77, 42, 20, .26) !important;
     border-radius: 50% !important;
-    opacity: .72 !important;
+    opacity: .42 !important;
     background:
-      linear-gradient(90deg, transparent 48.5%, rgba(74, 39, 20, .62) 48.5% 51.5%, transparent 51.5%),
-      linear-gradient(0deg, transparent 48.5%, rgba(74, 39, 20, .62) 48.5% 51.5%, transparent 51.5%),
-      linear-gradient(45deg, transparent 49%, rgba(147, 45, 35, .42) 49% 51%, transparent 51%),
-      linear-gradient(-45deg, transparent 49%, rgba(147, 45, 35, .42) 49% 51%, transparent 51%),
-      conic-gradient(from 0deg, transparent 0 10deg, rgba(76, 42, 22, .34) 10deg 16deg, transparent 16deg 74deg, rgba(76, 42, 22, .34) 74deg 80deg, transparent 80deg 100deg, rgba(76, 42, 22, .34) 100deg 106deg, transparent 106deg 164deg, rgba(76, 42, 22, .34) 164deg 170deg, transparent 170deg 190deg, rgba(76, 42, 22, .34) 190deg 196deg, transparent 196deg 254deg, rgba(76, 42, 22, .34) 254deg 260deg, transparent 260deg 280deg, rgba(76, 42, 22, .34) 280deg 286deg, transparent 286deg 344deg, rgba(76, 42, 22, .34) 344deg 350deg, transparent 350deg),
-      radial-gradient(circle, #913329 0 3px, transparent 4px),
-      radial-gradient(circle, transparent 0 21px, rgba(91, 50, 24, .30) 22px 23px, transparent 24px),
-      radial-gradient(circle, transparent 0 31px, rgba(91, 50, 24, .18) 32px 33px, transparent 34px) !important;
-    box-shadow: inset 0 0 0 4px rgba(255, 239, 192, .22) !important;
+      linear-gradient(90deg, transparent 49.2%, rgba(75, 40, 19, .60) 49.2% 50.8%, transparent 50.8%),
+      linear-gradient(0deg, transparent 49.2%, rgba(75, 40, 19, .60) 49.2% 50.8%, transparent 50.8%),
+      linear-gradient(45deg, transparent 49.4%, rgba(141, 47, 36, .34) 49.4% 50.6%, transparent 50.6%),
+      linear-gradient(-45deg, transparent 49.4%, rgba(141, 47, 36, .34) 49.4% 50.6%, transparent 50.6%),
+      conic-gradient(from 0deg, rgba(84, 45, 20, .30) 0 5deg, transparent 5deg 40deg, rgba(84, 45, 20, .22) 40deg 50deg, transparent 50deg 85deg, rgba(84, 45, 20, .30) 85deg 95deg, transparent 95deg 130deg, rgba(84, 45, 20, .22) 130deg 140deg, transparent 140deg 175deg, rgba(84, 45, 20, .30) 175deg 185deg, transparent 185deg 220deg, rgba(84, 45, 20, .22) 220deg 230deg, transparent 230deg 265deg, rgba(84, 45, 20, .30) 265deg 275deg, transparent 275deg 310deg, rgba(84, 45, 20, .22) 310deg 320deg, transparent 320deg 355deg, rgba(84, 45, 20, .30) 355deg 360deg),
+      radial-gradient(circle, #8f3429 0 4px, transparent 5px),
+      radial-gradient(circle, transparent 0 31px, rgba(82, 44, 21, .24) 32px 33px, transparent 34px),
+      radial-gradient(circle, transparent 0 47px, rgba(82, 44, 21, .14) 48px 49px, transparent 50px) !important;
+    box-shadow: inset 0 0 0 5px rgba(255, 239, 192, .18) !important;
     transform: rotate(8deg) !important;
   }
 
@@ -83,6 +69,225 @@
   .mind-map-shell .mind-link,
   .mind-map-shell .mind-resume {
     position: relative;
+    z-index: 2;
+  }
+
+  /* Les branches deviennent quatre repères de carte, pas quatre cartes UI. */
+  .mind-branch {
+    padding: 12px 16px 13px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: #4a2c17 !important;
+    background:
+      linear-gradient(90deg, transparent, rgba(255, 240, 193, .48) 16%, rgba(255, 240, 193, .48) 84%, transparent) !important;
+    box-shadow: none !important;
+    text-shadow: 0 1px 0 rgba(255, 239, 196, .82) !important;
+  }
+
+  .mind-branch::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 1px;
+    width: 72%;
+    height: 2px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, transparent, rgba(91, 50, 23, .48) 18%, rgba(91, 50, 23, .48) 82%, transparent);
+  }
+
+  .mind-branch strong {
+    color: #432715 !important;
+    font-size: 1.22rem !important;
+    font-weight: 800 !important;
+    letter-spacing: .018em !important;
+  }
+
+  .mind-branch-cap strong {
+    color: #92362c !important;
+  }
+
+  .mind-branch::after {
+    color: #7a5227 !important;
+    font-weight: 650 !important;
+    letter-spacing: .01em !important;
+  }
+
+  .mind-branch:hover,
+  .mind-branch.active {
+    transform: translateY(-2px) !important;
+    background:
+      linear-gradient(90deg, transparent, rgba(255, 240, 193, .72) 14%, rgba(255, 240, 193, .72) 86%, transparent) !important;
+  }
+
+  .mind-branch:hover::before,
+  .mind-branch.active::before {
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(145, 52, 42, .72) 18%, rgba(145, 52, 42, .72) 82%, transparent);
+  }
+
+  /* Routes de navigation : encrées, rythmiques, visibles. */
+  .mind-link {
+    opacity: 1 !important;
+    background: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+  }
+
+  .mind-link.west,
+  .mind-link.east {
+    height: 2px !important;
+    background: repeating-linear-gradient(90deg, #6d4422 0 9px, transparent 9px 16px) !important;
+  }
+
+  .mind-link.north,
+  .mind-link.south {
+    width: 2px !important;
+    background: repeating-linear-gradient(180deg, #6d4422 0 9px, transparent 9px 16px) !important;
+  }
+
+  .mind-link::after {
+    content: "";
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border: 2px solid #7b4a22;
+    border-radius: 50%;
+    background: #efd08a;
+  }
+
+  .mind-link.west::after { right: -3px; top: 50%; transform: translateY(-50%); }
+  .mind-link.east::after { left: -3px; top: 50%; transform: translateY(-50%); }
+  .mind-link.north::after { left: 50%; bottom: -3px; transform: translateX(-50%); }
+  .mind-link.south::after { left: 50%; top: -3px; transform: translateX(-50%); }
+
+  /* Le projet devient la pièce maîtresse, comme une plaque de commandement du navire. */
+  .mind-center {
+    min-height: 132px !important;
+    padding: 21px 28px !important;
+    overflow: visible !important;
+    border: 3px solid #b87528 !important;
+    border-radius: 12px 8px 13px 9px / 8px 13px 9px 12px !important;
+    background:
+      linear-gradient(180deg, rgba(12, 70, 89, .98), rgba(5, 43, 58, .99)) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 221, 142, .30),
+      inset 0 -12px 28px rgba(0, 0, 0, .14),
+      0 10px 18px rgba(53, 31, 12, .24) !important;
+  }
+
+  .mind-center::before {
+    content: "";
+    position: absolute;
+    inset: 7px;
+    pointer-events: none;
+    border: 1px solid rgba(246, 209, 119, .42);
+    border-radius: 7px 5px 9px 6px;
+  }
+
+  .mind-center small {
+    position: relative;
     z-index: 1;
+    color: #f0b868 !important;
+    font-size: .68rem !important;
+    font-weight: 800 !important;
+    letter-spacing: .16em !important;
+  }
+
+  .mind-center strong {
+    position: relative;
+    z-index: 1;
+    margin-top: 9px !important;
+    color: #fff1bd !important;
+    font-size: 1.58rem !important;
+    font-weight: 850 !important;
+    letter-spacing: .018em !important;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, .18) !important;
+  }
+
+  .mind-center p {
+    position: relative;
+    z-index: 1;
+    margin-top: 8px !important;
+    color: #f3d49a !important;
+    font-size: .82rem !important;
+    font-weight: 700 !important;
+  }
+
+  /* Le bloc de reprise devient le Log Pose : instrument de navigation, pas simple footer. */
+  .mind-resume {
+    grid-column: 2 / 5 !important;
+    grid-row: 8 !important;
+    position: relative !important;
+    min-height: 92px !important;
+    margin: 6px 0 0 !important;
+    padding: 25px 14px 8px !important;
+    display: grid !important;
+    grid-template-columns: .9fr 1.1fr !important;
+    align-self: stretch !important;
+    color: #f6dfaa !important;
+    border: 2px solid #b87428 !important;
+    border-radius: 12px 9px 13px 8px / 8px 13px 9px 12px !important;
+    background:
+      linear-gradient(180deg, rgba(7, 58, 76, .98), rgba(4, 38, 52, .99)) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 219, 133, .22),
+      0 7px 14px rgba(50, 29, 11, .18) !important;
+    overflow: visible !important;
+  }
+
+  .mind-resume::before {
+    content: "LOG POSE · POINT DE REPRISE";
+    position: absolute;
+    top: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 18px 4px;
+    color: #fff0ba;
+    border: 1px solid #c88431;
+    border-radius: 999px;
+    background: #77372d;
+    box-shadow: 0 3px 0 rgba(69, 33, 16, .22);
+    font: 800 .62rem/1 Arial, sans-serif;
+    letter-spacing: .14em;
+    white-space: nowrap;
+  }
+
+  .mind-resume > div {
+    padding: 10px 18px 7px !important;
+  }
+
+  .mind-resume > div + div {
+    border-left: 1px solid rgba(238, 184, 96, .36) !important;
+  }
+
+  .mind-resume small {
+    margin-bottom: 6px !important;
+    color: #efb96b !important;
+    font-size: .60rem !important;
+    font-weight: 800 !important;
+    letter-spacing: .13em !important;
+  }
+
+  .mind-resume strong {
+    color: #fff0bc !important;
+    font-size: .86rem !important;
+    font-weight: 800 !important;
+  }
+
+  .mind-resume span {
+    color: #d8c18e !important;
+    font-size: .69rem !important;
+  }
+}
+
+@media (min-width: 821px) and (max-height: 820px) {
+  .mind-center {
+    min-height: 112px !important;
+    padding-block: 15px !important;
+  }
+
+  .mind-resume {
+    min-height: 78px !important;
+    padding-top: 20px !important;
   }
 }
