@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vogue Marry — Test transcription</title>
+  <style>
+    :root {
+      font-family: Inter, system-ui, sans-serif;
+      color: #173140;
+      background: #efe3c4;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: linear-gradient(180deg,#f6edd5,#e7cf9e); }
+    main { width: min(960px, calc(100% - 32px)); margin: 36px auto; }
+    .panel { background: #fffaf0; border: 1px solid #c69b54; border-radius: 18px; box-shadow: 0 16px 36px rgba(60,38,14,.14); overflow: hidden; }
+    header { padding: 28px 30px 22px; background: #07384a; color: #fff2c4; }
+    header small { color: #e7b764; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 8px 0 6px; font: 700 2rem/1.1 Georgia,serif; }
+    header p { margin: 0; color: #d9c89c; }
+    section { padding: 26px 30px; border-top: 1px solid #e5d6b6; }
+    label { display: block; margin-bottom: 8px; font-weight: 800; }
+    input[type=file], input[type=password] { width: 100%; padding: 12px; border: 1px solid #cbb27d; border-radius: 10px; background: white; }
+    button { margin-top: 12px; padding: 11px 17px; border: 0; border-radius: 10px; background: #8d3f30; color: white; font-weight: 800; cursor: pointer; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .muted { color: #745f42; font-size: .92rem; }
+    .status { margin-top: 18px; padding: 14px 16px; border-radius: 10px; background: #f4e8c9; border: 1px solid #dbc18b; }
+    progress { width: 100%; height: 14px; margin-top: 10px; }
+    pre { white-space: pre-wrap; word-break: break-word; max-height: 520px; overflow: auto; padding: 18px; background: #102b38; color: #f6e7bd; border-radius: 12px; line-height: 1.5; }
+    a.download { display: inline-block; margin-top: 12px; color: #8d3f30; font-weight: 800; }
+    .hidden { display: none; }
+    .ok { color: #17613f; }
+    .error { color: #9a2e24; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="panel">
+    <header>
+      <small>Vogue Marry · test réel</small>
+      <h1>Transcription d’un enregistrement</h1>
+      <p>Déposer l’audio. Vogue Marry le découpe, transcrit, distingue les voix et recompose la chronologie.</p>
+    </header>
+
+    <section id="configSection" class="hidden">
+      <label for="apiKey">Clé API de transcription</label>
+      <input id="apiKey" type="password" autocomplete="off" placeholder="sk-…" />
+      <button id="saveKey">Enregistrer sur ce PC</button>
+      <p class="muted">La clé reste sur le PC dans <code>~/.config/vogue-merry/</code> et n’est jamais envoyée au navigateur après enregistrement.</p>
+    </section>
+
+    <section>
+      <label for="audio">Enregistrement</label>
+      <input id="audio" type="file" accept="audio/*,.m4a,.mp3,.wav,.ogg,.webm,.mp4" />
+      <p id="fileInfo" class="muted">Aucun fichier sélectionné.</p>
+      <button id="start" disabled>Transcrire avec Vogue Marry</button>
+
+      <div id="status" class="status hidden">
+        <strong id="statusText">En attente…</strong>
+        <progress id="progress" max="100" value="0"></progress>
+      </div>
+    </section>
+
+    <section id="resultSection" class="hidden">
+      <label>Transcription</label>
+      <pre id="result"></pre>
+      <a id="download" class="download" href="#">Télécharger la transcription complète</a>
+    </section>
+  </div>
+</main>
+
+<script>
+  const API = "http://localhost:8011";
+  const audioInput = document.querySelector("#audio");
+  const startButton = document.querySelector("#start");
+  const fileInfo = document.querySelector("#fileInfo");
+  const statusBox = document.querySelector("#status");
+  const statusText = document.querySelector("#statusText");
+  const progress = document.querySelector("#progress");
+  const resultSection = document.querySelector("#resultSection");
+  const result = document.querySelector("#result");
+  const download = document.querySelector("#download");
+  const configSection = document.querySelector("#configSection");
+  const apiKey = document.querySelector("#apiKey");
+  const saveKey = document.querySelector("#saveKey");
+
+  let health = null;
+
+  function humanSize(bytes) {
+    const mib = bytes / 1024 / 1024;
+    return `${mib.toFixed(1)} Mio`;
+  }
+
+  async function refreshHealth() {
+    try {
+      const response = await fetch(`${API}/api/transcription/health`);
+      health = await response.json();
+      configSection.classList.toggle("hidden", health.apiKeyConfigured);
+      if (!health.ffmpeg) {
+        statusBox.classList.remove("hidden");
+        statusText.innerHTML = '<span class="error">FFmpeg manque sur le PC. La transcription ne peut pas démarrer.</span>';
+      }
+      updateStartState();
+    } catch {
+      statusBox.classList.remove("hidden");
+      statusText.innerHTML = '<span class="error">Le moteur de transcription Vogue Marry n’est pas démarré.</span>';
+    }
+  }
+
+  function updateStartState() {
+    startButton.disabled = !audioInput.files?.[0] || !health?.apiKeyConfigured || !health?.ffmpeg;
+  }
+
+  audioInput.addEventListener("change", () => {
+    const file = audioInput.files?.[0];
+    fileInfo.textContent = file ? `${file.name} · ${humanSize(file.size)}` : "Aucun fichier sélectionné.";
+    updateStartState();
+  });
+
+  saveKey.addEventListener("click", async () => {
+    const response = await fetch(`${API}/api/transcription/config`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ apiKey: apiKey.value })
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      statusBox.classList.remove("hidden");
+      statusText.innerHTML = `<span class="error">${payload.error || "Clé refusée."}</span>`;
+      return;
+    }
+    apiKey.value = "";
+    await refreshHealth();
+  });
+
+  async function poll(jobId) {
+    const response = await fetch(`${API}/api/transcription/${jobId}`);
+    const state = await response.json();
+    statusText.textContent = state.message || state.state;
+    progress.value = state.progress || 0;
+
+    if (state.state === "error") {
+      statusText.innerHTML = `<span class="error">${state.message}</span>`;
+      startButton.disabled = false;
+      return;
+    }
+
+    if (state.state === "done") {
+      const resultResponse = await fetch(`${API}/api/transcription/${jobId}/result`);
+      const payload = await resultResponse.json();
+      result.textContent = payload.segments
+        .map((segment) => {
+          const date = new Date(segment.start * 1000).toISOString().slice(11, 19);
+          return `[${date}] Intervenant ${segment.speaker} — ${segment.text}`;
+        })
+        .join("\n\n");
+      resultSection.classList.remove("hidden");
+      download.href = `${API}/api/transcription/${jobId}/download`;
+      startButton.disabled = false;
+      return;
+    }
+
+    setTimeout(() => poll(jobId), 2500);
+  }
+
+  startButton.addEventListener("click", async () => {
+    const file = audioInput.files?.[0];
+    if (!file) return;
+
+    resultSection.classList.add("hidden");
+    statusBox.classList.remove("hidden");
+    statusText.textContent = "Envoi de l’enregistrement…";
+    progress.value = 1;
+    startButton.disabled = true;
+
+    const form = new FormData();
+    form.append("audio", file);
+
+    const response = await fetch(`${API}/api/transcription`, { method: "POST", body: form });
+    const payload = await response.json();
+    if (!response.ok) {
+      statusText.innerHTML = `<span class="error">${payload.error || "Échec de l’envoi."}</span>`;
+      startButton.disabled = false;
+      return;
+    }
+
+    poll(payload.jobId);
+  });
+
+  refreshHealth();
+</script>
+</body>
+</html>
