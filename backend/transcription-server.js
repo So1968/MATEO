@@ -6,18 +6,18 @@ import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
 import { spawn } from "child_process";
+import { fileURLToPath } from "url";
 
 const app = express();
 const PORT = Number(process.env.VOGUE_TRANSCRIPTION_PORT || 8011);
 const HOME = os.homedir();
 const ROOT = path.join(HOME, "VOGUE-MERRY-DONNEES", "99_TRANSCRIPTION_TESTS");
-const CONFIG_DIR = path.join(HOME, ".config", "vogue-merry");
-const KEY_FILE = path.join(CONFIG_DIR, "openai_api_key");
-const CHUNK_SECONDS = 600;
+const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const LOCAL_PYTHON = path.join(PROJECT_ROOT, ".venv-transcription", "bin", "python");
+const LOCAL_SCRIPT = path.join(PROJECT_ROOT, "backend", "local_transcribe.py");
+const MODEL = process.env.VOGUE_WHISPER_MODEL || "small";
 
 fs.mkdirSync(ROOT, { recursive: true });
-fs.mkdirSync(CONFIG_DIR, { recursive: true });
-
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 
@@ -56,92 +56,6 @@ function writeStatus(jobId, patch) {
   return next;
 }
 
-function readApiKey() {
-  if (process.env.OPENAI_API_KEY?.trim()) return process.env.OPENAI_API_KEY.trim();
-  if (fs.existsSync(KEY_FILE)) return fs.readFileSync(KEY_FILE, "utf8").trim();
-  return "";
-}
-
-function run(command, args) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { stdio: ["ignore", "pipe", "pipe"] });
-    let stdout = "";
-    let stderr = "";
-    child.stdout.on("data", (data) => { stdout += data.toString(); });
-    child.stderr.on("data", (data) => { stderr += data.toString(); });
-    child.on("error", reject);
-    child.on("close", (code) => {
-      if (code === 0) resolve({ stdout, stderr });
-      else reject(new Error(`${command} a échoué (${code}). ${stderr.slice(-1200)}`));
-    });
-  });
-}
-
-async function mediaDuration(filePath) {
-  const { stdout } = await run("ffprobe", [
-    "-v", "error",
-    "-show_entries", "format=duration",
-    "-of", "default=noprint_wrappers=1:nokey=1",
-    filePath
-  ]);
-  const seconds = Number(stdout.trim());
-  if (!Number.isFinite(seconds)) throw new Error("Durée audio illisible.");
-  return seconds;
-}
-
-async function splitAudio(sourcePath, chunksDir) {
-  fs.mkdirSync(chunksDir, { recursive: true });
-  const pattern = path.join(chunksDir, "chunk_%03d.mp3");
-  await run("ffmpeg", [
-    "-y",
-    "-i", sourcePath,
-    "-vn",
-    "-ac", "1",
-    "-ar", "16000",
-    "-b:a", "48k",
-    "-f", "segment",
-    "-segment_time", String(CHUNK_SECONDS),
-    "-reset_timestamps", "1",
-    pattern
-  ]);
-
-  return fs.readdirSync(chunksDir)
-    .filter((name) => /^chunk_\d+\.mp3$/.test(name))
-    .sort()
-    .map((name) => path.join(chunksDir, name));
-}
-
-async function transcribeChunk(filePath, apiKey) {
-  const buffer = fs.readFileSync(filePath);
-  const form = new FormData();
-  form.append("file", new Blob([buffer], { type: "audio/mpeg" }), path.basename(filePath));
-  form.append("model", "gpt-4o-transcribe-diarize");
-  form.append("response_format", "diarized_json");
-  form.append("chunking_strategy", "auto");
-  form.append("language", "fr");
-
-  const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}` },
-    body: form
-  });
-
-  const bodyText = await response.text();
-  let payload;
-  try {
-    payload = JSON.parse(bodyText);
-  } catch {
-    throw new Error(`Réponse de transcription illisible (${response.status}).`);
-  }
-
-  if (!response.ok) {
-    const message = payload?.error?.message || `Erreur API de transcription (${response.status}).`;
-    throw new Error(message);
-  }
-
-  return payload;
-}
-
 function formatClock(totalSeconds) {
   const value = Math.max(0, Math.floor(Number(totalSeconds) || 0));
   const hours = Math.floor(value / 3600);
@@ -156,77 +70,153 @@ function buildMarkdown(meta, segments) {
     "",
     `- Fichier : ${meta.originalName}`,
     `- Durée : ${formatClock(meta.duration)}`,
+    `- Moteur : Whisper local (${meta.model})`,
     `- Générée : ${new Date().toLocaleString("fr-FR")}`,
-    `- Segments : ${segments.length}`,
     "",
     "## Transcription",
     ""
   ];
 
   for (const segment of segments) {
-    lines.push(`[${formatClock(segment.start)}] Intervenant ${segment.speaker || "?"} — ${String(segment.text || "").trim()}`);
+    lines.push(`[${formatClock(segment.start)}] ${String(segment.text || "").trim()}`);
     lines.push("");
   }
 
   return `${lines.join("\n").trim()}\n`;
 }
 
+function localEngineReady() {
+  return fs.existsSync(LOCAL_PYTHON) && fs.existsSync(LOCAL_SCRIPT);
+}
+
 async function processJob(jobId, sourcePath, originalName) {
-  try {
-    const apiKey = readApiKey();
-    if (!apiKey) {
-      throw new Error("Clé API de transcription absente. Ouvrez la page de test Vogue Marry et enregistrez une clé API une seule fois.");
+  if (!localEngineReady()) {
+    writeStatus(jobId, {
+      state: "error",
+      message: "Le moteur local n’est pas encore installé. Lance : npm run transcription:setup",
+      progress: 0
+    });
+    return;
+  }
+
+  const segments = [];
+  let duration = 0;
+  let stderr = "";
+
+  writeStatus(jobId, {
+    state: "preparing",
+    message: `Chargement de Whisper local (${MODEL})… Le premier lancement télécharge le modèle une seule fois.`,
+    progress: 2,
+    model: MODEL,
+    engine: "local"
+  });
+
+  const child = spawn(LOCAL_PYTHON, [
+    LOCAL_SCRIPT,
+    sourcePath,
+    "--model", MODEL,
+    "--language", "fr"
+  ], {
+    cwd: PROJECT_ROOT,
+    env: process.env,
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+
+  let buffer = "";
+
+  function handleLine(line) {
+    if (!line.trim()) return;
+    let event;
+    try {
+      event = JSON.parse(line);
+    } catch {
+      return;
     }
 
-    writeStatus(jobId, { state: "preparing", message: "Préparation de l’audio…", progress: 2 });
-    const duration = await mediaDuration(sourcePath);
-    const chunksDir = path.join(jobDir(jobId), "chunks");
-    const chunks = await splitAudio(sourcePath, chunksDir);
-    if (!chunks.length) throw new Error("Aucun segment audio n’a été créé.");
+    if (event.type === "audio_meta") {
+      duration = Number(event.duration) || 0;
+      writeStatus(jobId, {
+        state: "preparing",
+        message: `Préparation de l’enregistrement (${formatClock(duration)})…`,
+        duration,
+        progress: 3
+      });
+      return;
+    }
 
-    writeStatus(jobId, {
-      state: "transcribing",
-      message: `Transcription de ${chunks.length} segment(s)…`,
-      progress: 8,
-      duration,
-      chunkCount: chunks.length
-    });
-
-    const mergedSegments = [];
-    const chunkResults = [];
-    let offset = 0;
-
-    for (let index = 0; index < chunks.length; index += 1) {
-      const chunkPath = chunks[index];
+    if (event.type === "engine_ready") {
       writeStatus(jobId, {
         state: "transcribing",
-        message: `Segment ${index + 1}/${chunks.length} en cours…`,
-        currentChunk: index + 1,
-        progress: Math.round(8 + (index / chunks.length) * 82)
+        message: "Transcription locale en cours…",
+        progress: 5,
+        duration
       });
+      return;
+    }
 
-      const result = await transcribeChunk(chunkPath, apiKey);
-      const chunkDuration = Number(result.duration) || await mediaDuration(chunkPath);
-      const segments = Array.isArray(result.segments) ? result.segments : [];
-
-      for (const segment of segments) {
-        mergedSegments.push({
-          id: `${index}-${segment.id || mergedSegments.length}`,
-          start: offset + Number(segment.start || 0),
-          end: offset + Number(segment.end || segment.start || 0),
-          speaker: segment.speaker || "?",
-          text: String(segment.text || "").trim()
-        });
+    if (event.type === "segment") {
+      const segment = {
+        id: event.id || segments.length + 1,
+        start: Number(event.start) || 0,
+        end: Number(event.end) || Number(event.start) || 0,
+        text: String(event.text || "").trim()
+      };
+      segments.push(segment);
+      const ratio = duration > 0 ? Math.min(1, segment.end / duration) : 0;
+      writeStatus(jobId, {
+        state: "transcribing",
+        message: `Transcription locale… ${formatClock(segment.end)} / ${formatClock(duration)}`,
+        progress: Math.max(5, Math.min(96, Math.round(5 + ratio * 91))),
+        duration,
+        segmentCount: segments.length
+      });
+      if (segments.length % 10 === 0) {
+        writeJson(path.join(jobDir(jobId), "transcription_partielle.json"), { segments });
       }
+      return;
+    }
 
-      chunkResults.push({
-        index,
-        duration: chunkDuration,
-        text: result.text || "",
-        segments
+    if (event.type === "error") {
+      writeStatus(jobId, {
+        state: "error",
+        message: event.message || "Erreur du moteur local.",
+        progress: 0
       });
-      writeJson(path.join(jobDir(jobId), `transcription_chunk_${String(index).padStart(3, "0")}.json`), result);
-      offset += chunkDuration;
+    }
+  }
+
+  child.stdout.on("data", (data) => {
+    buffer += data.toString();
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+    lines.forEach(handleLine);
+  });
+
+  child.stderr.on("data", (data) => {
+    stderr += data.toString();
+  });
+
+  child.on("error", (error) => {
+    writeStatus(jobId, {
+      state: "error",
+      message: `Impossible de démarrer Whisper local : ${error.message}`,
+      progress: 0
+    });
+  });
+
+  child.on("close", (code) => {
+    if (buffer.trim()) handleLine(buffer);
+
+    const current = readJson(statusPath(jobId));
+    if (current.state === "error") return;
+
+    if (code !== 0) {
+      writeStatus(jobId, {
+        state: "error",
+        message: stderr.trim().slice(-1200) || `Whisper local s’est arrêté avec le code ${code}.`,
+        progress: 0
+      });
+      return;
     }
 
     const result = {
@@ -234,34 +224,29 @@ async function processJob(jobId, sourcePath, originalName) {
       originalName,
       duration,
       createdAt: timestamp(),
-      model: "gpt-4o-transcribe-diarize",
-      segments: mergedSegments,
-      text: mergedSegments.map((segment) => segment.text).filter(Boolean).join(" "),
-      chunks: chunkResults.map(({ index, duration: chunkDuration }) => ({ index, duration: chunkDuration }))
+      model: MODEL,
+      engine: "faster-whisper-local",
+      language: "fr",
+      segments,
+      text: segments.map((segment) => segment.text).filter(Boolean).join(" ")
     };
 
     writeJson(path.join(jobDir(jobId), "transcription.json"), result);
     fs.writeFileSync(
       path.join(jobDir(jobId), "transcription.md"),
-      buildMarkdown({ originalName, duration }, mergedSegments),
+      buildMarkdown({ originalName, duration, model: MODEL }, segments),
       "utf8"
     );
 
     writeStatus(jobId, {
       state: "done",
-      message: "Transcription terminée.",
+      message: "Transcription locale terminée.",
       progress: 100,
       duration,
-      segmentCount: mergedSegments.length,
+      segmentCount: segments.length,
       resultReady: true
     });
-  } catch (error) {
-    writeStatus(jobId, {
-      state: "error",
-      message: error.message || "Échec de la transcription.",
-      progress: 0
-    });
-  }
+  });
 }
 
 const upload = multer({
@@ -278,33 +263,15 @@ const upload = multer({
   limits: { fileSize: 1024 * 1024 * 1024 }
 });
 
-app.get("/api/transcription/health", async (req, res) => {
-  let ffmpeg = false;
-  try {
-    await run("ffmpeg", ["-version"]);
-    ffmpeg = true;
-  } catch {
-    ffmpeg = false;
-  }
-
+app.get("/api/transcription/health", (req, res) => {
   res.json({
     status: "ok",
-    service: "vogue-marry-transcription",
-    apiKeyConfigured: Boolean(readApiKey()),
-    ffmpeg,
+    service: "vogue-marry-transcription-local",
+    localEngineReady: localEngineReady(),
+    model: MODEL,
+    mode: "local",
     port: PORT
   });
-});
-
-app.post("/api/transcription/config", (req, res) => {
-  const apiKey = String(req.body?.apiKey || "").trim();
-  if (!apiKey.startsWith("sk-")) {
-    return res.status(400).json({ error: "La clé API ne semble pas valide." });
-  }
-
-  fs.writeFileSync(KEY_FILE, `${apiKey}\n`, { encoding: "utf8", mode: 0o600 });
-  fs.chmodSync(KEY_FILE, 0o600);
-  return res.json({ status: "ok", apiKeyConfigured: true });
 });
 
 app.post("/api/transcription", upload.single("audio"), (req, res) => {
@@ -324,7 +291,9 @@ app.post("/api/transcription", upload.single("audio"), (req, res) => {
       progress: 0,
       originalName: req.file.originalname,
       size: req.file.size,
-      createdAt: timestamp()
+      createdAt: timestamp(),
+      engine: "local",
+      model: MODEL
     });
 
     setImmediate(() => processJob(jobId, sourcePath, req.file.originalname));
@@ -358,5 +327,5 @@ app.get("/api/transcription/:jobId/download", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Vogue Marry — transcription : http://localhost:${PORT}`);
+  console.log(`Vogue Marry — transcription locale : http://localhost:${PORT}`);
 });
