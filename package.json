@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "backend": "node backend/server.js",
-    "dev:all": "concurrently \"npm run backend\" \"npm run dev\""
+    "transcription": "node backend/transcription-server.js",
+    "dev:all": "concurrently \"npm run backend\" \"npm run transcription\" \"npm run dev\""
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
