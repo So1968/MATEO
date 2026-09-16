@@ -3,13 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vogue Marry — Test transcription</title>
+  <title>Vogue Marry — Test transcription locale</title>
   <style>
-    :root {
-      font-family: Inter, system-ui, sans-serif;
-      color: #173140;
-      background: #efe3c4;
-    }
+    :root { font-family: Inter, system-ui, sans-serif; color: #173140; background: #efe3c4; }
     * { box-sizing: border-box; }
     body { margin: 0; min-height: 100vh; background: linear-gradient(180deg,#f6edd5,#e7cf9e); }
     main { width: min(960px, calc(100% - 32px)); margin: 36px auto; }
@@ -20,10 +16,11 @@
     header p { margin: 0; color: #d9c89c; }
     section { padding: 26px 30px; border-top: 1px solid #e5d6b6; }
     label { display: block; margin-bottom: 8px; font-weight: 800; }
-    input[type=file], input[type=password] { width: 100%; padding: 12px; border: 1px solid #cbb27d; border-radius: 10px; background: white; }
+    input[type=file] { width: 100%; padding: 12px; border: 1px solid #cbb27d; border-radius: 10px; background: white; }
     button { margin-top: 12px; padding: 11px 17px; border: 0; border-radius: 10px; background: #8d3f30; color: white; font-weight: 800; cursor: pointer; }
     button:disabled { opacity: .45; cursor: not-allowed; }
     .muted { color: #745f42; font-size: .92rem; }
+    .notice { padding: 14px 16px; border-radius: 10px; background: #edf3ee; border: 1px solid #b7cdbb; color: #31533b; }
     .status { margin-top: 18px; padding: 14px 16px; border-radius: 10px; background: #f4e8c9; border: 1px solid #dbc18b; }
     progress { width: 100%; height: 14px; margin-top: 10px; }
     pre { white-space: pre-wrap; word-break: break-word; max-height: 520px; overflow: auto; padding: 18px; background: #102b38; color: #f6e7bd; border-radius: 12px; line-height: 1.5; }
@@ -31,6 +28,7 @@
     .hidden { display: none; }
     .ok { color: #17613f; }
     .error { color: #9a2e24; }
+    code { font-weight: 700; }
   </style>
 </head>
 <body>
@@ -38,15 +36,13 @@
   <div class="panel">
     <header>
       <small>Vogue Marry · test réel</small>
-      <h1>Transcription d’un enregistrement</h1>
-      <p>Déposer l’audio. Vogue Marry le découpe, transcrit, distingue les voix et recompose la chronologie.</p>
+      <h1>Transcription locale d’un enregistrement</h1>
+      <p>L’audio reste sur ce PC. Aucune clé API et aucun abonnement externe ne sont nécessaires.</p>
     </header>
 
-    <section id="configSection" class="hidden">
-      <label for="apiKey">Clé API de transcription</label>
-      <input id="apiKey" type="password" autocomplete="off" placeholder="sk-…" />
-      <button id="saveKey">Enregistrer sur ce PC</button>
-      <p class="muted">La clé reste sur le PC dans <code>~/.config/vogue-merry/</code> et n’est jamais envoyée au navigateur après enregistrement.</p>
+    <section>
+      <div id="engineInfo" class="notice">Vérification du moteur local…</div>
+      <p class="muted">Premier objectif : transcription française complète et horodatée. La séparation automatique des intervenants sera testée dans une étape dédiée, sans bloquer ce premier essai.</p>
     </section>
 
     <section>
@@ -80,9 +76,7 @@
   const resultSection = document.querySelector("#resultSection");
   const result = document.querySelector("#result");
   const download = document.querySelector("#download");
-  const configSection = document.querySelector("#configSection");
-  const apiKey = document.querySelector("#apiKey");
-  const saveKey = document.querySelector("#saveKey");
+  const engineInfo = document.querySelector("#engineInfo");
 
   let health = null;
 
@@ -95,42 +89,25 @@
     try {
       const response = await fetch(`${API}/api/transcription/health`);
       health = await response.json();
-      configSection.classList.toggle("hidden", health.apiKeyConfigured);
-      if (!health.ffmpeg) {
-        statusBox.classList.remove("hidden");
-        statusText.innerHTML = '<span class="error">FFmpeg manque sur le PC. La transcription ne peut pas démarrer.</span>';
+      if (health.localEngineReady) {
+        engineInfo.innerHTML = `<strong class="ok">Moteur local prêt.</strong> Whisper ${health.model} · traitement sur ce PC.`;
+      } else {
+        engineInfo.innerHTML = '<strong class="error">Moteur local à installer.</strong> Dans le terminal du projet, lance <code>npm run transcription:setup</code>, puis redémarre Vogue Marry.';
       }
       updateStartState();
     } catch {
-      statusBox.classList.remove("hidden");
-      statusText.innerHTML = '<span class="error">Le moteur de transcription Vogue Marry n’est pas démarré.</span>';
+      engineInfo.innerHTML = '<strong class="error">Le serveur de transcription Vogue Marry n’est pas démarré.</strong>';
     }
   }
 
   function updateStartState() {
-    startButton.disabled = !audioInput.files?.[0] || !health?.apiKeyConfigured || !health?.ffmpeg;
+    startButton.disabled = !audioInput.files?.[0] || !health?.localEngineReady;
   }
 
   audioInput.addEventListener("change", () => {
     const file = audioInput.files?.[0];
     fileInfo.textContent = file ? `${file.name} · ${humanSize(file.size)}` : "Aucun fichier sélectionné.";
     updateStartState();
-  });
-
-  saveKey.addEventListener("click", async () => {
-    const response = await fetch(`${API}/api/transcription/config`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ apiKey: apiKey.value })
-    });
-    const payload = await response.json();
-    if (!response.ok) {
-      statusBox.classList.remove("hidden");
-      statusText.innerHTML = `<span class="error">${payload.error || "Clé refusée."}</span>`;
-      return;
-    }
-    apiKey.value = "";
-    await refreshHealth();
   });
 
   async function poll(jobId) {
@@ -151,7 +128,7 @@
       result.textContent = payload.segments
         .map((segment) => {
           const date = new Date(segment.start * 1000).toISOString().slice(11, 19);
-          return `[${date}] Intervenant ${segment.speaker} — ${segment.text}`;
+          return `[${date}] ${segment.text}`;
         })
         .join("\n\n");
       resultSection.classList.remove("hidden");
@@ -169,7 +146,7 @@
 
     resultSection.classList.add("hidden");
     statusBox.classList.remove("hidden");
-    statusText.textContent = "Envoi de l’enregistrement…";
+    statusText.textContent = "Envoi local de l’enregistrement…";
     progress.value = 1;
     startButton.disabled = true;
 
