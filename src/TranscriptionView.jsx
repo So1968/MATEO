@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./transcription-view.css";
 
 const API = "http://localhost:8011";
+const STANLEY_CONTEXT = "Entretien professionnel en français à l’ARTAG concernant Stanley. Noms et termes possibles : ARTAG, Stanley, Martine, CSE, employeur, salarié, entretien préalable, sanction disciplinaire, avertissement, témoignages, direction, convention collective.";
 
 function formatSize(bytes) {
   if (!Number.isFinite(bytes)) return "";
@@ -21,6 +22,7 @@ export default function TranscriptionView() {
   const [health, setHealth] = useState(null);
   const [mode, setMode] = useState("high");
   const [apiKeyInput, setApiKeyInput] = useState("");
+  const [contextHint, setContextHint] = useState(STANLEY_CONTEXT);
   const [file, setFile] = useState(null);
   const [job, setJob] = useState(null);
   const [result, setResult] = useState(null);
@@ -129,6 +131,7 @@ export default function TranscriptionView() {
       const form = new FormData();
       form.append("audio", file);
       form.append("mode", mode);
+      if (mode === "high") form.append("context", contextHint);
       const response = await fetch(`${API}/api/transcription`, { method: "POST", body: form });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Impossible d’envoyer l’enregistrement.");
@@ -167,16 +170,16 @@ export default function TranscriptionView() {
             onClick={() => { setMode("high"); resetRun(); }}
           >
             <small>DOSSIER SENSIBLE</small>
-            <strong>Haute précision</strong>
-            <span>Transcription API avec séparation automatique des intervenants.</span>
+            <strong>Double vérification</strong>
+            <span>Texte haute précision puis second passage pour repérer les intervenants.</span>
           </button>
         </div>
 
         <div className="transcription-statusline">
-          <strong>{mode === "high" ? "Moteur haute précision" : "Moteur local"}</strong>
+          <strong>{mode === "high" ? "Moteur dossier sensible" : "Moteur local"}</strong>
           <span className={engineReady ? "ready" : "not-ready"}>
             {mode === "high"
-              ? (health?.highPrecisionReady ? "Prêt · diarisation activée" : "Clé API à enregistrer")
+              ? (health?.highPrecisionReady ? "Prêt · double vérification active" : "Clé API à enregistrer")
               : (health?.localEngineReady ? `Prêt · Whisper ${health.localModel}` : "À installer")}
           </span>
         </div>
@@ -189,8 +192,8 @@ export default function TranscriptionView() {
 
         {mode === "high" && !health?.highPrecisionReady && health ? (
           <div className="transcription-api-config">
-            <strong>Activer la haute précision</strong>
-            <p>Colle une clé API OpenAI. Elle sera enregistrée uniquement sur ce PC dans <code>~/.config/vogue-merry/</code>.</p>
+            <strong>Activer le mode dossier sensible</strong>
+            <p>Colle une clé API OpenAI. Elle reste enregistrée uniquement sur ce PC dans <code>~/.config/vogue-merry/</code>.</p>
             <div>
               <input
                 type="password"
@@ -207,11 +210,24 @@ export default function TranscriptionView() {
         {mode === "high" && health?.highPrecisionReady ? (
           <div className="transcription-callout api-warning">
             <div>
-              <strong>Haute précision active</strong>
-              <span>L’audio est envoyé au service de transcription OpenAI. Vogue Marry conserve ensuite le résultat dans le dossier local.</span>
+              <strong>Dossier sensible · double vérification</strong>
+              <span>Le texte principal est produit par GPT-Transcribe. Un second passage sert uniquement à repérer qui parle. L’original reste conservé sur ce PC.</span>
             </div>
             <button type="button" className="transcription-link-button" onClick={removeApiKey}>Effacer la clé</button>
           </div>
+        ) : null}
+
+        {mode === "high" ? (
+          <label className="transcription-context">
+            <span>Contexte et mots à reconnaître</span>
+            <textarea
+              value={contextHint}
+              onChange={(event) => setContextHint(event.target.value)}
+              rows={4}
+              placeholder="Noms propres, sigles, vocabulaire métier, contexte de la réunion…"
+            />
+            <small>Ces indications servent à éviter les erreurs sur les noms, sigles et termes sensibles. Elles ne sont pas ajoutées au texte final si elles ne sont pas entendues.</small>
+          </label>
         ) : null}
 
         <label className="transcription-file">
@@ -234,7 +250,7 @@ export default function TranscriptionView() {
           {busy
             ? "Transcription en cours…"
             : mode === "high"
-              ? "Transcrire en haute précision"
+              ? "Transcrire en dossier sensible"
               : "Transcrire en local"}
         </button>
 
@@ -253,8 +269,9 @@ export default function TranscriptionView() {
         <section className="transcription-result">
           <div className="transcription-result-head">
             <div>
-              <small>{result.mode === "high" ? "HAUTE PRÉCISION · TRANSCRIPTION TERMINÉE" : "TRANSCRIPTION LOCALE TERMINÉE"}</small>
+              <small>{result.mode === "high" ? "DOSSIER SENSIBLE · DOUBLE VÉRIFICATION TERMINÉE" : "TRANSCRIPTION LOCALE TERMINÉE"}</small>
               <h2>{result.originalName}</h2>
+              {result.warnings?.length ? <p className="transcription-result-warning">{result.warnings.join(" · ")}</p> : null}
             </div>
             <a href={`${API}/api/transcription/${result.jobId}/download`}>Télécharger le texte</a>
           </div>
