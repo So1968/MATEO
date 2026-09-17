@@ -19,23 +19,28 @@ function formatClock(totalSeconds) {
 
 export default function TranscriptionView() {
   const [health, setHealth] = useState(null);
+  const [mode, setMode] = useState("high");
+  const [apiKeyInput, setApiKeyInput] = useState("");
   const [file, setFile] = useState(null);
   const [job, setJob] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
+  async function refreshHealth() {
+    try {
+      const response = await fetch(`${API}/api/transcription/health`);
+      const payload = await response.json();
+      setHealth(payload);
+      return payload;
+    } catch {
+      setError("Le moteur de transcription Vogue Marry n’est pas démarré.");
+      return null;
+    }
+  }
+
   useEffect(() => {
-    let cancelled = false;
-    fetch(`${API}/api/transcription/health`)
-      .then((response) => response.json())
-      .then((payload) => {
-        if (!cancelled) setHealth(payload);
-      })
-      .catch(() => {
-        if (!cancelled) setError("Le moteur local de transcription n’est pas démarré.");
-      });
-    return () => { cancelled = true; };
+    refreshHealth();
   }, []);
 
   useEffect(() => {
@@ -59,7 +64,7 @@ export default function TranscriptionView() {
           setBusy(false);
         }
       } catch {
-        setError("Vogue Marry n’arrive plus à joindre le moteur local.");
+        setError("Vogue Marry n’arrive plus à joindre le moteur de transcription.");
         setBusy(false);
       }
     }, 2000);
@@ -67,13 +72,51 @@ export default function TranscriptionView() {
     return () => window.clearInterval(timer);
   }, [job?.jobId, job?.state]);
 
-  const canStart = Boolean(file && health?.localEngineReady && !busy);
+  const engineReady = mode === "high" ? health?.highPrecisionReady : health?.localEngineReady;
+  const canStart = Boolean(file && engineReady && !busy);
+
   const transcript = useMemo(() => {
     if (!result?.segments) return "";
     return result.segments
-      .map((segment) => `[${formatClock(segment.start)}] ${segment.text}`)
+      .map((segment) => {
+        const speaker = segment.speaker ? ` Intervenant ${segment.speaker} —` : "";
+        return `[${formatClock(segment.start)}]${speaker} ${segment.text}`;
+      })
       .join("\n\n");
   }, [result]);
+
+  function resetRun() {
+    setError("");
+    setResult(null);
+    setJob(null);
+  }
+
+  async function saveApiKey() {
+    setError("");
+    try {
+      const response = await fetch(`${API}/api/transcription/config/api-key`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey: apiKeyInput })
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Impossible d’enregistrer la clé.");
+      setApiKeyInput("");
+      await refreshHealth();
+    } catch (err) {
+      setError(err.message || "Impossible d’enregistrer la clé API.");
+    }
+  }
+
+  async function removeApiKey() {
+    setError("");
+    try {
+      await fetch(`${API}/api/transcription/config/api-key`, { method: "DELETE" });
+      await refreshHealth();
+    } catch {
+      setError("Impossible d’effacer la clé API.");
+    }
+  }
 
   async function startTranscription() {
     if (!file || !canStart) return;
@@ -85,10 +128,11 @@ export default function TranscriptionView() {
     try {
       const form = new FormData();
       form.append("audio", file);
+      form.append("mode", mode);
       const response = await fetch(`${API}/api/transcription`, { method: "POST", body: form });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Impossible d’envoyer l’enregistrement.");
-      setJob({ jobId: payload.jobId, state: "queued", message: "Enregistrement reçu.", progress: 2 });
+      setJob({ jobId: payload.jobId, state: "queued", message: "Enregistrement reçu.", progress: 2, mode });
     } catch (err) {
       setBusy(false);
       setError(err.message || "Échec de l’envoi.");
@@ -101,22 +145,72 @@ export default function TranscriptionView() {
         <a href="/" className="transcription-back">← Vogue Marry</a>
         <div>
           <small>TRACES AUDIO</small>
-          <h1>Transcription locale</h1>
-          <p>L’enregistrement reste sur ce PC. Aucun compte ni clé API n’est nécessaire.</p>
+          <h1>Transcription audio</h1>
+          <p>Choisir le niveau de précision selon l’enjeu du dossier.</p>
         </div>
       </header>
 
       <section className="transcription-panel">
+        <div className="transcription-mode-grid" aria-label="Mode de transcription">
+          <button
+            type="button"
+            className={`transcription-mode${mode === "local" ? " active" : ""}`}
+            onClick={() => { setMode("local"); resetRun(); }}
+          >
+            <small>QUOTIDIEN</small>
+            <strong>Local · gratuit</strong>
+            <span>Whisper sur ce PC. L’audio ne quitte pas l’ordinateur.</span>
+          </button>
+          <button
+            type="button"
+            className={`transcription-mode high${mode === "high" ? " active" : ""}`}
+            onClick={() => { setMode("high"); resetRun(); }}
+          >
+            <small>DOSSIER SENSIBLE</small>
+            <strong>Haute précision</strong>
+            <span>Transcription API avec séparation automatique des intervenants.</span>
+          </button>
+        </div>
+
         <div className="transcription-statusline">
-          <strong>Moteur local</strong>
-          <span className={health?.localEngineReady ? "ready" : "not-ready"}>
-            {health?.localEngineReady ? `Prêt · Whisper ${health.model}` : "À installer"}
+          <strong>{mode === "high" ? "Moteur haute précision" : "Moteur local"}</strong>
+          <span className={engineReady ? "ready" : "not-ready"}>
+            {mode === "high"
+              ? (health?.highPrecisionReady ? "Prêt · diarisation activée" : "Clé API à enregistrer")
+              : (health?.localEngineReady ? `Prêt · Whisper ${health.localModel}` : "À installer")}
           </span>
         </div>
 
-        {!health?.localEngineReady && health ? (
+        {mode === "local" && !health?.localEngineReady && health ? (
           <div className="transcription-callout">
             Lance une seule fois <code>npm run transcription:setup</code>, puis redémarre Vogue Marry.
+          </div>
+        ) : null}
+
+        {mode === "high" && !health?.highPrecisionReady && health ? (
+          <div className="transcription-api-config">
+            <strong>Activer la haute précision</strong>
+            <p>Colle une clé API OpenAI. Elle sera enregistrée uniquement sur ce PC dans <code>~/.config/vogue-merry/</code>.</p>
+            <div>
+              <input
+                type="password"
+                value={apiKeyInput}
+                onChange={(event) => setApiKeyInput(event.target.value)}
+                placeholder="sk-…"
+                autoComplete="off"
+              />
+              <button type="button" onClick={saveApiKey} disabled={!apiKeyInput.trim()}>Enregistrer</button>
+            </div>
+          </div>
+        ) : null}
+
+        {mode === "high" && health?.highPrecisionReady ? (
+          <div className="transcription-callout api-warning">
+            <div>
+              <strong>Haute précision active</strong>
+              <span>L’audio est envoyé au service de transcription OpenAI. Vogue Marry conserve ensuite le résultat dans le dossier local.</span>
+            </div>
+            <button type="button" className="transcription-link-button" onClick={removeApiKey}>Effacer la clé</button>
           </div>
         ) : null}
 
@@ -127,9 +221,7 @@ export default function TranscriptionView() {
             accept="audio/*,.m4a,.mp3,.wav,.ogg,.webm,.mp4"
             onChange={(event) => {
               setFile(event.target.files?.[0] || null);
-              setError("");
-              setResult(null);
-              setJob(null);
+              resetRun();
             }}
           />
         </label>
@@ -139,7 +231,11 @@ export default function TranscriptionView() {
         </div>
 
         <button type="button" className="transcription-start" disabled={!canStart} onClick={startTranscription}>
-          {busy ? "Transcription en cours…" : "Transcrire avec Vogue Marry"}
+          {busy
+            ? "Transcription en cours…"
+            : mode === "high"
+              ? "Transcrire en haute précision"
+              : "Transcrire en local"}
         </button>
 
         {job ? (
@@ -157,7 +253,7 @@ export default function TranscriptionView() {
         <section className="transcription-result">
           <div className="transcription-result-head">
             <div>
-              <small>TRANSCRIPTION TERMINÉE</small>
+              <small>{result.mode === "high" ? "HAUTE PRÉCISION · TRANSCRIPTION TERMINÉE" : "TRANSCRIPTION LOCALE TERMINÉE"}</small>
               <h2>{result.originalName}</h2>
             </div>
             <a href={`${API}/api/transcription/${result.jobId}/download`}>Télécharger le texte</a>
