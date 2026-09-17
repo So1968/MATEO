@@ -173,6 +173,39 @@
   font-size: .9rem;
 }
 
+.transcription-context {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 15px 16px;
+  border: 1px solid #d7bd8d;
+  border-radius: 11px;
+  background: #fbf4e5;
+}
+
+.transcription-context > span {
+  font-weight: 800;
+  color: #5d442e;
+}
+
+.transcription-context textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 94px;
+  padding: 11px 12px;
+  border: 1px solid #c8ad79;
+  border-radius: 9px;
+  background: #fff;
+  color: #173140;
+  font: inherit;
+  line-height: 1.45;
+}
+
+.transcription-context small {
+  color: #725d3f;
+  line-height: 1.4;
+}
+
 .transcription-api-config {
   background: #f7e7d9;
   border: 1px solid #d8a687;
@@ -306,6 +339,12 @@
 .transcription-result-head a {
   color: #7e3b2e;
   font-weight: 800;
+}
+
+.transcription-result-warning {
+  margin: 8px 0 0;
+  color: #8a432f;
+  font-size: .9rem;
 }
 
 .transcription-result pre {
