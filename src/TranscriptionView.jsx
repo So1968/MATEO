@@ -3,6 +3,10 @@ import "./transcription-view.css";
 
 const API = "http://localhost:8011";
 const STANLEY_CONTEXT = "Entretien professionnel en français à l’ARTAG concernant Stanley. Noms et termes possibles : ARTAG, Stanley, Martine, CSE, employeur, salarié, entretien préalable, sanction disciplinaire, avertissement, témoignages, direction, convention collective.";
+const PRIMARY_COST_PER_MINUTE_USD = 0.0045;
+const SPEAKER_COST_PER_MINUTE_USD = 0.006;
+const SENSITIVE_CHUNK_SECONDS = 900;
+const SENSITIVE_OVERLAP_SECONDS = 4;
 
 function formatSize(bytes) {
   if (!Number.isFinite(bytes)) return "";
@@ -18,12 +22,37 @@ function formatClock(totalSeconds) {
   return [hours, minutes, seconds].map((part) => String(part).padStart(2, "0")).join(":");
 }
 
+function formatUsd(value) {
+  if (!Number.isFinite(value)) return "—";
+  return `${value.toFixed(value < 1 ? 2 : 2)} $`;
+}
+
+function sensitiveProcessedSeconds(duration) {
+  const total = Number(duration) || 0;
+  if (total <= 0) return 0;
+  let cursor = 0;
+  let processed = 0;
+  while (cursor < total - 0.25) {
+    const chunkDuration = Math.min(SENSITIVE_CHUNK_SECONDS, total - cursor);
+    processed += chunkDuration;
+    if (total - cursor <= SENSITIVE_CHUNK_SECONDS) break;
+    cursor += SENSITIVE_CHUNK_SECONDS - SENSITIVE_OVERLAP_SECONDS;
+  }
+  return processed;
+}
+
+function estimateSensitiveCost(duration) {
+  const processedMinutes = sensitiveProcessedSeconds(duration) / 60;
+  return processedMinutes * (PRIMARY_COST_PER_MINUTE_USD + SPEAKER_COST_PER_MINUTE_USD);
+}
+
 export default function TranscriptionView() {
   const [health, setHealth] = useState(null);
   const [mode, setMode] = useState("high");
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [contextHint, setContextHint] = useState(STANLEY_CONTEXT);
   const [file, setFile] = useState(null);
+  const [audioDuration, setAudioDuration] = useState(null);
   const [job, setJob] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
@@ -44,6 +73,32 @@ export default function TranscriptionView() {
   useEffect(() => {
     refreshHealth();
   }, []);
+
+  useEffect(() => {
+    setAudioDuration(null);
+    if (!file) return undefined;
+
+    const url = URL.createObjectURL(file);
+    const audio = new Audio();
+    audio.preload = "metadata";
+    audio.src = url;
+
+    const handleLoaded = () => {
+      if (Number.isFinite(audio.duration) && audio.duration > 0) setAudioDuration(audio.duration);
+    };
+    const handleError = () => setAudioDuration(null);
+
+    audio.addEventListener("loadedmetadata", handleLoaded);
+    audio.addEventListener("error", handleError);
+    audio.load();
+
+    return () => {
+      audio.removeEventListener("loadedmetadata", handleLoaded);
+      audio.removeEventListener("error", handleError);
+      audio.src = "";
+      URL.revokeObjectURL(url);
+    };
+  }, [file]);
 
   useEffect(() => {
     if (!job?.jobId || job.state === "done" || job.state === "error") return undefined;
@@ -76,6 +131,8 @@ export default function TranscriptionView() {
 
   const engineReady = mode === "high" ? health?.highPrecisionReady : health?.localEngineReady;
   const canStart = Boolean(file && engineReady && !busy);
+  const estimatedCost = mode === "high" && audioDuration ? estimateSensitiveCost(audioDuration) : 0;
+  const completedCost = result?.mode === "high" && result?.duration ? estimateSensitiveCost(result.duration) : 0;
 
   const transcript = useMemo(() => {
     if (!result?.segments) return "";
@@ -243,8 +300,27 @@ export default function TranscriptionView() {
         </label>
 
         <div className="transcription-filemeta">
-          {file ? <><strong>{file.name}</strong><span>{formatSize(file.size)}</span></> : <span>Aucun fichier sélectionné.</span>}
+          {file ? (
+            <>
+              <strong>{file.name}</strong>
+              <span>{formatSize(file.size)}{audioDuration ? ` · ${formatClock(audioDuration)}` : ""}</span>
+            </>
+          ) : <span>Aucun fichier sélectionné.</span>}
         </div>
+
+        {file ? (
+          <div className="transcription-callout">
+            <strong>{mode === "high" ? "Coût estimé avant lancement" : "Coût"}</strong>
+            <div>
+              {mode === "high"
+                ? (audioDuration
+                  ? <><strong>{formatUsd(estimatedCost)}</strong> pour cet enregistrement · estimation selon la durée réellement envoyée aux deux moteurs.</>
+                  : <>Calcul de la durée en cours…</>)
+                : <><strong>0 $</strong> · transcription entièrement locale et gratuite.</>}
+            </div>
+            {mode === "high" ? <small>Tarifs de référence : GPT-Transcribe 0,0045 $/min + repérage des locuteurs 0,006 $/min. Le montant facturé par l’API peut différer légèrement.</small> : null}
+          </div>
+        ) : null}
 
         <button type="button" className="transcription-start" disabled={!canStart} onClick={startTranscription}>
           {busy
@@ -271,6 +347,7 @@ export default function TranscriptionView() {
             <div>
               <small>{result.mode === "high" ? "DOSSIER SENSIBLE · DOUBLE VÉRIFICATION TERMINÉE" : "TRANSCRIPTION LOCALE TERMINÉE"}</small>
               <h2>{result.originalName}</h2>
+              {result.mode === "high" ? <p><strong>Coût estimé de cette transcription : {formatUsd(completedCost)}</strong> · hors essais ou relances précédents.</p> : <p><strong>Coût : 0 $</strong> · traitement local.</p>}
               {result.warnings?.length ? <p className="transcription-result-warning">{result.warnings.join(" · ")}</p> : null}
             </div>
             <a href={`${API}/api/transcription/${result.jobId}/download`}>Télécharger le texte</a>
