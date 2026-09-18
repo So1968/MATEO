@@ -24,7 +24,7 @@ function formatClock(totalSeconds) {
 
 function formatUsd(value) {
   if (!Number.isFinite(value)) return "—";
-  return `${value.toFixed(value < 1 ? 2 : 2)} $`;
+  return `${value.toFixed(2)} $`;
 }
 
 function sensitiveProcessedSeconds(duration) {
@@ -206,7 +206,7 @@ export default function TranscriptionView() {
         <div>
           <small>TRACES AUDIO</small>
           <h1>Transcription audio</h1>
-          <p>Choisir le niveau de précision selon l’enjeu du dossier.</p>
+          <p>Deux modes seulement : gratuit en local, ou double vérification pour les dossiers sensibles.</p>
         </div>
       </header>
 
@@ -217,9 +217,9 @@ export default function TranscriptionView() {
             className={`transcription-mode${mode === "local" ? " active" : ""}`}
             onClick={() => { setMode("local"); resetRun(); }}
           >
-            <small>QUOTIDIEN</small>
-            <strong>Local · gratuit</strong>
-            <span>Whisper sur ce PC. L’audio ne quitte pas l’ordinateur.</span>
+            <small>GRATUIT · SUR CE PC</small>
+            <strong>Local renforcé</strong>
+            <span>Faster-Whisper large-v3-turbo. L’audio ne quitte pas l’ordinateur.</span>
           </button>
           <button
             type="button"
@@ -233,11 +233,11 @@ export default function TranscriptionView() {
         </div>
 
         <div className="transcription-statusline">
-          <strong>{mode === "high" ? "Moteur dossier sensible" : "Moteur local"}</strong>
+          <strong>{mode === "high" ? "Moteur dossier sensible" : "Moteur local renforcé"}</strong>
           <span className={engineReady ? "ready" : "not-ready"}>
             {mode === "high"
               ? (health?.highPrecisionReady ? "Prêt · double vérification active" : "Clé API à enregistrer")
-              : (health?.localEngineReady ? `Prêt · Whisper ${health.localModel}` : "À installer")}
+              : (health?.localEngineReady ? `Prêt · ${health.localModel}` : "À installer")}
           </span>
         </div>
 
@@ -316,7 +316,7 @@ export default function TranscriptionView() {
                 ? (audioDuration
                   ? <><strong>{formatUsd(estimatedCost)}</strong> pour cet enregistrement · estimation selon la durée réellement envoyée aux deux moteurs.</>
                   : <>Calcul de la durée en cours…</>)
-                : <><strong>0 $</strong> · transcription entièrement locale et gratuite.</>}
+                : <><strong>0 $</strong> · transcription renforcée entièrement locale et gratuite.</>}
             </div>
             {mode === "high" ? <small>Tarifs de référence : GPT-Transcribe 0,0045 $/min + repérage des locuteurs 0,006 $/min. Le montant facturé par l’API peut différer légèrement.</small> : null}
           </div>
@@ -327,7 +327,7 @@ export default function TranscriptionView() {
             ? "Transcription en cours…"
             : mode === "high"
               ? "Transcrire en dossier sensible"
-              : "Transcrire en local"}
+              : "Transcrire gratuitement en local"}
         </button>
 
         {job ? (
@@ -345,9 +345,9 @@ export default function TranscriptionView() {
         <section className="transcription-result">
           <div className="transcription-result-head">
             <div>
-              <small>{result.mode === "high" ? "DOSSIER SENSIBLE · DOUBLE VÉRIFICATION TERMINÉE" : "TRANSCRIPTION LOCALE TERMINÉE"}</small>
+              <small>{result.mode === "high" ? "DOSSIER SENSIBLE · DOUBLE VÉRIFICATION TERMINÉE" : "TRANSCRIPTION LOCALE RENFORCÉE TERMINÉE"}</small>
               <h2>{result.originalName}</h2>
-              {result.mode === "high" ? <p><strong>Coût estimé de cette transcription : {formatUsd(completedCost)}</strong> · hors essais ou relances précédents.</p> : <p><strong>Coût : 0 $</strong> · traitement local.</p>}
+              {result.mode === "high" ? <p><strong>Coût estimé de cette transcription : {formatUsd(completedCost)}</strong> · hors essais ou relances précédents.</p> : <p><strong>Coût : 0 $</strong> · traitement local renforcé.</p>}
               {result.warnings?.length ? <p className="transcription-result-warning">{result.warnings.join(" · ")}</p> : null}
             </div>
             <a href={`${API}/api/transcription/${result.jobId}/download`}>Télécharger le texte</a>
