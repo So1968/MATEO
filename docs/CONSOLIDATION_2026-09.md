@@ -55,11 +55,13 @@ Pendant la consolidation :
 - [x] suppression du patch global de `Storage.prototype.setItem` ;
 - [x] confirmation des interlocuteurs enregistrée explicitement via le service local ;
 - [x] consentement explicite obligatoire avant l'envoi d'un audio, du contexte et des noms vers OpenAI ;
-- [x] Multer mis à jour en `2.4.0` et `package-lock.json` régénéré ;
+- [x] Multer mis à jour et verrouillé en `2.4.0` et `package-lock.json` régénéré ;
 - [x] nom du paquet harmonisé en `vogue-merry` dans le lockfile ;
+- [x] garde-fou automatisé ajouté pour empêcher une régression de Multer sous `2.4.0` ;
 - [x] tests de garde-fou ajoutés avec `node:test` ;
 - [x] CI GitHub : `npm ci`, syntaxe Node/Python, tests et build frontend ;
-- [x] CI complète réussie sur le commit `727ecf2`.
+- [x] workflows temporaires de migration retirés après usage ;
+- [x] CI complète réussie après nettoyage des fichiers temporaires, sur le commit `743ff6b`.
 
 ### À faire avant intégration
 
