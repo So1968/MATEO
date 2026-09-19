@@ -118,6 +118,22 @@ test("une transcription liée à une escale rejoint son journal", () => {
   assert.match(memoryApi, /hasTranscription/u);
 });
 
+test("le Coffre expose les documents locaux avec validation humaine", () => {
+  const memoryApi = read("backend/server.js");
+  const localApi = read("src/lib/local-api.js");
+  const documentsView = read("src/features/documents/DocumentsView.jsx");
+  const app = read("src/App.jsx");
+  assert.match(memoryApi, /app.get\("\/api\/documents"/u);
+  assert.match(memoryApi, /app.post\("\/api\/documents\/validate"/u);
+  assert.match(memoryApi, /relativePath/u);
+  assert.doesNotMatch(memoryApi, /filePath: filePath/u);
+  assert.match(localApi, /loadDocuments/u);
+  assert.match(documentsView, /Valider le classement/u);
+  assert.match(documentsView, /depositDocument/u);
+  assert.match(app, /DocumentsView/u);
+  assert.equal(exists("src/features/documents/DocumentsView.jsx"), true);
+});
+
 test("le nombre de participants ne force pas le nombre de voix Pyannote", () => {
   const server = read("backend/transcription-server-v6.js");
   assert.doesNotMatch(server, /args\.push\("--num-speakers"/u);

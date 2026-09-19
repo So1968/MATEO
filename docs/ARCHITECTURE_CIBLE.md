@@ -10,6 +10,8 @@ Le parcours fonctionnel de référence est :
 
 Quand une transcription est liée à une escale, V6 conserve le résultat technique dans `transcription_v6.json` et `transcription_v6.md`, puis remplace sa section gérée dans `journal_de_bord_exporte.md`. L'interface peut ensuite lire le journal et le valider manuellement.
 
+Le Coffre expose les documents locaux via `/api/documents`. Un dépôt arrive d'abord dans `00_WATER_SEVEN_PORT_ENTREE`, reçoit une proposition de classement, puis n'est déplacé vers `08_coffre_documents_sources` qu'après validation humaine. L'API ne renvoie que des chemins relatifs à la mémoire locale, jamais de chemin absolu.
+
 ## Sources de vérité
 
 Les données utilisateur ne vivent pas dans le code React.
@@ -50,6 +52,12 @@ Responsabilités :
 - accès aux transcriptions ;
 - confirmation des interlocuteurs ;
 - identification et suivi des besoins.
+
+Les routes documentaires principales sont :
+
+- `GET /api/documents` : documents classés, pièces jointes d'escales et documents entrants à valider ;
+- `POST /api/water-seven/deposit` : dépôt local d'un fichier ;
+- `POST /api/documents/validate` : classement confirmé vers une île et le Coffre.
 
 Le service doit écouter uniquement sur `127.0.0.1`.
 

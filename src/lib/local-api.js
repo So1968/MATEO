@@ -22,6 +22,28 @@ export async function loadInbox() {
   return Array.isArray(payload.items) ? payload.items : [];
 }
 
+export async function loadDocuments(projectSlug = "") {
+  const params = projectSlug ? `?projectSlug=${encodeURIComponent(projectSlug)}` : "";
+  const payload = await localApi(`/api/documents${params}`);
+  return {
+    documents: Array.isArray(payload.documents) ? payload.documents : [],
+    pendingCount: Number(payload.pendingCount || 0)
+  };
+}
+
+export function depositDocument(file) {
+  const form = new FormData();
+  form.append("document", file, file.name);
+  return localApi("/api/water-seven/deposit", { method: "POST", body: form });
+}
+
+export function validateDocument({ sourceId, projectSlug }) {
+  return localApi("/api/documents/validate", {
+    method: "POST",
+    body: JSON.stringify({ sourceId, projectSlug })
+  });
+}
+
 export async function searchMemory(query, projectSlug = "") {
   const params = new URLSearchParams({ q: query });
   if (projectSlug) params.set("projectSlug", projectSlug);

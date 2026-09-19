@@ -192,6 +192,72 @@ test("API mémoire : crée une escale, rattache un audio et la retrouve", async 
   });
 });
 
+test("API Coffre : propose puis valide le classement d’un document local", async () => {
+  await withServer("backend/server.js", 8010, async (home) => {
+    const requestOptions = {
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "http://localhost:5173"
+      }
+    };
+    const projectResponse = await fetch("http://127.0.0.1:8010/api/projects", {
+      method: "POST",
+      ...requestOptions,
+      body: JSON.stringify({ name: "Projet coffre" })
+    });
+    assert.equal(projectResponse.status, 201);
+
+    const form = new FormData();
+    form.append("document", new Blob(["Décision validée à conserver"], { type: "text/plain" }), "decision.txt");
+    const depositResponse = await fetch("http://127.0.0.1:8010/api/water-seven/deposit", {
+      method: "POST",
+      headers: { Origin: "http://localhost:5173" },
+      body: form
+    });
+    assert.equal(depositResponse.status, 201);
+    const depositPayload = await depositResponse.json();
+
+    const pendingResponse = await fetch("http://127.0.0.1:8010/api/documents", {
+      headers: { Origin: "http://localhost:5173" }
+    });
+    assert.equal(pendingResponse.status, 200);
+    const pendingPayload = await pendingResponse.json();
+    assert.equal(pendingPayload.pendingCount, 1);
+    assert.equal(pendingPayload.documents[0].source, "Water Seven");
+    assert.equal(pendingPayload.documents[0].reviewStatus, "à valider");
+    assert.equal("filePath" in pendingPayload.documents[0], false);
+    assert.equal(path.isAbsolute(pendingPayload.documents[0].relativePath), false);
+
+    const validateResponse = await fetch("http://127.0.0.1:8010/api/documents/validate", {
+      method: "POST",
+      ...requestOptions,
+      body: JSON.stringify({ sourceId: depositPayload.deposit.id, projectSlug: "projet_coffre" })
+    });
+    assert.equal(validateResponse.status, 201);
+    const validatedPayload = await validateResponse.json();
+    assert.equal(validatedPayload.document.projectSlug, "projet_coffre");
+    assert.equal(validatedPayload.document.source, "Coffre");
+
+    const targetPath = path.join(
+      home,
+      "VOGUE-MERRY-DONNEES",
+      "01_PROJETS",
+      "projet_coffre",
+      "08_coffre_documents_sources",
+      "decision.txt"
+    );
+    assert.equal(fs.existsSync(targetPath), true);
+
+    const storedResponse = await fetch("http://127.0.0.1:8010/api/documents?projectSlug=projet_coffre", {
+      headers: { Origin: "http://localhost:5173" }
+    });
+    const storedPayload = await storedResponse.json();
+    assert.equal(storedPayload.pendingCount, 0);
+    assert.equal(storedPayload.documents[0].reviewStatus, "classé");
+    assert.equal(storedPayload.documents[0].relativePath, "01_PROJETS/projet_coffre/08_coffre_documents_sources/decision.txt");
+  });
+});
+
 test("API unifiée : expose la transcription locale sur 8010", async () => {
   await withUnifiedServer(async () => {
     const response = await fetch("http://127.0.0.1:8010/api/transcription/health", {

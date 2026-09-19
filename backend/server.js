@@ -29,6 +29,31 @@ const ALLOWED_ORIGINS = new Set([
   "http://127.0.0.1:5173",
   "http://localhost:5173"
 ]);
+const DOCUMENT_EXTENSIONS = new Set([
+  ".csv",
+  ".doc",
+  ".docx",
+  ".gif",
+  ".htm",
+  ".html",
+  ".jpeg",
+  ".jpg",
+  ".json",
+  ".md",
+  ".odt",
+  ".pdf",
+  ".png",
+  ".ppt",
+  ".pptx",
+  ".rtf",
+  ".txt",
+  ".webp",
+  ".xls",
+  ".xlsx",
+  ".xml",
+  ".yaml",
+  ".yml"
+]);
 
 app.use(cors({
   origin(origin, callback) {
@@ -336,6 +361,146 @@ function meetingHasAudio(meetingDir) {
   }
 }
 
+function toDataRelativePath(filePath) {
+  return path.relative(DATA_ROOT, filePath).split(path.sep).join("/");
+}
+
+function walkDocumentFiles(dirPath, files = []) {
+  if (!fs.existsSync(dirPath)) return files;
+
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.isSymbolicLink()) continue;
+    const fullPath = path.join(dirPath, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name !== "99_versions") walkDocumentFiles(fullPath, files);
+      continue;
+    }
+    if (DOCUMENT_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) files.push(fullPath);
+  }
+
+  return files;
+}
+
+function formatDocumentSize(sizeBytes) {
+  if (!Number.isFinite(sizeBytes) || sizeBytes <= 0) return "Moins d’un Ko";
+  if (sizeBytes < 1024 * 1024) return `${Math.max(1, Math.round(sizeBytes / 1024))} Ko`;
+  return `${(sizeBytes / (1024 * 1024)).toFixed(1)} Mo`;
+}
+
+function makeDocumentRecord(filePath, options = {}) {
+  const stats = fs.statSync(filePath);
+  const projectSlug = options.projectSlug || "";
+  return {
+    id: options.id || toDataRelativePath(filePath),
+    source: options.source || "Coffre",
+    reviewStatus: options.reviewStatus || "classé",
+    category: options.category || "Document",
+    projectSlug,
+    projectName: projectSlug ? projectSlug.replaceAll("_", " ") : "",
+    meetingDirName: options.meetingDirName || "",
+    fileName: path.basename(filePath),
+    relativePath: toDataRelativePath(filePath),
+    extension: path.extname(filePath).replace(".", "").toLowerCase(),
+    sizeBytes: stats.size,
+    size: formatDocumentSize(stats.size),
+    modifiedAt: stats.mtime.toISOString(),
+    analysis: options.analysis || null
+  };
+}
+
+function listProjectDocuments(projectSlug) {
+  const projectDir = safePathInside(PROJECTS_ROOT, projectSlug);
+  const documents = [];
+  const coffreDir = path.join(projectDir, "08_coffre_documents_sources");
+
+  for (const filePath of walkDocumentFiles(coffreDir)) {
+    documents.push(makeDocumentRecord(filePath, {
+      projectSlug,
+      source: "Coffre",
+      category: "Document classé"
+    }));
+  }
+
+  const meetingsDir = path.join(projectDir, "01_escales_reunions");
+  if (fs.existsSync(meetingsDir)) {
+    const meetingEntries = fs.readdirSync(meetingsDir, { withFileTypes: true });
+    for (const meetingEntry of meetingEntries) {
+      if (!meetingEntry.isDirectory() || meetingEntry.isSymbolicLink()) continue;
+      const attachmentsDir = path.join(meetingsDir, meetingEntry.name, "pieces_jointes");
+      for (const filePath of walkDocumentFiles(attachmentsDir)) {
+        documents.push(makeDocumentRecord(filePath, {
+          projectSlug,
+          meetingDirName: meetingEntry.name,
+          source: "Pièce jointe d’escale",
+          category: "Pièce jointe"
+        }));
+      }
+    }
+  }
+
+  return documents;
+}
+
+function listWaterSevenDocuments() {
+  if (!fs.existsSync(WATER_SEVEN_ROOT)) return [];
+  const documents = [];
+  const deposits = fs.readdirSync(WATER_SEVEN_ROOT, { withFileTypes: true });
+
+  for (const deposit of deposits) {
+    if (!deposit.isDirectory() || deposit.isSymbolicLink()) continue;
+    const depositDir = safePathInside(WATER_SEVEN_ROOT, deposit.name);
+    const metadataPath = path.join(depositDir, "fil_origine.json");
+    const metadata = readJsonIfExists(metadataPath);
+    const sourceFiles = fs.readdirSync(depositDir, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name !== "fil_origine.json" && entry.name !== "classement_valide.json")
+      .map((entry) => path.join(depositDir, entry.name));
+
+    for (const filePath of sourceFiles) {
+      documents.push(makeDocumentRecord(filePath, {
+        id: metadata?.id || deposit.name,
+        source: "Water Seven",
+        reviewStatus: "à valider",
+        category: metadata?.analysis?.category || "Épave à trier",
+        analysis: metadata?.analysis || null
+      }));
+    }
+  }
+
+  return documents;
+}
+
+function uniqueDocumentPath(targetDir, fileName) {
+  const parsed = path.parse(fileName);
+  let candidate = path.join(targetDir, fileName);
+  let suffix = 2;
+  while (fs.existsSync(candidate)) {
+    candidate = path.join(targetDir, `${parsed.name}_${suffix}${parsed.ext}`);
+    suffix += 1;
+  }
+  return candidate;
+}
+
+function findWaterSevenDocument(sourceId) {
+  const safeSourceId = safeSegment(sourceId);
+  if (!safeSourceId) throw new Error("Document entrant invalide.");
+
+  const depositDir = safePathInside(WATER_SEVEN_ROOT, safeSourceId);
+  const metadataPath = path.join(depositDir, "fil_origine.json");
+  const metadata = readJsonIfExists(metadataPath);
+  if (!metadata || !fs.existsSync(depositDir)) throw new Error("Document entrant introuvable.");
+
+  const sourceFile = fs.readdirSync(depositDir, { withFileTypes: true })
+    .find((entry) => entry.isFile() && entry.name !== "fil_origine.json" && entry.name !== "classement_valide.json");
+  if (!sourceFile) throw new Error("Le document entrant est introuvable dans Water Seven.");
+
+  return {
+    depositDir,
+    metadata,
+    filePath: path.join(depositDir, sourceFile.name)
+  };
+}
+
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
@@ -373,6 +538,80 @@ app.post("/api/water-seven/deposit", upload.single("document"), (req, res) => {
     res.status(201).json({ status: "ok", deposit: metadata });
   } catch (error) {
     res.status(400).json({ error: error.message || "Erreur pendant le dépôt dans Water Seven." });
+  }
+});
+
+app.get("/api/documents", (req, res) => {
+  try {
+    const requestedProject = String(req.query.projectSlug || "").trim();
+    const projectSlug = requestedProject ? safeSegment(requestedProject) : "";
+    if (requestedProject && !projectSlug) throw new Error("Île/projet invalide.");
+
+    ensureDir(PROJECTS_ROOT);
+    const projectSlugs = projectSlug
+      ? [projectSlug]
+      : fs.readdirSync(PROJECTS_ROOT, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && !entry.isSymbolicLink())
+        .map((entry) => entry.name);
+    const documents = projectSlugs.flatMap((slug) => listProjectDocuments(slug));
+    if (!projectSlug) documents.push(...listWaterSevenDocuments());
+
+    documents.sort((a, b) => {
+      if (a.reviewStatus !== b.reviewStatus) return a.reviewStatus === "à valider" ? -1 : 1;
+      return String(b.modifiedAt).localeCompare(String(a.modifiedAt));
+    });
+
+    res.json({
+      projectSlug,
+      count: documents.length,
+      pendingCount: documents.filter((document) => document.reviewStatus === "à valider").length,
+      documents
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message || "Erreur pendant la lecture du Coffre." });
+  }
+});
+
+app.post("/api/documents/validate", (req, res) => {
+  try {
+    const sourceId = safeSegment(req.body.sourceId);
+    const projectSlug = safeSegment(req.body.projectSlug);
+    if (!sourceId || !projectSlug) throw new Error("Document et île/projet sont obligatoires.");
+
+    const projectDir = safePathInside(PROJECTS_ROOT, projectSlug);
+    if (!fs.existsSync(projectDir)) throw new Error("Île/projet introuvable.");
+
+    const incoming = findWaterSevenDocument(sourceId);
+    const targetDir = safePathInside(projectDir, "08_coffre_documents_sources");
+    ensureDir(targetDir);
+
+    const originalName = safeSegment(req.body.fileName || path.basename(incoming.filePath));
+    if (!originalName) throw new Error("Nom de document invalide.");
+    const targetPath = uniqueDocumentPath(targetDir, originalName);
+    fs.renameSync(incoming.filePath, targetPath);
+
+    const validation = {
+      sourceId,
+      validatedAt: new Date().toISOString(),
+      projectSlug,
+      destination: "Coffre",
+      originalName: path.basename(incoming.filePath),
+      relativePath: toDataRelativePath(targetPath),
+      analysis: incoming.metadata.analysis || null
+    };
+    fs.writeFileSync(path.join(incoming.depositDir, "classement_valide.json"), JSON.stringify(validation, null, 2), "utf8");
+
+    res.status(201).json({
+      status: "ok",
+      document: makeDocumentRecord(targetPath, {
+        projectSlug,
+        source: "Coffre",
+        category: "Document classé",
+        analysis: incoming.metadata.analysis || null
+      })
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message || "Erreur pendant le classement du document." });
   }
 });
 

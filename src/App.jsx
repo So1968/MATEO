@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { loadInbox, loadProjects } from "./lib/local-api.js";
 import MeetingsView from "./features/meetings/MeetingsView.jsx";
+import DocumentsView from "./features/documents/DocumentsView.jsx";
 import ProjectsView from "./features/projects/ProjectsView.jsx";
 import { makeProjectViewModel } from "./features/projects/project-utils.js";
 import SearchView from "./features/search/SearchView.jsx";
@@ -192,6 +193,30 @@ button { font: inherit; }
 .meeting-report { max-height: 340px; margin-top: 15px; padding: 11px; overflow: auto; border: 1px solid rgba(112,75,28,.22); border-radius: 7px; background: rgba(255,255,255,.24); }
 .meeting-report small { margin-bottom: 8px; }
 .meeting-report pre { margin: 0; white-space: pre-wrap; color: #55442d; font: .75rem/1.45 Arial,sans-serif; }
+.documents-toolbar { margin-bottom: 18px; padding: 13px 15px; display: flex; align-items: end; justify-content: space-between; gap: 14px; color: #4d3b25; border: 1px solid #8d6431; border-radius: 9px; background: linear-gradient(180deg,#fff1ca,#e5c785); }
+.documents-toolbar label { display: grid; gap: 5px; color: #6d542f; font: 700 .67rem Arial,sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+.documents-toolbar select { min-width: 190px; padding: 8px 9px; color: #332715; border: 1px solid rgba(112,75,28,.34); border-radius: 6px; background: rgba(255,255,255,.65); font: .78rem Arial,sans-serif; }
+.document-upload-button { position: relative; padding: 9px 12px; color: #26313a !important; border: 1px solid #b7873d; border-radius: 6px; background: #efd79c; cursor: pointer; }
+.document-upload-button input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.document-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.document-card { min-height: 0; }
+.document-card-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.document-card-heading h3 { margin-bottom: 4px; overflow-wrap: anywhere; }
+.document-status { flex: 0 0 auto; padding: 5px 7px; color: #315b43; border: 1px solid rgba(49,91,67,.24); border-radius: 999px; background: rgba(170,224,183,.35); font: 700 .64rem Arial,sans-serif; }
+.document-status.pending { color: #82501f; border-color: rgba(130,80,31,.28); background: rgba(239,215,156,.58); }
+.document-meta, .document-project, .document-path { margin-top: 8px !important; font-size: .74rem !important; }
+.document-project strong { color: #3f301a; }
+.document-path { color: #806334 !important; overflow-wrap: anywhere; font-size: .68rem !important; }
+.document-review { margin-top: 14px; padding: 11px; border: 1px solid rgba(112,75,28,.24); border-radius: 7px; background: rgba(255,255,255,.22); }
+.document-review > div:first-child strong, .document-review > div:first-child span { display: block; }
+.document-review > div:first-child span { margin-top: 3px; color: #725a38; font: .73rem/1.35 Arial,sans-serif; }
+.document-review ul { margin: 9px 0 0; padding-left: 18px; color: #82501f; font: .7rem/1.35 Arial,sans-serif; }
+.document-clear { margin-top: 9px !important; color: #315b43 !important; font-size: .72rem !important; }
+.document-review-actions { margin-top: 11px; display: flex; align-items: end; gap: 8px; }
+.document-review-actions label { flex: 1; display: grid; gap: 5px; color: #6d542f; font: 700 .65rem Arial,sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+.document-review-actions select { width: 100%; padding: 8px 7px; color: #332715; border: 1px solid rgba(112,75,28,.34); border-radius: 6px; background: rgba(255,255,255,.65); font: .76rem Arial,sans-serif; }
+.document-review-actions button { padding: 8px 10px; color: #26313a; border: 1px solid #b7873d; border-radius: 6px; background: #efd79c; cursor: pointer; font: 700 .68rem Arial,sans-serif; }
+.document-review-actions button:disabled { opacity: .55; cursor: not-allowed; }
 .search-form { margin-bottom: 20px; padding: 16px; color: #4d3b25; border: 1px solid #8d6431; border-radius: 9px; background: linear-gradient(180deg,#fff1ca,#e5c785); }
 .search-form label { display: block; margin-bottom: 7px; font: 700 .7rem Arial,sans-serif; letter-spacing: .06em; text-transform: uppercase; }
 .search-form > div { display: flex; gap: 8px; }
@@ -359,8 +384,10 @@ button { font: inherit; }
   .pont-view { height: auto; min-height: 680px; overflow: visible; }
   .priorities-grid { grid-template-columns: 1fr; }
   .sea-map, .generic-view, .islands-view, .project-world-view { min-height: 680px; }
-  .generic-grid, .island-project-grid, .world-overview, .world-items { grid-template-columns: 1fr; }
+  .generic-grid, .island-project-grid, .world-overview, .world-items, .document-list { grid-template-columns: 1fr; }
   .meeting-list, .search-results { grid-template-columns: 1fr; }
+  .documents-toolbar { align-items: stretch; flex-direction: column; }
+  .documents-toolbar select { width: 100%; }
   .meeting-setup, .meeting-setup-fields { grid-template-columns: 1fr; }
   .markerGrid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .world-summary-card.wide { grid-column: auto; }
@@ -664,10 +691,10 @@ function IslandProjectView({ project, onBack }) {
 function GenericView({ active, meetings, projects, loading, error, onSaved }) {
   if (active === "escales") return <MeetingsView meetings={meetings} projects={projects} loading={loading} error={error} onSaved={onSaved} />;
   if (active === "journal") return <MeetingsView meetings={meetings} loading={loading} error={error} journalOnly onSaved={onSaved} />;
+  if (active === "coffre") return <DocumentsView projects={projects} />;
   if (active === "longuevue") return <SearchView />;
 
   const labels = {
-    coffre: ["Coffre", "Les documents seront branchés sur les sources locales dans la prochaine tranche."],
     manoeuvres: ["Manœuvres", "Les actions seront extraites des journaux validés dans la prochaine tranche."],
     caps: ["Caps validés", "Les décisions seront extraites des journaux validés dans la prochaine tranche."]
   };

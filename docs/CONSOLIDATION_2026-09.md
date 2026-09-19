@@ -74,6 +74,7 @@ Pendant la consolidation :
 - [x] `MeetingMode` relié à la création d'une escale, aux marqueurs et à l'export audio ;
 - [x] interface et tests de transcription branchés sur la façade unifiée 8010 ;
 - [x] transcription V6 recopiée dans l'escale et affichée dans le journal ; lecture et validation reliées à l'interface ;
+- [x] Coffre branché sur les documents locaux, avec dépôt Water Seven, proposition de classement et validation humaine vers une île ;
 - [ ] faire tourner les tests locaux sur le poste de développement ;
 - [ ] tester une courte transcription locale sans appel API payant.
 
@@ -95,9 +96,8 @@ Pendant la consolidation :
 
 ### P2 — réunification produit
 
-1. Brancher le Coffre sur les documents locaux sans exposer les chemins absolus.
-2. Extraire les Manœuvres et Caps validés depuis les journaux.
-3. Faire du Log Pose une vraie reprise de contexte persistée.
+1. Extraire les Manœuvres et Caps validés depuis les journaux.
+2. Faire du Log Pose une vraie reprise de contexte persistée.
 
 ## Condition avant intégration dans `main`
 
