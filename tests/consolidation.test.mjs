@@ -27,6 +27,15 @@ test("Multer reste verrouillé sur la version consolidée", () => {
   assert.equal(packageLock.packages?.["node_modules/multer"]?.version, "2.4.0");
 });
 
+test("les dépendances frontend critiques ne reviennent pas à latest", () => {
+  const packageJson = JSON.parse(read("package.json"));
+  for (const dependency of ["@vitejs/plugin-react", "lucide-react", "react", "react-dom", "vite"]) {
+    const version = packageJson.dependencies?.[dependency];
+    assert.ok(version && version !== "latest", `${dependency} doit rester explicitement versionnée`);
+    assert.match(version, /^\d+\.\d+\.\d+(?:[-+].+)?$/u, `${dependency} doit utiliser une version exacte`);
+  }
+});
+
 test("les anciennes versions du moteur ne restent pas dans le code actif", () => {
   for (const file of [
     "backend/transcription-server.js",
