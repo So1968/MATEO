@@ -12,10 +12,24 @@ const HOME = os.homedir();
 const DATA_ROOT = path.join(HOME, "VOGUE-MERRY-DONNEES");
 const PROJECTS_ROOT = path.join(DATA_ROOT, "01_PROJETS");
 const WATER_SEVEN_ROOT = path.join(DATA_ROOT, "00_WATER_SEVEN_PORT_ENTREE");
+const ALLOWED_ORIGINS = new Set([
+  "http://127.0.0.1:5173",
+  "http://localhost:5173"
+]);
 
-app.use(cors());
-app.use(express.json());
-const upload = multer({ storage: multer.memoryStorage() });
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || ALLOWED_ORIGINS.has(origin)) return callback(null, true);
+    return callback(new Error("Origine non autorisée."));
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"]
+}));
+app.use(express.json({ limit: "1mb" }));
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 150 * 1024 * 1024, files: 1 }
+});
 
 function slugify(value) {
   return String(value || "")
@@ -38,7 +52,17 @@ function writeFileIfMissing(filePath, content) {
 }
 
 function safeSegment(value) {
-  return String(value || "").replace(/[\/\\]/g, "");
+  const segment = String(value || "").trim();
+  if (!segment || segment === "." || segment === ".." || segment.includes("..")) return "";
+  if (/[\/\\\0]/.test(segment)) return "";
+  return segment;
+}
+
+function safePathInside(root, ...segments) {
+  const resolved = path.resolve(root, ...segments);
+  const normalizedRoot = path.resolve(root) + path.sep;
+  if (!resolved.startsWith(normalizedRoot)) throw new Error("Chemin de données invalide.");
+  return resolved;
 }
 
 function timestampForFile() {
@@ -154,7 +178,7 @@ function createProjectStructure(projectName) {
   const slug = slugify(projectName);
   if (!slug) throw new Error("Nom de projet invalide.");
 
-  const baseDir = path.join(PROJECTS_ROOT, slug);
+  const baseDir = safePathInside(PROJECTS_ROOT, slug);
   ensureDir(baseDir);
 
   const folders = [
@@ -245,7 +269,10 @@ function readMeetingData(meetingDir) {
 }
 
 function findMeetingDir(projectSlug, meetingDirName) {
-  return path.join(PROJECTS_ROOT, projectSlug, "01_escales_reunions", meetingDirName);
+  const safeProjectSlug = safeSegment(projectSlug);
+  const safeMeetingDirName = safeSegment(meetingDirName);
+  if (!safeProjectSlug || !safeMeetingDirName) throw new Error("Projet ou escale invalide.");
+  return safePathInside(PROJECTS_ROOT, safeProjectSlug, "01_escales_reunions", safeMeetingDirName);
 }
 
 function findReportPaths(meetingDir) {
@@ -255,11 +282,21 @@ function findReportPaths(meetingDir) {
   };
 }
 
+function meetingHasAudio(meetingDir) {
+  try {
+    return fs.readdirSync(meetingDir).some((name) => name.startsWith("audio_original."));
+  } catch {
+    return false;
+  }
+}
+
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
-    service: "vogue-merry-local-backend",
-    dataRoot: DATA_ROOT
+    service: "vogue-marry-local-backend",
+    dataRoot: DATA_ROOT,
+    host: "127.0.0.1",
+    port: PORT
   });
 });
 
@@ -272,7 +309,7 @@ app.post("/api/water-seven/deposit", upload.single("document"), (req, res) => {
     const depositDir = path.join(WATER_SEVEN_ROOT, depositId);
     ensureDir(depositDir);
 
-    const safeOriginalName = safeSegment(req.file.originalname || "document");
+    const safeOriginalName = safeSegment(req.file.originalname || "document") || "document";
     const filePath = path.join(depositDir, safeOriginalName);
     fs.writeFileSync(filePath, req.file.buffer);
 
@@ -341,7 +378,7 @@ app.post("/api/meetings/export", (req, res) => {
     const projectSlug = slugify(projectName);
     if (!projectSlug) throw new Error("Projet manquant.");
 
-    const projectDir = path.join(PROJECTS_ROOT, projectSlug);
+    const projectDir = safePathInside(PROJECTS_ROOT, projectSlug);
     ensureDir(projectDir);
 
     const meetingsDir = path.join(projectDir, "01_escales_reunions");
@@ -429,7 +466,7 @@ app.post("/api/meetings/export-audio", upload.single("audio"), (req, res) => {
     const safeMeetingDirName = safeSegment(meetingDirName);
     if (!projectSlug || !safeMeetingDirName) throw new Error("Projet ou escale manquant.");
 
-    const meetingDir = path.join(PROJECTS_ROOT, projectSlug, "01_escales_reunions", safeMeetingDirName);
+    const meetingDir = findMeetingDir(projectSlug, safeMeetingDirName);
     ensureDir(meetingDir);
 
     const extension = path.extname(req.file.originalname || "") || ".webm";
@@ -459,7 +496,7 @@ app.get("/api/inbox", (req, res) => {
         const meetingDir = path.join(meetingsDir, meeting.name);
         const data = readMeetingData(meetingDir);
         const reportPaths = findReportPaths(meetingDir);
-        const hasAudio = fs.existsSync(path.join(meetingDir, "audio_original.webm"));
+        const hasAudio = meetingHasAudio(meetingDir);
         const hasReport = fs.existsSync(reportPaths.exportedPath);
         const hasValidatedReport = fs.existsSync(reportPaths.validatedPath);
         const hasRawNotes = Boolean(data?.rawNotes && String(data.rawNotes).trim());
@@ -581,7 +618,7 @@ app.get("/api/search", (req, res) => {
     const projectSlug = safeSegment(req.query.projectSlug);
     if (!query) return res.json({ results: [] });
 
-    const roots = projectSlug ? [path.join(PROJECTS_ROOT, projectSlug)] : [PROJECTS_ROOT];
+    const roots = projectSlug ? [safePathInside(PROJECTS_ROOT, projectSlug)] : [PROJECTS_ROOT];
     const results = [];
 
     for (const root of roots) {
