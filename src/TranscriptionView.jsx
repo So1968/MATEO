@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./transcription-view.css";
 
 const API = "http://localhost:8011";
+const SPEAKER_API = "http://localhost:8012";
 const LAST_JOB_KEY = "vogue-marry:last-transcription-job";
 const DEFAULT_CONTEXT = "Réunion professionnelle en français. Respecter les noms propres, sigles, termes métier et décisions entendues. Ne rien inventer si un passage est incertain.";
 const GPT_COST_PER_MINUTE_USD = 0.0045;
@@ -74,6 +75,7 @@ export default function TranscriptionView() {
   const [meetingId, setMeetingId] = useState("");
   const [manualParticipants, setManualParticipants] = useState("");
   const [mode, setMode] = useState("local");
+  const [cloudConsent, setCloudConsent] = useState(false);
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [hfTokenInput, setHfTokenInput] = useState("");
   const [contextHint, setContextHint] = useState(DEFAULT_CONTEXT);
@@ -124,7 +126,10 @@ export default function TranscriptionView() {
     if (!resultResponse.ok) return null;
     const payload = await resultResponse.json();
     setResult(payload);
-    setSpeakerOverrides(readSpeakerOverrides(jobId));
+    setSpeakerOverrides({
+      ...readSpeakerOverrides(jobId),
+      ...(payload.speakerOverrides || {})
+    });
     setSpeakerNotice("");
     return payload;
   }
@@ -200,7 +205,7 @@ export default function TranscriptionView() {
   }, [job?.jobId, job?.state]);
 
   const engineReady = mode === "high" ? health?.highPrecisionReady : health?.localEngineReady;
-  const canStart = Boolean(file && engineReady && !busy);
+  const canStart = Boolean(file && engineReady && !busy && (mode !== "high" || cloudConsent));
   const estimatedCost = mode === "high" && audioDuration ? estimateSensitiveCost(audioDuration) : 0;
   const completedCost = result?.mode === "high" ? Number(result?.verification?.estimatedCostUsd || 0) : 0;
 
@@ -256,10 +261,33 @@ export default function TranscriptionView() {
     });
   }
 
-  function saveSpeakerOverrides() {
+  async function saveSpeakerOverrides() {
     if (!result?.jobId) return;
-    window.localStorage.setItem(speakerMapKey(result.jobId), JSON.stringify(speakerOverrides));
-    setSpeakerNotice("Noms mémorisés pour ce compte rendu sur cet ordinateur.");
+    if (!Object.keys(speakerOverrides).length) {
+      setSpeakerNotice("Aucun nom à enregistrer.");
+      return;
+    }
+
+    setSpeakerNotice("Enregistrement…");
+    try {
+      const response = await fetch(`${SPEAKER_API}/api/transcription/${encodeURIComponent(result.jobId)}/speakers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mapping: speakerOverrides })
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Impossible d’enregistrer les interlocuteurs.");
+
+      const confirmedMapping = payload.mapping || speakerOverrides;
+      window.localStorage.setItem(speakerMapKey(result.jobId), JSON.stringify(confirmedMapping));
+      setSpeakerOverrides(confirmedMapping);
+      if (payload.result) setResult(payload.result);
+      setSpeakerNotice(payload.persistedToMeeting
+        ? "Noms confirmés dans la transcription et dans l’escale."
+        : "Noms confirmés dans la transcription.");
+    } catch (err) {
+      setSpeakerNotice(err.message || "Impossible d’enregistrer les interlocuteurs.");
+    }
   }
 
   function downloadCorrectedTranscript() {
@@ -343,6 +371,12 @@ export default function TranscriptionView() {
         setJob(state);
         await loadResult(payload.jobId);
         setBusy(false);
+      } else if (payload.alreadyRunning) {
+        const stateResponse = await fetch(`${API}/api/transcription/${payload.jobId}`);
+        const state = await stateResponse.json();
+        setJob(state);
+        setBusy(state.state !== "done" && state.state !== "error");
+        if (state.state === "done") await loadResult(payload.jobId);
       } else {
         setJob({ jobId: payload.jobId, state: "queued", message: "Enregistrement reçu.", progress: 2, mode });
       }
@@ -368,7 +402,7 @@ export default function TranscriptionView() {
           <button
             type="button"
             className={`transcription-mode${mode === "local" ? " active" : ""}`}
-            onClick={() => { setMode("local"); resetRun(); }}
+            onClick={() => { setMode("local"); setCloudConsent(false); resetRun(); }}
           >
             <small>GRATUIT · SUR CE PC</small>
             <strong>Local renforcé</strong>
@@ -377,16 +411,16 @@ export default function TranscriptionView() {
           <button
             type="button"
             className={`transcription-mode high${mode === "high" ? " active" : ""}`}
-            onClick={() => { setMode("high"); resetRun(); }}
+            onClick={() => { setMode("high"); setCloudConsent(false); resetRun(); }}
           >
             <small>DOSSIER SENSIBLE</small>
-            <strong>Vérifié</strong>
-            <span>Même traitement local, puis une seconde lecture GPT du texte seulement.</span>
+            <strong>Contrôle renforcé</strong>
+            <span>Même traitement local, puis une seconde lecture indépendante avec GPT.</span>
           </button>
         </div>
 
         <div className="transcription-statusline">
-          <strong>{mode === "high" ? "Dossier sensible" : "Moteur local renforcé"}</strong>
+          <strong>{mode === "high" ? "Contrôle renforcé" : "Moteur local renforcé"}</strong>
           <span className={engineReady ? "ready" : "not-ready"}>
             {engineReady ? `Prêt · ${health?.localModel || "large-v3-turbo"}` : "Configuration nécessaire"}
           </span>
@@ -450,13 +484,13 @@ export default function TranscriptionView() {
         {health?.localDiarizationReady ? (
           <div className="transcription-callout">
             <strong>Interlocuteurs · gratuit</strong>
-            <div>Pyannote est prêt. Vogue Marry utilise le nombre et les noms de l’escale, puis cherche les présentations faites en début de réunion pour associer les voix aux personnes.</div>
+            <div>Pyannote est prêt. La liste de l’escale sert de contexte, mais Vogue Marry ne force pas le nombre de voix et n’associe automatiquement un nom qu’après une présentation explicite de la personne.</div>
           </div>
         ) : null}
 
         {mode === "high" && !health?.openAIConfigured && health ? (
           <div className="transcription-api-config">
-            <strong>Activer la vérification dossier sensible</strong>
+            <strong>Activer le contrôle renforcé</strong>
             <p>La clé OpenAI reste enregistrée uniquement sur ce PC dans <code>~/.config/vogue-merry/</code>.</p>
             <div>
               <input
@@ -472,16 +506,29 @@ export default function TranscriptionView() {
         ) : null}
 
         {mode === "high" ? (
-          <label className="transcription-context">
-            <span>Contexte utile à la vérification</span>
-            <textarea
-              value={contextHint}
-              onChange={(event) => setContextHint(event.target.value)}
-              rows={3}
-              placeholder="Sigles, vocabulaire métier, contexte de la réunion…"
-            />
-            <small>Les noms des participants sont ajoutés automatiquement depuis l’escale.</small>
-          </label>
+          <>
+            <label className="transcription-context">
+              <span>Contexte utile à la seconde lecture</span>
+              <textarea
+                value={contextHint}
+                onChange={(event) => setContextHint(event.target.value)}
+                rows={3}
+                placeholder="Sigles, vocabulaire métier, contexte de la réunion…"
+              />
+              <small>Les noms des participants sont ajoutés automatiquement depuis l’escale.</small>
+            </label>
+            <label className="transcription-callout">
+              <strong>Avant l’envoi vers OpenAI</strong>
+              <div>
+                <input
+                  type="checkbox"
+                  checked={cloudConsent}
+                  onChange={(event) => setCloudConsent(event.target.checked)}
+                />{" "}
+                J’ai compris que l’audio, le contexte et les noms des participants seront envoyés à OpenAI pour cette seconde lecture. Le mode local n’effectue aucun envoi vers OpenAI.
+              </div>
+            </label>
+          </>
         ) : null}
 
         <label className="transcription-file">
@@ -522,7 +569,7 @@ export default function TranscriptionView() {
           {busy
             ? "Transcription en cours…"
             : mode === "high"
-              ? "Transcrire et vérifier"
+              ? "Transcrire et contrôler"
               : "Transcrire gratuitement"}
         </button>
 
@@ -541,7 +588,7 @@ export default function TranscriptionView() {
         <section className="transcription-result">
           <div className="transcription-result-head">
             <div>
-              <small>{result.mode === "high" ? "DOSSIER SENSIBLE · VÉRIFIÉ" : "LOCAL RENFORCÉ · TERMINÉ"}</small>
+              <small>{result.mode === "high" ? "CONTRÔLE RENFORCÉ · DOUBLE LECTURE" : "LOCAL RENFORCÉ · TERMINÉ"}</small>
               <h2>{result.originalName}</h2>
               <p>
                 <strong>{result.participantCount || 0} participant{result.participantCount > 1 ? "s" : ""} attendu{result.participantCount > 1 ? "s" : ""}</strong>
@@ -553,7 +600,7 @@ export default function TranscriptionView() {
             <div className="transcription-downloads">
               <a href={`${API}/api/transcription/${result.jobId}/download`}>Texte brut du moteur</a>
               {Object.keys(speakerOverrides).length ? <button type="button" onClick={downloadCorrectedTranscript}>Texte avec noms confirmés</button> : null}
-              {result.mode === "high" ? <a href={`${API}/api/transcription/${result.jobId}/download-verification`}>Vérification GPT</a> : null}
+              {result.mode === "high" ? <a href={`${API}/api/transcription/${result.jobId}/download-verification`}>Seconde lecture GPT</a> : null}
             </div>
           </div>
 
@@ -583,7 +630,7 @@ export default function TranscriptionView() {
                 ))}
               </div>
               <div className="transcription-speaker-actions">
-                <button type="button" onClick={saveSpeakerOverrides}>Mémoriser ces noms</button>
+                <button type="button" onClick={saveSpeakerOverrides}>Confirmer ces noms</button>
                 {speakerNotice ? <span>{speakerNotice}</span> : null}
               </div>
             </div>
