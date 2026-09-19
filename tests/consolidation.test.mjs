@@ -19,6 +19,14 @@ test("les services locaux restent limités à la boucle locale", () => {
   }
 });
 
+test("Multer reste verrouillé sur la version consolidée", () => {
+  const packageJson = JSON.parse(read("package.json"));
+  const packageLock = JSON.parse(read("package-lock.json"));
+  assert.equal(packageJson.dependencies?.multer, "2.4.0");
+  assert.equal(packageLock.packages?.[""]?.dependencies?.multer, "2.4.0");
+  assert.equal(packageLock.packages?.["node_modules/multer"]?.version, "2.4.0");
+});
+
 test("les anciennes versions du moteur ne restent pas dans le code actif", () => {
   for (const file of [
     "backend/transcription-server.js",
