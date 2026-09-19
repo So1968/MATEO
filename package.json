@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "backend": "node backend/server.js",
-    "transcription": "VOGUE_WHISPER_MODEL=large-v3-turbo node backend/transcription-server-v5.js",
+    "transcription": "VOGUE_WHISPER_MODEL=large-v3-turbo node backend/transcription-server-v6.js",
     "transcription:setup": "bash scripts/setup-local-transcription.sh",
     "dev:all": "concurrently \"npm run backend\" \"npm run transcription\" \"npm run dev\""
   },
