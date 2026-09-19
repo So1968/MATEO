@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./transcription-view.css";
 
 const API = "http://localhost:8011";
-const STANLEY_CONTEXT = "Entretien professionnel en français à l’ARTAG concernant Stanley. Noms et termes possibles : ARTAG, Stanley, Martine, CSE, employeur, salarié, entretien préalable, sanction disciplinaire, avertissement, témoignages, direction, convention collective.";
-const PRIMARY_COST_PER_MINUTE_USD = 0.0045;
-const SPEAKER_COST_PER_MINUTE_USD = 0.006;
+const LAST_JOB_KEY = "vogue-marry:last-transcription-job";
+const DEFAULT_CONTEXT = "Réunion professionnelle en français. Respecter les noms propres, sigles, termes métier et décisions entendues. Ne rien inventer si un passage est incertain.";
+const GPT_COST_PER_MINUTE_USD = 0.0045;
 const SENSITIVE_CHUNK_SECONDS = 900;
 const SENSITIVE_OVERLAP_SECONDS = 4;
 
@@ -27,7 +27,7 @@ function formatUsd(value) {
   return `${value.toFixed(2)} $`;
 }
 
-function sensitiveProcessedSeconds(duration) {
+function processedSeconds(duration) {
   const total = Number(duration) || 0;
   if (total <= 0) return 0;
   let cursor = 0;
@@ -42,21 +42,43 @@ function sensitiveProcessedSeconds(duration) {
 }
 
 function estimateSensitiveCost(duration) {
-  const processedMinutes = sensitiveProcessedSeconds(duration) / 60;
-  return processedMinutes * (PRIMARY_COST_PER_MINUTE_USD + SPEAKER_COST_PER_MINUTE_USD);
+  return (processedSeconds(duration) / 60) * GPT_COST_PER_MINUTE_USD;
+}
+
+function parseParticipantText(value) {
+  return Array.from(new Set(
+    String(value || "")
+      .split(/[\n;,|]+/)
+      .map((item) => item.replace(/^[-•]\s*/, "").trim())
+      .filter(Boolean)
+  ));
 }
 
 export default function TranscriptionView() {
   const [health, setHealth] = useState(null);
-  const [mode, setMode] = useState("high");
+  const [escales, setEscales] = useState([]);
+  const [meetingId, setMeetingId] = useState("");
+  const [manualParticipants, setManualParticipants] = useState("");
+  const [mode, setMode] = useState("local");
   const [apiKeyInput, setApiKeyInput] = useState("");
-  const [contextHint, setContextHint] = useState(STANLEY_CONTEXT);
+  const [hfTokenInput, setHfTokenInput] = useState("");
+  const [contextHint, setContextHint] = useState(DEFAULT_CONTEXT);
   const [file, setFile] = useState(null);
   const [audioDuration, setAudioDuration] = useState(null);
   const [job, setJob] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
+  const selectedMeeting = useMemo(
+    () => escales.find((item) => item.id === meetingId) || null,
+    [escales, meetingId]
+  );
+
+  const participants = useMemo(
+    () => selectedMeeting?.participants?.length ? selectedMeeting.participants : parseParticipantText(manualParticipants),
+    [selectedMeeting, manualParticipants]
+  );
 
   async function refreshHealth() {
     try {
@@ -70,8 +92,47 @@ export default function TranscriptionView() {
     }
   }
 
+  async function loadEscales() {
+    try {
+      const response = await fetch(`${API}/api/transcription/escales`);
+      if (!response.ok) return;
+      const payload = await response.json();
+      setEscales(Array.isArray(payload.escales) ? payload.escales : []);
+    } catch {
+      // L'absence d'escales ne bloque pas l'import manuel d'un audio.
+    }
+  }
+
+  async function loadResult(jobId) {
+    const resultResponse = await fetch(`${API}/api/transcription/${jobId}/result`);
+    if (!resultResponse.ok) return null;
+    const payload = await resultResponse.json();
+    setResult(payload);
+    return payload;
+  }
+
   useEffect(() => {
     refreshHealth();
+    loadEscales();
+
+    const savedJobId = window.localStorage.getItem(LAST_JOB_KEY);
+    if (!savedJobId) return;
+    (async () => {
+      try {
+        const response = await fetch(`${API}/api/transcription/${savedJobId}`);
+        if (!response.ok) return;
+        const state = await response.json();
+        setJob(state);
+        if (state.state === "done") {
+          await loadResult(savedJobId);
+          setBusy(false);
+        } else if (state.state !== "error") {
+          setBusy(true);
+        }
+      } catch {
+        // Le moteur sera récupéré au prochain rafraîchissement.
+      }
+    })();
   }, []);
 
   useEffect(() => {
@@ -82,19 +143,14 @@ export default function TranscriptionView() {
     const audio = new Audio();
     audio.preload = "metadata";
     audio.src = url;
-
     const handleLoaded = () => {
       if (Number.isFinite(audio.duration) && audio.duration > 0) setAudioDuration(audio.duration);
     };
-    const handleError = () => setAudioDuration(null);
-
     audio.addEventListener("loadedmetadata", handleLoaded);
-    audio.addEventListener("error", handleError);
     audio.load();
 
     return () => {
       audio.removeEventListener("loadedmetadata", handleLoaded);
-      audio.removeEventListener("error", handleError);
       audio.src = "";
       URL.revokeObjectURL(url);
     };
@@ -102,27 +158,23 @@ export default function TranscriptionView() {
 
   useEffect(() => {
     if (!job?.jobId || job.state === "done" || job.state === "error") return undefined;
+    window.localStorage.setItem(LAST_JOB_KEY, job.jobId);
 
     const timer = window.setInterval(async () => {
       try {
         const response = await fetch(`${API}/api/transcription/${job.jobId}`);
         const state = await response.json();
         setJob(state);
-
         if (state.state === "done") {
-          const resultResponse = await fetch(`${API}/api/transcription/${job.jobId}/result`);
-          const payload = await resultResponse.json();
-          setResult(payload);
+          await loadResult(job.jobId);
           setBusy(false);
         }
-
         if (state.state === "error") {
           setError(state.message || "La transcription a échoué.");
           setBusy(false);
         }
       } catch {
-        setError("Vogue Marry n’arrive plus à joindre le moteur de transcription.");
-        setBusy(false);
+        setError("Vogue Marry n’arrive plus à joindre le moteur. Le travail déjà terminé reste conservé.");
       }
     }, 2000);
 
@@ -132,15 +184,12 @@ export default function TranscriptionView() {
   const engineReady = mode === "high" ? health?.highPrecisionReady : health?.localEngineReady;
   const canStart = Boolean(file && engineReady && !busy);
   const estimatedCost = mode === "high" && audioDuration ? estimateSensitiveCost(audioDuration) : 0;
-  const completedCost = result?.mode === "high" && result?.duration ? estimateSensitiveCost(result.duration) : 0;
+  const completedCost = result?.mode === "high" ? Number(result?.verification?.estimatedCostUsd || 0) : 0;
 
   const transcript = useMemo(() => {
     if (!result?.segments) return "";
     return result.segments
-      .map((segment) => {
-        const speaker = segment.speaker ? ` Intervenant ${segment.speaker} —` : "";
-        return `[${formatClock(segment.start)}]${speaker} ${segment.text}`;
-      })
+      .map((segment) => `[${formatClock(segment.start)}] ${segment.speaker || "Intervenant"} — ${segment.text}`)
       .join("\n\n");
   }, [result]);
 
@@ -148,6 +197,8 @@ export default function TranscriptionView() {
     setError("");
     setResult(null);
     setJob(null);
+    setBusy(false);
+    window.localStorage.removeItem(LAST_JOB_KEY);
   }
 
   async function saveApiKey() {
@@ -159,21 +210,28 @@ export default function TranscriptionView() {
         body: JSON.stringify({ apiKey: apiKeyInput })
       });
       const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "Impossible d’enregistrer la clé.");
+      if (!response.ok) throw new Error(payload.error || "Impossible d’enregistrer la clé OpenAI.");
       setApiKeyInput("");
       await refreshHealth();
     } catch (err) {
-      setError(err.message || "Impossible d’enregistrer la clé API.");
+      setError(err.message || "Impossible d’enregistrer la clé OpenAI.");
     }
   }
 
-  async function removeApiKey() {
+  async function saveHfToken() {
     setError("");
     try {
-      await fetch(`${API}/api/transcription/config/api-key`, { method: "DELETE" });
+      const response = await fetch(`${API}/api/transcription/config/hf-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: hfTokenInput })
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Impossible d’enregistrer le jeton Hugging Face.");
+      setHfTokenInput("");
       await refreshHealth();
-    } catch {
-      setError("Impossible d’effacer la clé API.");
+    } catch (err) {
+      setError(err.message || "Impossible d’enregistrer le jeton Hugging Face.");
     }
   }
 
@@ -188,11 +246,24 @@ export default function TranscriptionView() {
       const form = new FormData();
       form.append("audio", file);
       form.append("mode", mode);
-      if (mode === "high") form.append("context", contextHint);
+      form.append("context", contextHint);
+      if (meetingId) form.append("meetingId", meetingId);
+      form.append("participantsJson", JSON.stringify(participants));
+
       const response = await fetch(`${API}/api/transcription`, { method: "POST", body: form });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Impossible d’envoyer l’enregistrement.");
-      setJob({ jobId: payload.jobId, state: "queued", message: "Enregistrement reçu.", progress: 2, mode });
+
+      window.localStorage.setItem(LAST_JOB_KEY, payload.jobId);
+      if (payload.cached) {
+        const stateResponse = await fetch(`${API}/api/transcription/${payload.jobId}`);
+        const state = await stateResponse.json();
+        setJob(state);
+        await loadResult(payload.jobId);
+        setBusy(false);
+      } else {
+        setJob({ jobId: payload.jobId, state: "queued", message: "Enregistrement reçu.", progress: 2, mode });
+      }
     } catch (err) {
       setBusy(false);
       setError(err.message || "Échec de l’envoi.");
@@ -204,9 +275,9 @@ export default function TranscriptionView() {
       <header className="transcription-topbar">
         <a href="/" className="transcription-back">← Vogue Marry</a>
         <div>
-          <small>TRACES AUDIO</small>
-          <h1>Transcription audio</h1>
-          <p>Deux modes seulement : gratuit en local, ou double vérification pour les dossiers sensibles.</p>
+          <small>TRACES AUDIO · ESCALES</small>
+          <h1>Transcription des réunions</h1>
+          <p>Matéo réutilise l’équipage déjà saisi dans l’escale pour reconnaître les voix.</p>
         </div>
       </header>
 
@@ -219,7 +290,7 @@ export default function TranscriptionView() {
           >
             <small>GRATUIT · SUR CE PC</small>
             <strong>Local renforcé</strong>
-            <span>Faster-Whisper large-v3-turbo. L’audio ne quitte pas l’ordinateur.</span>
+            <span>large-v3-turbo + repérage local des interlocuteurs. Coût API : 0 $.</span>
           </button>
           <button
             type="button"
@@ -227,30 +298,77 @@ export default function TranscriptionView() {
             onClick={() => { setMode("high"); resetRun(); }}
           >
             <small>DOSSIER SENSIBLE</small>
-            <strong>Double vérification</strong>
-            <span>Texte haute précision puis second passage pour repérer les intervenants.</span>
+            <strong>Vérifié</strong>
+            <span>Même traitement local, puis une seconde lecture GPT du texte seulement.</span>
           </button>
         </div>
 
         <div className="transcription-statusline">
-          <strong>{mode === "high" ? "Moteur dossier sensible" : "Moteur local renforcé"}</strong>
+          <strong>{mode === "high" ? "Dossier sensible" : "Moteur local renforcé"}</strong>
           <span className={engineReady ? "ready" : "not-ready"}>
-            {mode === "high"
-              ? (health?.highPrecisionReady ? "Prêt · double vérification active" : "Clé API à enregistrer")
-              : (health?.localEngineReady ? `Prêt · ${health.localModel}` : "À installer")}
+            {engineReady ? `Prêt · ${health?.localModel || "large-v3-turbo"}` : "Configuration nécessaire"}
           </span>
         </div>
 
-        {mode === "local" && !health?.localEngineReady && health ? (
+        {!health?.localEngineReady && health ? (
           <div className="transcription-callout">
-            Lance une seule fois <code>npm run transcription:setup</code>, puis redémarre Vogue Marry.
+            Lance une seule fois <code>npm run transcription:setup</code>, puis redémarre le moteur de transcription.
           </div>
         ) : null}
 
-        {mode === "high" && !health?.highPrecisionReady && health ? (
+        <div className="transcription-context">
+          <span>Escale / réunion de Matéo</span>
+          <select value={meetingId} onChange={(event) => { setMeetingId(event.target.value); resetRun(); }}>
+            <option value="">Audio hors escale / participants à saisir manuellement</option>
+            {escales.map((escale) => (
+              <option key={escale.id} value={escale.id}>
+                {escale.meetingDate ? `${escale.meetingDate} · ` : ""}{escale.title} · {escale.projectName}
+              </option>
+            ))}
+          </select>
+          {selectedMeeting ? (
+            <small>{selectedMeeting.participantCount} participant{selectedMeeting.participantCount > 1 ? "s" : ""} prévu{selectedMeeting.participantCount > 1 ? "s" : ""} · {participants.join(" · ") || "aucun nom enregistré"}</small>
+          ) : (
+            <>
+              <textarea
+                value={manualParticipants}
+                onChange={(event) => setManualParticipants(event.target.value)}
+                rows={3}
+                placeholder="Un nom par ligne, uniquement si l’audio n’est pas déjà rattaché à une escale."
+              />
+              <small>Dans une escale normale, cette saisie est inutile : Vogue Marry récupère les noms déjà enregistrés.</small>
+            </>
+          )}
+        </div>
+
+        {health?.pyannoteInstalled && !health?.huggingFaceConfigured ? (
           <div className="transcription-api-config">
-            <strong>Activer le mode dossier sensible</strong>
-            <p>Colle une clé API OpenAI. Elle reste enregistrée uniquement sur ce PC dans <code>~/.config/vogue-merry/</code>.</p>
+            <strong>Activer gratuitement la reconnaissance des interlocuteurs</strong>
+            <p>Pyannote Community-1 fonctionne ensuite en local. Après avoir accepté les conditions du modèle sur Hugging Face, colle ici ton jeton une seule fois.</p>
+            <div>
+              <input
+                type="password"
+                value={hfTokenInput}
+                onChange={(event) => setHfTokenInput(event.target.value)}
+                placeholder="hf_…"
+                autoComplete="off"
+              />
+              <button type="button" onClick={saveHfToken} disabled={!hfTokenInput.trim()}>Activer les voix</button>
+            </div>
+          </div>
+        ) : null}
+
+        {health?.localDiarizationReady ? (
+          <div className="transcription-callout">
+            <strong>Interlocuteurs · gratuit</strong>
+            <div>Pyannote est prêt. Vogue Marry utilise le nombre et les noms de l’escale, puis cherche les présentations faites en début de réunion pour associer les voix aux personnes.</div>
+          </div>
+        ) : null}
+
+        {mode === "high" && !health?.openAIConfigured && health ? (
+          <div className="transcription-api-config">
+            <strong>Activer la vérification dossier sensible</strong>
+            <p>La clé OpenAI reste enregistrée uniquement sur ce PC dans <code>~/.config/vogue-merry/</code>.</p>
             <div>
               <input
                 type="password"
@@ -264,26 +382,16 @@ export default function TranscriptionView() {
           </div>
         ) : null}
 
-        {mode === "high" && health?.highPrecisionReady ? (
-          <div className="transcription-callout api-warning">
-            <div>
-              <strong>Dossier sensible · double vérification</strong>
-              <span>Le texte principal est produit par GPT-Transcribe. Un second passage sert uniquement à repérer qui parle. L’original reste conservé sur ce PC.</span>
-            </div>
-            <button type="button" className="transcription-link-button" onClick={removeApiKey}>Effacer la clé</button>
-          </div>
-        ) : null}
-
         {mode === "high" ? (
           <label className="transcription-context">
-            <span>Contexte et mots à reconnaître</span>
+            <span>Contexte utile à la vérification</span>
             <textarea
               value={contextHint}
               onChange={(event) => setContextHint(event.target.value)}
-              rows={4}
-              placeholder="Noms propres, sigles, vocabulaire métier, contexte de la réunion…"
+              rows={3}
+              placeholder="Sigles, vocabulaire métier, contexte de la réunion…"
             />
-            <small>Ces indications servent à éviter les erreurs sur les noms, sigles et termes sensibles. Elles ne sont pas ajoutées au texte final si elles ne sont pas entendues.</small>
+            <small>Les noms des participants sont ajoutés automatiquement depuis l’escale.</small>
           </label>
         ) : null}
 
@@ -314,11 +422,10 @@ export default function TranscriptionView() {
             <div>
               {mode === "high"
                 ? (audioDuration
-                  ? <><strong>{formatUsd(estimatedCost)}</strong> pour cet enregistrement · estimation selon la durée réellement envoyée aux deux moteurs.</>
+                  ? <><strong>{formatUsd(estimatedCost)}</strong> · seule la seconde lecture GPT est payante. Le repérage des voix reste local et gratuit.</>
                   : <>Calcul de la durée en cours…</>)
-                : <><strong>0 $</strong> · transcription renforcée entièrement locale et gratuite.</>}
+                : <><strong>0 $</strong> · transcription et repérage des interlocuteurs en local.</>}
             </div>
-            {mode === "high" ? <small>Tarifs de référence : GPT-Transcribe 0,0045 $/min + repérage des locuteurs 0,006 $/min. Le montant facturé par l’API peut différer légèrement.</small> : null}
           </div>
         ) : null}
 
@@ -326,15 +433,15 @@ export default function TranscriptionView() {
           {busy
             ? "Transcription en cours…"
             : mode === "high"
-              ? "Transcrire en dossier sensible"
-              : "Transcrire gratuitement en local"}
+              ? "Transcrire et vérifier"
+              : "Transcrire gratuitement"}
         </button>
 
         {job ? (
           <div className="transcription-progress">
             <div><strong>{job.message || job.state}</strong><span>{job.progress || 0}%</span></div>
             <progress max="100" value={job.progress || 0} />
-            {job.duration ? <small>{formatClock(job.duration)} d’audio · {job.segmentCount || 0} segments produits</small> : null}
+            {job.duration ? <small>{formatClock(job.duration)} d’audio · {job.segmentCount || 0} passages structurés</small> : null}
           </div>
         ) : null}
 
@@ -345,12 +452,20 @@ export default function TranscriptionView() {
         <section className="transcription-result">
           <div className="transcription-result-head">
             <div>
-              <small>{result.mode === "high" ? "DOSSIER SENSIBLE · DOUBLE VÉRIFICATION TERMINÉE" : "TRANSCRIPTION LOCALE RENFORCÉE TERMINÉE"}</small>
+              <small>{result.mode === "high" ? "DOSSIER SENSIBLE · VÉRIFIÉ" : "LOCAL RENFORCÉ · TERMINÉ"}</small>
               <h2>{result.originalName}</h2>
-              {result.mode === "high" ? <p><strong>Coût estimé de cette transcription : {formatUsd(completedCost)}</strong> · hors essais ou relances précédents.</p> : <p><strong>Coût : 0 $</strong> · traitement local renforcé.</p>}
+              <p>
+                <strong>{result.participantCount || 0} participant{result.participantCount > 1 ? "s" : ""} attendu{result.participantCount > 1 ? "s" : ""}</strong>
+                {result.detectedSpeakerCount ? ` · ${result.detectedSpeakerCount} voix détectée${result.detectedSpeakerCount > 1 ? "s" : ""}` : ""}
+              </p>
+              {result.mode === "high" ? <p><strong>Coût API estimé : {formatUsd(completedCost)}</strong> · reconnaissance des voix : 0 $.</p> : <p><strong>Coût API : 0 $</strong>.</p>}
+              {result.unresolvedSpeakers?.length ? <p className="transcription-result-warning">À confirmer : {result.unresolvedSpeakers.join(" · ")}</p> : null}
               {result.warnings?.length ? <p className="transcription-result-warning">{result.warnings.join(" · ")}</p> : null}
             </div>
-            <a href={`${API}/api/transcription/${result.jobId}/download`}>Télécharger le texte</a>
+            <div>
+              <a href={`${API}/api/transcription/${result.jobId}/download`}>Télécharger le texte</a>
+              {result.mode === "high" ? <><br /><a href={`${API}/api/transcription/${result.jobId}/download-verification`}>Télécharger la vérification GPT</a></> : null}
+            </div>
           </div>
           <pre>{transcript}</pre>
         </section>
