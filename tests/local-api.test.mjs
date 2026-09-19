@@ -89,14 +89,17 @@ test("API transcription : démarre sans secret et annonce son mode local", async
   });
 });
 
-test("API interlocuteurs : reste locale et ne nécessite aucun secret pour sa santé", async () => {
-  await withServer("backend/speaker-sync-server.js", 8012, async () => {
-    const response = await fetch("http://127.0.0.1:8012/api/speaker-sync/health", {
-      headers: { Origin: "http://localhost:5173" }
+test("API interlocuteurs : est intégrée au moteur de transcription", async () => {
+  await withServer("backend/transcription-server-v6.js", 8011, async () => {
+    const response = await fetch("http://127.0.0.1:8011/api/transcription/job-inexistant/speakers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "http://localhost:5173"
+      },
+      body: JSON.stringify({ mapping: { SPEAKER_00: "Test" } })
     });
-    assert.equal(response.status, 200);
+    assert.equal(response.status, 404);
     assert.equal(response.headers.get("access-control-allow-origin"), "http://localhost:5173");
-    const payload = await response.json();
-    assert.equal(payload.host, "127.0.0.1");
   });
 });

@@ -66,8 +66,8 @@ Pendant la consolidation :
 
 ### À faire avant intégration
 
-- [ ] absorber `speaker-sync-server.js` dans `transcription-server-v6.js` pour supprimer le port 8012 ;
-- [ ] créer un fichier de dépendances Python reproductible ;
+- [x] service de confirmation des interlocuteurs absorbé dans `transcription-server-v6.js` ; le port 8012 a été supprimé ;
+- [x] dépendances Python directes centralisées dans `requirements-transcription.txt` ;
 - [ ] ajouter un vrai lint du frontend ;
 - [ ] ajouter des tests fonctionnels des routes locales, au-delà des garde-fous statiques ;
 - [ ] connecter progressivement l'interface aux vraies données du backend ;
@@ -78,10 +78,9 @@ Pendant la consolidation :
 
 ### P0 — terminer la consolidation technique
 
-1. Absorber le service 8012 dans le moteur de transcription.
-2. Retester CI après suppression du service temporaire.
-3. Rendre les dépendances Python reproductibles.
-4. Ajouter lint et tests de routes.
+1. Retester CI après suppression du service 8012.
+2. Ajouter lint et approfondir les tests fonctionnels des routes.
+3. Valider une transcription locale courte sur le poste réel.
 
 ### P1 — validation sur le poste réel
 

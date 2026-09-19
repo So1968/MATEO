@@ -27,7 +27,7 @@ if [ ! -d "$VENV" ]; then
 fi
 
 "$VENV/bin/python" -m pip install --upgrade pip wheel setuptools
-"$VENV/bin/python" -m pip install "faster-whisper>=1.1,<2" "pyannote.audio>=4,<5"
+"$VENV/bin/python" -m pip install -r "$ROOT/requirements-transcription.txt"
 
 "$VENV/bin/python" - <<'PY'
 import faster_whisper

@@ -804,6 +804,153 @@ const upload = multer({
   limits: { fileSize: 1024 * 1024 * 1024, files: 1 }
 });
 
+
+function speakerMeetingDataPath(meetingId) {
+  const value = String(meetingId || "");
+  const slash = value.indexOf("/");
+  if (slash <= 0 || slash === value.length - 1) return null;
+  const projectSlug = value.slice(0, slash);
+  const meetingDir = value.slice(slash + 1);
+  if (!/^[A-Za-z0-9._-]+$/.test(projectSlug) || !/^[A-Za-z0-9._-]+$/.test(meetingDir)) return null;
+  if ([projectSlug, meetingDir].some((part) => part === "." || part === "..")) return null;
+  const resolved = path.resolve(PROJECTS_ROOT, projectSlug, "01_escales_reunions", meetingDir, "donnees_escale.json");
+  const root = path.resolve(PROJECTS_ROOT) + path.sep;
+  return resolved.startsWith(root) ? resolved : null;
+}
+
+function cleanSpeakerMapping(mapping, participants) {
+  if (!mapping || typeof mapping !== "object" || Array.isArray(mapping)) return {};
+  const allowed = new Set((participants || []).map((name) => String(name || "").trim()).filter(Boolean));
+  const clean = {};
+  for (const [sourceSpeaker, rawName] of Object.entries(mapping)) {
+    const speaker = String(sourceSpeaker || "").trim();
+    const name = String(rawName || "").trim();
+    if (!speaker || !name) continue;
+    if (allowed.size && !allowed.has(name)) continue;
+    clean[speaker] = name;
+  }
+  return clean;
+}
+
+function buildCorrectedTranscriptMarkdown(result) {
+  const lines = [
+    "# Transcription — Vogue Marry",
+    "",
+    `- Fichier : ${result.originalName || ""}`,
+    result.duration ? `- Durée : ${formatClock(result.duration)}` : null,
+    result.meeting?.title ? `- Escale : ${result.meeting.title}` : null,
+    result.participants?.length ? `- Participants : ${result.participants.join(", ")}` : null,
+    result.mode === "high" ? "- Mode : Contrôle renforcé · double lecture" : "- Mode : Local renforcé · gratuit",
+    result.mode === "high" && Number.isFinite(Number(result.verification?.estimatedCostUsd))
+      ? `- Coût API estimé : ${Number(result.verification.estimatedCostUsd).toFixed(2)} $`
+      : "- Coût API : 0 $",
+    result.speakerConfirmationsUpdatedAt ? `- Interlocuteurs confirmés : ${result.speakerConfirmationsUpdatedAt}` : null,
+    result.warnings?.length ? `- Avertissements : ${result.warnings.join(" | ")}` : null,
+    "",
+    "## Transcription",
+    ""
+  ].filter(Boolean);
+
+  for (const segment of result.segments || []) {
+    lines.push(`[${formatClock(segment.start)}] ${segment.speaker || "Intervenant"} — ${segment.text || ""}`);
+    lines.push("");
+  }
+
+  if (result.unresolvedSpeakers?.length) {
+    lines.push("## Interlocuteurs restant à confirmer", "");
+    for (const speaker of result.unresolvedSpeakers) lines.push(`- ${speaker}`);
+    lines.push("");
+  }
+
+  if (result.verification?.reviewChunks?.length) {
+    lines.push("## Passages à vérifier sur l'audio", "");
+    for (const chunk of result.verification.reviewChunks) {
+      lines.push(`- ${formatClock(chunk.start)} → ${formatClock(chunk.end)} · concordance locale/GPT ${Math.round((Number(chunk.similarity) || 0) * 100)} %`);
+    }
+    lines.push("");
+  }
+
+  return `${lines.join("\n").trim()}\n`;
+}
+
+function persistSpeakerMappingToMeeting(result, status, mapping, updatedAt) {
+  const meetingId = result.meeting?.id || status?.meetingId || "";
+  const dataPath = speakerMeetingDataPath(meetingId);
+  if (!dataPath || !fs.existsSync(dataPath)) return false;
+
+  const data = readJsonIfExists(dataPath) || {};
+  const confirmations = data.transcriptionSpeakerConfirmations && typeof data.transcriptionSpeakerConfirmations === "object"
+    ? data.transcriptionSpeakerConfirmations
+    : {};
+
+  confirmations[result.jobId] = {
+    updatedAt,
+    originalName: result.originalName || "",
+    mapping
+  };
+
+  data.transcriptionSpeakerConfirmations = confirmations;
+  writeJson(dataPath, data);
+  return true;
+}
+
+app.post("/api/transcription/:jobId/speakers", (req, res) => {
+  try {
+    const dir = requestJobDir(req.params.jobId);
+    if (!dir) return res.status(400).json({ error: "Identifiant de transcription invalide." });
+
+    const resultPath = path.join(dir, "transcription.json");
+    const jobStatusPath = path.join(dir, "status.json");
+    if (!fs.existsSync(resultPath)) return res.status(404).json({ error: "Transcription introuvable ou inachevée." });
+
+    const result = readJson(resultPath);
+    const status = readJsonIfExists(jobStatusPath) || {};
+    const mapping = cleanSpeakerMapping(req.body?.mapping, result.participants || []);
+    if (!Object.keys(mapping).length) return res.status(400).json({ error: "Aucune correspondance d'interlocuteur valide." });
+
+    const updatedAt = new Date().toISOString();
+    const mergedOverrides = { ...(result.speakerOverrides || {}), ...mapping };
+
+    result.segments = (result.segments || []).map((segment) => {
+      const confirmed = mergedOverrides[segment.sourceSpeaker];
+      return confirmed
+        ? { ...segment, speaker: confirmed, speakerConfidence: "confirme-manuel" }
+        : segment;
+    });
+    result.speakerOverrides = mergedOverrides;
+    result.unresolvedSpeakers = Array.from(new Set(
+      result.segments
+        .filter((segment) => segment.speakerConfidence === "non-identifie")
+        .map((segment) => segment.speaker)
+        .filter(Boolean)
+    ));
+    result.speakerConfirmationsUpdatedAt = updatedAt;
+    result.text = result.segments.map((segment) => `${segment.speaker || "Intervenant"} — ${segment.text || ""}`).join("\n");
+
+    writeJson(resultPath, result);
+    fs.writeFileSync(path.join(dir, "transcription.md"), buildCorrectedTranscriptMarkdown(result), "utf8");
+
+    const persistedToMeeting = persistSpeakerMappingToMeeting(result, status, mergedOverrides, updatedAt);
+    writeJson(jobStatusPath, {
+      ...status,
+      jobId: result.jobId,
+      speakerConfirmationsUpdatedAt: updatedAt,
+      speakerConfirmationsPersistedToMeeting: persistedToMeeting,
+      updatedAt
+    });
+
+    return res.json({
+      status: "ok",
+      persistedToMeeting,
+      mapping: mergedOverrides,
+      unresolvedSpeakers: result.unresolvedSpeakers,
+      result
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message || "Impossible d'enregistrer les interlocuteurs." });
+  }
+});
+
 app.get("/api/transcription/health", (req, res) => {
   const localReady = localEngineReady();
   const pyannoteReady = pyannoteInstalled();

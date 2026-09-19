@@ -10,8 +10,7 @@ const exists = (relativePath) => fs.existsSync(path.join(ROOT, relativePath));
 test("les services locaux restent limités à la boucle locale", () => {
   for (const file of [
     "backend/server.js",
-    "backend/transcription-server-v6.js",
-    "backend/speaker-sync-server.js"
+    "backend/transcription-server-v6.js"
   ]) {
     const source = read(file);
     assert.match(source, /app\.listen\([^\n]*"127\.0\.0\.1"/u, `${file} doit écouter uniquement sur 127.0.0.1`);
@@ -59,7 +58,9 @@ test("la synchronisation des interlocuteurs n'altère plus Storage.prototype", (
   const main = read("src/main.jsx");
   assert.doesNotMatch(main, /speaker-map-sync/u);
   const view = read("src/TranscriptionView.jsx");
-  assert.match(view, /SPEAKER_API/u);
+  assert.doesNotMatch(view, /SPEAKER_API/u);
+  assert.equal(exists("backend/speaker-sync-server.js"), false);
+  assert.match(read("backend/transcription-server-v6.js"), /\/api\/transcription\/:jobId\/speakers/u);
   assert.match(view, /Confirmer ces noms/u);
 });
 

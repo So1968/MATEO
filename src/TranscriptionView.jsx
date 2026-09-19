@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./transcription-view.css";
 
 const API = "http://localhost:8011";
-const SPEAKER_API = "http://localhost:8012";
 const LAST_JOB_KEY = "vogue-marry:last-transcription-job";
 const DEFAULT_CONTEXT = "Réunion professionnelle en français. Respecter les noms propres, sigles, termes métier et décisions entendues. Ne rien inventer si un passage est incertain.";
 const GPT_COST_PER_MINUTE_USD = 0.0045;
@@ -270,7 +269,7 @@ export default function TranscriptionView() {
 
     setSpeakerNotice("Enregistrement…");
     try {
-      const response = await fetch(`${SPEAKER_API}/api/transcription/${encodeURIComponent(result.jobId)}/speakers`, {
+      const response = await fetch(`${API}/api/transcription/${encodeURIComponent(result.jobId)}/speakers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mapping: speakerOverrides })

@@ -9,14 +9,14 @@
     "test": "node --test tests/*.test.mjs",
     "preview": "vite preview",
     "backend": "node backend/server.js",
-    "transcription": "concurrently -k -n moteur,voix \"VOGUE_WHISPER_MODEL=large-v3-turbo node backend/transcription-server-v6.js\" \"node backend/speaker-sync-server.js\"",
+    "transcription": "VOGUE_WHISPER_MODEL=large-v3-turbo node backend/transcription-server-v6.js",
     "transcription:setup": "bash scripts/setup-local-transcription.sh",
     "dev:all": "concurrently \"npm run backend\" \"npm run transcription\" \"npm run dev\""
   },
   "dependencies": {
     "@vitejs/plugin-react": "6.0.1",
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
+    "cors": "2.8.6",
+    "express": "5.2.1",
     "lucide-react": "1.14.0",
     "multer": "2.4.0",
     "react": "19.2.5",
@@ -24,7 +24,7 @@
     "vite": "8.0.10"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "9.2.1"
   },
   "type": "module"
 }
