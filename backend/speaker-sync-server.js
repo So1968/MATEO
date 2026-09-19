@@ -81,7 +81,11 @@ function buildCorrectedMarkdown(result) {
     result.meeting?.title ? `- Escale : ${result.meeting.title}` : null,
     result.participants?.length ? `- Participants : ${result.participants.join(", ")}` : null,
     result.mode === "high" ? "- Mode : Dossier sensible · vérifié" : "- Mode : Local renforcé · gratuit",
+    result.mode === "high" && Number.isFinite(Number(result.verification?.estimatedCostUsd))
+      ? `- Coût API estimé : ${Number(result.verification.estimatedCostUsd).toFixed(2)} $`
+      : "- Coût API : 0 $",
     result.speakerConfirmationsUpdatedAt ? `- Interlocuteurs confirmés : ${result.speakerConfirmationsUpdatedAt}` : null,
+    result.warnings?.length ? `- Avertissements : ${result.warnings.join(" | ")}` : null,
     "",
     "## Transcription",
     ""
@@ -95,6 +99,14 @@ function buildCorrectedMarkdown(result) {
   if (result.unresolvedSpeakers?.length) {
     lines.push("## Interlocuteurs restant à confirmer", "");
     for (const speaker of result.unresolvedSpeakers) lines.push(`- ${speaker}`);
+    lines.push("");
+  }
+
+  if (result.verification?.reviewChunks?.length) {
+    lines.push("## Passages à vérifier sur l'audio", "");
+    for (const chunk of result.verification.reviewChunks) {
+      lines.push(`- ${formatClock(chunk.start)} → ${formatClock(chunk.end)} · concordance locale/GPT ${Math.round((Number(chunk.similarity) || 0) * 100)} %`);
+    }
     lines.push("");
   }
 
