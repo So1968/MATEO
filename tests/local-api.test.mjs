@@ -258,6 +258,120 @@ test("API Coffre : propose puis valide le classement d’un document local", asy
   });
 });
 
+test("API mémoire : extrait puis valide actions et décisions des journaux", async () => {
+  await withServer("backend/server.js", 8010, async (home) => {
+    const requestOptions = {
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "http://localhost:5173"
+      }
+    };
+    const projectResponse = await fetch("http://127.0.0.1:8010/api/projects", {
+      method: "POST",
+      ...requestOptions,
+      body: JSON.stringify({ name: "Projet connaissance" })
+    });
+    assert.equal(projectResponse.status, 201);
+
+    const meetingResponse = await fetch("http://127.0.0.1:8010/api/meetings/export", {
+      method: "POST",
+      ...requestOptions,
+      body: JSON.stringify({
+        projectName: "Projet connaissance",
+        meetingDate: "2026-09-19",
+        meetingType: "réunion",
+        title: "Décisions et actions",
+        decisions: "| Date | Cap validé / décision | Statut | Source | Impact |\n|---|---|---|---|---|\n| 2026-09-19 | Utiliser la mémoire locale | Acté | Réunion | Moins de doublons |",
+        actions: "- Préparer la courte transcription locale\n- Vérifier le classement du Coffre",
+        rawNotes: "[]"
+      })
+    });
+    assert.equal(meetingResponse.status, 201);
+    const meetingPayload = await meetingResponse.json();
+
+    const beforeValidation = await fetch("http://127.0.0.1:8010/api/knowledge/action?projectSlug=projet_connaissance", {
+      headers: { Origin: "http://localhost:5173" }
+    });
+    assert.equal(beforeValidation.status, 200);
+    assert.equal((await beforeValidation.json()).count, 0);
+
+    const journalValidation = await fetch("http://127.0.0.1:8010/api/meetings/validate", {
+      method: "POST",
+      ...requestOptions,
+      body: JSON.stringify({ projectSlug: "projet_connaissance", meetingDirName: meetingPayload.meetingDirName })
+    });
+    assert.equal(journalValidation.status, 201);
+
+    const actionsResponse = await fetch("http://127.0.0.1:8010/api/knowledge/action?projectSlug=projet_connaissance", {
+      headers: { Origin: "http://localhost:5173" }
+    });
+    const actionsPayload = await actionsResponse.json();
+    assert.equal(actionsPayload.pendingCount, 2);
+    assert.equal(actionsPayload.items[0].reviewStatus, "à valider");
+    assert.equal(actionsPayload.items[0].projectSlug, "projet_connaissance");
+
+    const decisionsResponse = await fetch("http://127.0.0.1:8010/api/knowledge/decision?projectSlug=projet_connaissance", {
+      headers: { Origin: "http://localhost:5173" }
+    });
+    const decisionsPayload = await decisionsResponse.json();
+    assert.equal(decisionsPayload.pendingCount, 1);
+    assert.equal(decisionsPayload.items[0].decision, "Utiliser la mémoire locale");
+
+    const actionToValidate = actionsPayload.items.find((item) => item.action === "Préparer la courte transcription locale");
+    const actionValidation = await fetch("http://127.0.0.1:8010/api/knowledge/action/validate", {
+      method: "POST",
+      ...requestOptions,
+      body: JSON.stringify({
+        itemId: actionToValidate.id,
+        projectSlug: "projet_connaissance",
+        item: {
+          action: actionToValidate.action,
+          responsable: "Sofia",
+          echeance: "2026-09-20",
+          statut: "À faire"
+        }
+      })
+    });
+    assert.equal(actionValidation.status, 201);
+
+    const decisionToValidate = decisionsPayload.items[0];
+    const decisionValidation = await fetch("http://127.0.0.1:8010/api/knowledge/decision/validate", {
+      method: "POST",
+      ...requestOptions,
+      body: JSON.stringify({
+        itemId: decisionToValidate.id,
+        projectSlug: "projet_connaissance",
+        item: {
+          decision: decisionToValidate.decision,
+          date: decisionToValidate.date,
+          statut: "Validé",
+          impact: decisionToValidate.impact
+        }
+      })
+    });
+    assert.equal(decisionValidation.status, 201);
+
+    const storedActions = JSON.parse(fs.readFileSync(path.join(
+      home,
+      "VOGUE-MERRY-DONNEES",
+      "01_PROJETS",
+      "projet_connaissance",
+      "03_manoeuvres_actions",
+      "manoeuvres_actions.json"
+    ), "utf8"));
+    const storedDecisions = JSON.parse(fs.readFileSync(path.join(
+      home,
+      "VOGUE-MERRY-DONNEES",
+      "01_PROJETS",
+      "projet_connaissance",
+      "02_caps_valides_decisions",
+      "caps_valides.json"
+    ), "utf8"));
+    assert.equal(storedActions[0].responsable, "Sofia");
+    assert.equal(storedDecisions[0].statut, "Validé");
+  });
+});
+
 test("API unifiée : expose la transcription locale sur 8010", async () => {
   await withUnifiedServer(async () => {
     const response = await fetch("http://127.0.0.1:8010/api/transcription/health", {

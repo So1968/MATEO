@@ -134,6 +134,24 @@ test("le Coffre expose les documents locaux avec validation humaine", () => {
   assert.equal(exists("src/features/documents/DocumentsView.jsx"), true);
 });
 
+test("les Manœuvres et Caps viennent des journaux validés", () => {
+  const memoryApi = read("backend/server.js");
+  const localApi = read("src/lib/local-api.js");
+  const knowledgeView = read("src/features/knowledge/KnowledgeView.jsx");
+  const app = read("src/App.jsx");
+  assert.match(memoryApi, /app\.get\("\/api\/knowledge\/:kind"/u);
+  assert.match(memoryApi, /app\.post\("\/api\/knowledge\/:kind\/validate"/u);
+  assert.match(memoryApi, /journal_de_bord_valide\.md/u);
+  assert.match(memoryApi, /reviewStatus: "à valider"/u);
+  assert.match(localApi, /loadKnowledge/u);
+  assert.match(localApi, /validateKnowledge/u);
+  assert.match(knowledgeView, /journaux de bord validés/u);
+  assert.match(knowledgeView, /Valider ce/u);
+  assert.match(app, /KnowledgeView kind="action"/u);
+  assert.match(app, /KnowledgeView kind="decision"/u);
+  assert.equal(exists("src/features/knowledge/KnowledgeView.jsx"), true);
+});
+
 test("le nombre de participants ne force pas le nombre de voix Pyannote", () => {
   const server = read("backend/transcription-server-v6.js");
   assert.doesNotMatch(server, /args\.push\("--num-speakers"/u);

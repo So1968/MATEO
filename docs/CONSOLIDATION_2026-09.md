@@ -75,6 +75,7 @@ Pendant la consolidation :
 - [x] interface et tests de transcription branchés sur la façade unifiée 8010 ;
 - [x] transcription V6 recopiée dans l'escale et affichée dans le journal ; lecture et validation reliées à l'interface ;
 - [x] Coffre branché sur les documents locaux, avec dépôt Water Seven, proposition de classement et validation humaine vers une île ;
+- [x] Manœuvres et Caps validés alimentés par les journaux de bord validés, avec proposition puis validation humaine ;
 - [ ] faire tourner les tests locaux sur le poste de développement ;
 - [ ] tester une courte transcription locale sans appel API payant.
 
@@ -96,8 +97,7 @@ Pendant la consolidation :
 
 ### P2 — réunification produit
 
-1. Extraire les Manœuvres et Caps validés depuis les journaux.
-2. Faire du Log Pose une vraie reprise de contexte persistée.
+1. Faire du Log Pose une vraie reprise de contexte persistée.
 
 ## Condition avant intégration dans `main`
 

@@ -44,6 +44,22 @@ export function validateDocument({ sourceId, projectSlug }) {
   });
 }
 
+export async function loadKnowledge(kind, projectSlug = "") {
+  const params = projectSlug ? `?projectSlug=${encodeURIComponent(projectSlug)}` : "";
+  const payload = await localApi(`/api/knowledge/${kind}${params}`);
+  return {
+    items: Array.isArray(payload.items) ? payload.items : [],
+    pendingCount: Number(payload.pendingCount || 0)
+  };
+}
+
+export function validateKnowledge(kind, { itemId, projectSlug, item }) {
+  return localApi(`/api/knowledge/${kind}/validate`, {
+    method: "POST",
+    body: JSON.stringify({ itemId, projectSlug, item })
+  });
+}
+
 export async function searchMemory(query, projectSlug = "") {
   const params = new URLSearchParams({ q: query });
   if (projectSlug) params.set("projectSlug", projectSlug);

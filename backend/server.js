@@ -353,6 +353,282 @@ function findReportPaths(meetingDir) {
   };
 }
 
+const KNOWLEDGE_CONFIG = {
+  action: {
+    label: "Manœuvres",
+    folder: "03_manoeuvres_actions",
+    fileName: "manoeuvres_actions.json",
+    markdownName: "manoeuvres_actions.md",
+    textField: "action"
+  },
+  decision: {
+    label: "Caps validés",
+    folder: "02_caps_valides_decisions",
+    fileName: "caps_valides.json",
+    markdownName: "caps_valides.md",
+    textField: "decision"
+  }
+};
+
+const KNOWLEDGE_HEADINGS = {
+  action: ["manœuvres / actions à faire", "manoeuvres / actions à faire", "actions à mener"],
+  decision: ["caps validés / décisions prises", "caps valides / decisions prises", "décisions actées", "repères validés"]
+};
+
+function normalizeKnowledgeText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function markdownCells(line) {
+  return String(line || "")
+    .trim()
+    .replace(/^\|/u, "")
+    .replace(/\|$/u, "")
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function isMarkdownSeparator(line) {
+  return /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$/u.test(String(line || "").trim());
+}
+
+function extractMarkdownSection(content, headings) {
+  const wanted = new Set(headings.map(normalizeKnowledgeText));
+  const lines = String(content || "").split(/\r?\n/u);
+  const start = lines.findIndex((line) => {
+    if (!/^#{2,6}\s+/u.test(line.trim())) return false;
+    return wanted.has(normalizeKnowledgeText(line.replace(/^#{2,6}\s+/u, "")));
+  });
+  if (start < 0) return [];
+
+  const section = [];
+  for (const line of lines.slice(start + 1)) {
+    if (/^#{1,6}\s+/u.test(line.trim())) break;
+    section.push(line);
+  }
+  return section;
+}
+
+function parseKnowledgeSection(lines, kind) {
+  const meaningfulLines = lines.map((line) => line.trim()).filter(Boolean);
+  if (!meaningfulLines.length) return [];
+
+  const tableLines = meaningfulLines.filter((line) => line.startsWith("|"));
+  if (tableLines.length >= 2 && isMarkdownSeparator(tableLines[1])) {
+    const headers = markdownCells(tableLines[0]).map(normalizeKnowledgeText);
+    return tableLines.slice(2)
+      .filter((line) => !isMarkdownSeparator(line))
+      .map((line) => {
+        const values = markdownCells(line);
+        return Object.fromEntries(headers.map((header, index) => [header, values[index] || ""]));
+      })
+      .filter((row) => Object.values(row).some(Boolean));
+  }
+
+  return meaningfulLines
+    .map((line) => line.replace(/^[-*]\s+/u, "").replace(/^\d+[.)]\s+/u, "").trim())
+    .filter(Boolean)
+    .map((text) => ({ [kind === "action" ? "action" : "decision"]: text }));
+}
+
+function pickKnowledgeValue(row, names) {
+  for (const name of names) {
+    const value = row[normalizeKnowledgeText(name)];
+    if (value) return value.trim();
+  }
+  return "";
+}
+
+function knowledgeItemId(kind, projectSlug, meetingDirName, index, text) {
+  const compactText = slugify(text).slice(0, 48) || "a_completer";
+  return `${kind}:${projectSlug}:${meetingDirName}:${index}:${compactText}`;
+}
+
+function knowledgeSource(data, meetingDirName) {
+  return `Journal de bord — ${data?.title || meetingDirName}`;
+}
+
+function makeKnowledgeItem(kind, projectSlug, meetingDirName, data, row, index, origin = "journal") {
+  const config = KNOWLEDGE_CONFIG[kind];
+  const text = pickKnowledgeValue(row, kind === "action"
+    ? ["action", "manœuvre / action", "manoeuvre / action", "manœuvre"]
+    : ["cap validé / décision", "cap valide / decision", "décision", "decision", "repère validé"]);
+  const meetingDate = data?.meetingDate || meetingDirName.slice(0, 10);
+  const item = {
+    id: knowledgeItemId(kind, projectSlug, meetingDirName, index, text),
+    kind,
+    reviewStatus: "à valider",
+    projectSlug,
+    projectName: data?.projectName || projectSlug.replaceAll("_", " "),
+    meetingDirName,
+    date: pickKnowledgeValue(row, ["date"]) || meetingDate,
+    source: pickKnowledgeValue(row, ["source"]) || knowledgeSource(data, meetingDirName),
+    origin,
+    needsDetail: !text
+  };
+
+  if (kind === "action") {
+    item.action = text;
+    item.responsable = pickKnowledgeValue(row, ["responsable", "responsable(s)"]);
+    item.echeance = pickKnowledgeValue(row, ["échéance", "echeance", "date"]);
+    item.statut = pickKnowledgeValue(row, ["statut", "status"]) || "À préciser";
+    item.decisionId = pickKnowledgeValue(row, ["décision liée", "decision liee"]);
+    item.documentId = pickKnowledgeValue(row, ["document lié", "document lie"]);
+  } else {
+    item.decision = text;
+    item.impact = pickKnowledgeValue(row, ["impact", "conséquence", "consequence"]);
+    item.statut = pickKnowledgeValue(row, ["statut", "status"]) || "À préciser";
+  }
+
+  return { ...item, needsDetail: origin === "marqueur" || item.needsDetail || !item[config.textField] };
+}
+
+function meetingMarkerRows(data) {
+  try {
+    const markers = JSON.parse(String(data?.rawNotes || ""));
+    if (!Array.isArray(markers)) return [];
+    return markers
+      .filter((marker) => marker?.type === "action" || marker?.type === "decision")
+      .map((marker) => ({
+        type: marker.type,
+        text: marker.text || marker.content || marker.note || `${marker.label || (marker.type === "action" ? "Action" : "Décision")} repérée à ${marker.timeLabel || "un moment de l’escale"} — à préciser`
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function extractKnowledgeFromMeeting(projectSlug, meetingEntry, data, content, kind) {
+  const rows = parseKnowledgeSection(extractMarkdownSection(content, KNOWLEDGE_HEADINGS[kind]), kind);
+  const items = rows.map((row, index) => makeKnowledgeItem(kind, projectSlug, meetingEntry.name, data, row, index));
+  const seenTexts = new Set(items.map((item) => normalizeKnowledgeText(item[KNOWLEDGE_CONFIG[kind].textField])));
+  const markerRows = meetingMarkerRows(data).filter((marker) => marker.type === kind);
+  const markerOffset = items.length;
+  markerRows.forEach((marker, index) => {
+    const item = makeKnowledgeItem(kind, projectSlug, meetingEntry.name, data, {
+      [kind === "action" ? "action" : "decision"]: marker.text
+    }, markerOffset + index, "marqueur");
+    const normalizedText = normalizeKnowledgeText(item[KNOWLEDGE_CONFIG[kind].textField]);
+    if (!seenTexts.has(normalizedText)) {
+      items.push(item);
+      seenTexts.add(normalizedText);
+    }
+  });
+  return items;
+}
+
+function readKnowledgeEntries(projectSlug, kind) {
+  const config = KNOWLEDGE_CONFIG[kind];
+  const filePath = safePathInside(PROJECTS_ROOT, projectSlug, config.folder, config.fileName);
+  const entries = readJsonIfExists(filePath);
+  if (Array.isArray(entries)) {
+    return entries.map((entry, index) => normalizeStoredKnowledgeEntry(projectSlug, kind, entry, index));
+  }
+
+  const markdownPath = safePathInside(PROJECTS_ROOT, projectSlug, config.folder, config.markdownName);
+  if (!fs.existsSync(markdownPath)) return [];
+  const rows = parseKnowledgeSection(fs.readFileSync(markdownPath, "utf8").split(/\r?\n/u), kind);
+  return rows.map((row, index) => normalizeStoredKnowledgeEntry(projectSlug, kind, row, index));
+}
+
+function normalizeStoredKnowledgeEntry(projectSlug, kind, entry, index) {
+  const config = KNOWLEDGE_CONFIG[kind];
+  const mapped = kind === "action"
+    ? {
+      action: entry?.action || pickKnowledgeValue(entry, ["action", "manœuvre / action", "manoeuvre / action", "manœuvre"]),
+      responsable: entry?.responsable || pickKnowledgeValue(entry, ["responsable"]),
+      echeance: entry?.echeance || pickKnowledgeValue(entry, ["échéance", "echeance"]),
+      statut: entry?.statut || pickKnowledgeValue(entry, ["statut", "status"]),
+      decisionId: entry?.decisionId || pickKnowledgeValue(entry, ["décision liée", "decision liee"]),
+      documentId: entry?.documentId || pickKnowledgeValue(entry, ["document lié", "document lie"])
+    }
+    : {
+      decision: entry?.decision || pickKnowledgeValue(entry, ["cap validé / décision", "cap valide / decision", "décision", "decision"]),
+      date: entry?.date || pickKnowledgeValue(entry, ["date"]),
+      statut: entry?.statut || pickKnowledgeValue(entry, ["statut", "status"]),
+      impact: entry?.impact || pickKnowledgeValue(entry, ["impact"])
+    };
+  const text = String(mapped[config.textField] || "").trim();
+  return {
+    ...entry,
+    ...mapped,
+    id: entry?.id || knowledgeItemId(kind, projectSlug, entry?.meetingDirName || "manuel", index, text),
+    kind,
+    reviewStatus: "validé",
+    projectSlug,
+    projectName: entry?.projectName || projectSlug.replaceAll("_", " "),
+    meetingDirName: entry?.meetingDirName || "",
+    date: entry?.date || "À confirmer",
+    source: entry?.source || "Mémoire projet"
+  };
+}
+
+function readValidatedKnowledgeProposals(projectSlug, kind) {
+  const projectDir = safePathInside(PROJECTS_ROOT, projectSlug);
+  const meetingsDir = path.join(projectDir, "01_escales_reunions");
+  if (!fs.existsSync(meetingsDir)) return [];
+
+  const proposals = [];
+  const meetings = fs.readdirSync(meetingsDir, { withFileTypes: true });
+  for (const meeting of meetings) {
+    if (!meeting.isDirectory() || meeting.isSymbolicLink()) continue;
+    const meetingDir = path.join(meetingsDir, meeting.name);
+    const validatedPath = findReportPaths(meetingDir).validatedPath;
+    if (!fs.existsSync(validatedPath)) continue;
+    const content = fs.readFileSync(validatedPath, "utf8");
+    proposals.push(...extractKnowledgeFromMeeting(projectSlug, meeting, readMeetingData(meetingDir) || {}, content, kind));
+  }
+  return proposals;
+}
+
+function knowledgeMarkdownValue(value) {
+  return String(value || "").replace(/\r?\n/gu, " ").replace(/\|/gu, "\\|").trim();
+}
+
+function writeKnowledgeEntries(projectSlug, kind, entries) {
+  const config = KNOWLEDGE_CONFIG[kind];
+  const directory = safePathInside(PROJECTS_ROOT, projectSlug, config.folder);
+  ensureDir(directory);
+  fs.writeFileSync(path.join(directory, config.fileName), JSON.stringify(entries, null, 2), "utf8");
+
+  const projectName = entries[0]?.projectName || projectSlug.replaceAll("_", " ");
+  const lines = kind === "action"
+    ? [
+      `# Manœuvres / actions — ${projectName}`,
+      "",
+      "| Action | Responsable | Échéance | Statut | Source | Île | Décision liée | Document lié |",
+      "|---|---|---|---|---|---|---|---|",
+      ...entries.map((entry) => `| ${knowledgeMarkdownValue(entry.action)} | ${knowledgeMarkdownValue(entry.responsable)} | ${knowledgeMarkdownValue(entry.echeance)} | ${knowledgeMarkdownValue(entry.statut)} | ${knowledgeMarkdownValue(entry.source)} | ${knowledgeMarkdownValue(entry.projectName)} | ${knowledgeMarkdownValue(entry.decisionId)} | ${knowledgeMarkdownValue(entry.documentId)} |`)
+    ]
+    : [
+      `# Caps validés / décisions — ${projectName}`,
+      "",
+      "| Date | Cap validé / décision | Statut | Source | Impact | Île |",
+      "|---|---|---|---|---|---|",
+      ...entries.map((entry) => `| ${knowledgeMarkdownValue(entry.date)} | ${knowledgeMarkdownValue(entry.decision)} | ${knowledgeMarkdownValue(entry.statut)} | ${knowledgeMarkdownValue(entry.source)} | ${knowledgeMarkdownValue(entry.impact)} | ${knowledgeMarkdownValue(entry.projectName)} |`)
+    ];
+  fs.writeFileSync(path.join(directory, config.markdownName), `${lines.join("\n")}\n`, "utf8");
+}
+
+function knowledgeItemsForProject(projectSlug, kind) {
+  const accepted = readKnowledgeEntries(projectSlug, kind).map((item) => ({ ...item, reviewStatus: "validé" }));
+  const acceptedIds = new Set(accepted.map((item) => item.id));
+  const proposals = readValidatedKnowledgeProposals(projectSlug, kind)
+    .filter((item) => !acceptedIds.has(item.id));
+  return [...accepted, ...proposals];
+}
+
+function safeKnowledgeKind(value) {
+  const kind = String(value || "").trim();
+  if (!Object.hasOwn(KNOWLEDGE_CONFIG, kind)) throw new Error("Type de mémoire invalide.");
+  return kind;
+}
+
 function meetingHasAudio(meetingDir) {
   try {
     return fs.readdirSync(meetingDir).some((name) => name.startsWith("audio_original."));
@@ -873,6 +1149,81 @@ app.post("/api/meetings/save-report", (req, res) => {
     res.json({ status: "ok", savedFileName: path.basename(exportedPath) });
   } catch (error) {
     res.status(400).json({ error: error.message || "Erreur pendant l’enregistrement du journal de bord." });
+  }
+});
+
+app.get("/api/knowledge/:kind", (req, res) => {
+  try {
+    const kind = safeKnowledgeKind(req.params.kind);
+    const requestedProject = String(req.query.projectSlug || "").trim();
+    const projectSlug = requestedProject ? safeSegment(requestedProject) : "";
+    if (requestedProject && !projectSlug) throw new Error("Île/projet invalide.");
+
+    ensureDir(PROJECTS_ROOT);
+    const projectSlugs = projectSlug
+      ? [projectSlug]
+      : fs.readdirSync(PROJECTS_ROOT, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && !entry.isSymbolicLink())
+        .map((entry) => entry.name);
+    const items = projectSlugs.flatMap((slug) => knowledgeItemsForProject(slug, kind));
+    items.sort((a, b) => {
+      if (a.reviewStatus !== b.reviewStatus) return a.reviewStatus === "à valider" ? -1 : 1;
+      return String(b.date || "").localeCompare(String(a.date || ""));
+    });
+
+    res.json({
+      kind,
+      projectSlug,
+      count: items.length,
+      pendingCount: items.filter((item) => item.reviewStatus === "à valider").length,
+      items
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message || "Erreur pendant la lecture de la mémoire projet." });
+  }
+});
+
+app.post("/api/knowledge/:kind/validate", (req, res) => {
+  try {
+    const kind = safeKnowledgeKind(req.params.kind);
+    const projectSlug = safeSegment(req.body.projectSlug);
+    const itemId = String(req.body.itemId || "").trim();
+    if (!projectSlug || !itemId) throw new Error("Île/projet et élément obligatoires.");
+
+    const projectDir = safePathInside(PROJECTS_ROOT, projectSlug);
+    if (!fs.existsSync(projectDir)) throw new Error("Île/projet introuvable.");
+
+    const accepted = readKnowledgeEntries(projectSlug, kind);
+    const alreadyAccepted = accepted.find((item) => item.id === itemId);
+    if (alreadyAccepted) return res.status(200).json({ status: "ok", item: { ...alreadyAccepted, reviewStatus: "validé" } });
+
+    const candidate = readValidatedKnowledgeProposals(projectSlug, kind).find((item) => item.id === itemId);
+    if (!candidate) throw new Error("Élément non trouvé dans un journal de bord validé.");
+
+    const editableFields = kind === "action"
+      ? ["action", "responsable", "echeance", "statut", "decisionId", "documentId"]
+      : ["decision", "date", "statut", "impact"];
+    const submitted = req.body.item && typeof req.body.item === "object" ? req.body.item : {};
+    const validatedItem = { ...candidate };
+    editableFields.forEach((field) => {
+      if (Object.hasOwn(submitted, field)) validatedItem[field] = String(submitted[field] || "").trim();
+    });
+
+    const textField = KNOWLEDGE_CONFIG[kind].textField;
+    if (!validatedItem[textField]) throw new Error("Le contenu de l’élément ne peut pas être vide.");
+    if (candidate.origin === "marqueur" && !Object.hasOwn(submitted, textField)) {
+      throw new Error("Précisez l’action ou la décision repérée avant validation.");
+    }
+
+    const storedItem = {
+      ...validatedItem,
+      reviewStatus: "validé",
+      validatedAt: new Date().toISOString()
+    };
+    writeKnowledgeEntries(projectSlug, kind, [...accepted, storedItem]);
+    res.status(201).json({ status: "ok", item: storedItem });
+  } catch (error) {
+    res.status(400).json({ error: error.message || "Erreur pendant la validation de l’élément." });
   }
 });
 

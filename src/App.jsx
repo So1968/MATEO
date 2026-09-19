@@ -15,6 +15,7 @@ import {
 import { loadInbox, loadProjects } from "./lib/local-api.js";
 import MeetingsView from "./features/meetings/MeetingsView.jsx";
 import DocumentsView from "./features/documents/DocumentsView.jsx";
+import KnowledgeView from "./features/knowledge/KnowledgeView.jsx";
 import ProjectsView from "./features/projects/ProjectsView.jsx";
 import { makeProjectViewModel } from "./features/projects/project-utils.js";
 import SearchView from "./features/search/SearchView.jsx";
@@ -217,6 +218,30 @@ button { font: inherit; }
 .document-review-actions select { width: 100%; padding: 8px 7px; color: #332715; border: 1px solid rgba(112,75,28,.34); border-radius: 6px; background: rgba(255,255,255,.65); font: .76rem Arial,sans-serif; }
 .document-review-actions button { padding: 8px 10px; color: #26313a; border: 1px solid #b7873d; border-radius: 6px; background: #efd79c; cursor: pointer; font: 700 .68rem Arial,sans-serif; }
 .document-review-actions button:disabled { opacity: .55; cursor: not-allowed; }
+.knowledge-toolbar { margin-bottom: 18px; padding: 13px 15px; display: flex; align-items: end; gap: 14px; color: #4d3b25; border: 1px solid #8d6431; border-radius: 9px; background: linear-gradient(180deg,#fff1ca,#e5c785); }
+.knowledge-toolbar label { display: grid; gap: 5px; color: #6d542f; font: 700 .67rem Arial,sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+.knowledge-toolbar select { min-width: 190px; padding: 8px 9px; color: #332715; border: 1px solid rgba(112,75,28,.34); border-radius: 6px; background: rgba(255,255,255,.65); font: .78rem Arial,sans-serif; }
+.knowledge-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.knowledge-card { min-height: 0; }
+.knowledge-card-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.knowledge-card-heading h3 { margin-bottom: 4px; overflow-wrap: anywhere; }
+.knowledge-status { flex: 0 0 auto; padding: 5px 7px; color: #315b43; border: 1px solid rgba(49,91,67,.24); border-radius: 999px; background: rgba(170,224,183,.35); font: 700 .64rem Arial,sans-serif; }
+.knowledge-status.pending { color: #82501f; border-color: rgba(130,80,31,.28); background: rgba(239,215,156,.58); }
+.knowledge-meta { margin-top: 8px !important; color: #806334 !important; font-size: .74rem !important; }
+.knowledge-warning { margin-top: 9px !important; padding: 7px 9px; color: #82501f !important; border: 1px solid rgba(130,80,31,.24); border-radius: 6px; background: rgba(239,215,156,.4); font-size: .72rem !important; }
+.knowledge-edit-form { margin-top: 14px; padding: 11px; border: 1px solid rgba(112,75,28,.24); border-radius: 7px; background: rgba(255,255,255,.22); }
+.knowledge-edit-form label { display: grid; gap: 5px; margin-bottom: 9px; color: #6d542f; font: 700 .65rem Arial,sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+.knowledge-edit-form input, .knowledge-edit-form textarea { width: 100%; min-width: 0; padding: 8px 9px; color: #332715; border: 1px solid rgba(112,75,28,.34); border-radius: 6px; background: rgba(255,255,255,.65); font: .78rem/1.35 Arial,sans-serif; resize: vertical; }
+.knowledge-edit-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.knowledge-edit-grid label { margin-bottom: 0; }
+.knowledge-wide-field { grid-column: 1/-1; }
+.knowledge-validate-button { margin-top: 11px; padding: 8px 10px; color: #26313a; border: 1px solid #b7873d; border-radius: 6px; background: #efd79c; cursor: pointer; font: 700 .68rem Arial,sans-serif; }
+.knowledge-validate-button:disabled { opacity: .55; cursor: not-allowed; }
+.knowledge-details { margin-top: 14px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+.knowledge-details > div { padding: 8px 9px; border: 1px solid rgba(112,75,28,.2); border-radius: 6px; background: rgba(255,255,255,.2); }
+.knowledge-details strong, .knowledge-details span { display: block; }
+.knowledge-details strong { color: #806334; font: 700 .62rem Arial,sans-serif; letter-spacing: .05em; text-transform: uppercase; }
+.knowledge-details span { margin-top: 3px; color: #5f4c31; font: .72rem/1.35 Arial,sans-serif; overflow-wrap: anywhere; }
 .search-form { margin-bottom: 20px; padding: 16px; color: #4d3b25; border: 1px solid #8d6431; border-radius: 9px; background: linear-gradient(180deg,#fff1ca,#e5c785); }
 .search-form label { display: block; margin-bottom: 7px; font: 700 .7rem Arial,sans-serif; letter-spacing: .06em; text-transform: uppercase; }
 .search-form > div { display: flex; gap: 8px; }
@@ -384,10 +409,14 @@ button { font: inherit; }
   .pont-view { height: auto; min-height: 680px; overflow: visible; }
   .priorities-grid { grid-template-columns: 1fr; }
   .sea-map, .generic-view, .islands-view, .project-world-view { min-height: 680px; }
-  .generic-grid, .island-project-grid, .world-overview, .world-items, .document-list { grid-template-columns: 1fr; }
+  .generic-grid, .island-project-grid, .world-overview, .world-items, .document-list, .knowledge-list { grid-template-columns: 1fr; }
   .meeting-list, .search-results { grid-template-columns: 1fr; }
   .documents-toolbar { align-items: stretch; flex-direction: column; }
   .documents-toolbar select { width: 100%; }
+  .knowledge-toolbar { align-items: stretch; flex-direction: column; }
+  .knowledge-toolbar select { width: 100%; }
+  .knowledge-edit-grid, .knowledge-details { grid-template-columns: 1fr; }
+  .knowledge-wide-field { grid-column: auto; }
   .meeting-setup, .meeting-setup-fields { grid-template-columns: 1fr; }
   .markerGrid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .world-summary-card.wide { grid-column: auto; }
@@ -420,7 +449,7 @@ function Sidebar({ active, onChange, projectCount, meetingCount, journalCount })
         <p>Le journal de bord<br />qui vous aide à garder<br />le cap sur vos projets.</p>
       </div>
       <nav className="side-nav">
-        {MENU.filter(({ id }) => id !== "manoeuvres" && id !== "caps").map(({ id, label, sublabel, icon: Icon }) => (
+        {MENU.map(({ id, label, sublabel, icon: Icon }) => (
           <button key={id} className={active === id ? "active" : ""} onClick={() => onChange(id)}>
             <span className="nav-icon"><Icon size={25} /></span>
             <span className="nav-label"><strong>{label}</strong><span>{sublabel}</span></span>
@@ -693,12 +722,10 @@ function GenericView({ active, meetings, projects, loading, error, onSaved }) {
   if (active === "journal") return <MeetingsView meetings={meetings} loading={loading} error={error} journalOnly onSaved={onSaved} />;
   if (active === "coffre") return <DocumentsView projects={projects} />;
   if (active === "longuevue") return <SearchView />;
+  if (active === "manoeuvres") return <KnowledgeView kind="action" projects={projects} />;
+  if (active === "caps") return <KnowledgeView kind="decision" projects={projects} />;
 
-  const labels = {
-    manoeuvres: ["Manœuvres", "Les actions seront extraites des journaux validés dans la prochaine tranche."],
-    caps: ["Caps validés", "Les décisions seront extraites des journaux validés dans la prochaine tranche."]
-  };
-  const [title, text] = labels[active] || ["Espace Vogue Marry", "Sélectionnez une fonction dans le menu."];
+  const [title, text] = ["Espace Vogue Marry", "Sélectionnez une fonction dans le menu."];
   return (
     <section className="generic-view">
       <div className="data-empty">

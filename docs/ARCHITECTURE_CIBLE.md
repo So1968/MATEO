@@ -12,6 +12,8 @@ Quand une transcription est liée à une escale, V6 conserve le résultat techni
 
 Le Coffre expose les documents locaux via `/api/documents`. Un dépôt arrive d'abord dans `00_WATER_SEVEN_PORT_ENTREE`, reçoit une proposition de classement, puis n'est déplacé vers `08_coffre_documents_sources` qu'après validation humaine. L'API ne renvoie que des chemins relatifs à la mémoire locale, jamais de chemin absolu.
 
+Les journaux de bord validés alimentent ensuite deux sorties structurées : les actions proposées dans `03_manoeuvres_actions` et les décisions proposées dans `02_caps_valides_decisions`. Elles restent en attente tant qu'une personne ne les a pas relues et validées ; les marqueurs `Action` et `Décision` sans détail demandent une précision avant enregistrement.
+
 ## Sources de vérité
 
 Les données utilisateur ne vivent pas dans le code React.
@@ -57,7 +59,9 @@ Les routes documentaires principales sont :
 
 - `GET /api/documents` : documents classés, pièces jointes d'escales et documents entrants à valider ;
 - `POST /api/water-seven/deposit` : dépôt local d'un fichier ;
-- `POST /api/documents/validate` : classement confirmé vers une île et le Coffre.
+- `POST /api/documents/validate` : classement confirmé vers une île et le Coffre ;
+- `GET /api/knowledge/action` et `GET /api/knowledge/decision` : propositions et éléments validés ;
+- `POST /api/knowledge/action/validate` et `POST /api/knowledge/decision/validate` : validation humaine d'une action ou d'une décision.
 
 Le service doit écouter uniquement sur `127.0.0.1`.
 
