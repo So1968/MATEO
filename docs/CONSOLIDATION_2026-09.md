@@ -41,7 +41,7 @@ La migration vers cette structure doit se faire progressivement, sans casser l'�
 
 - `backend/server.js` : API locale principale et mémoire projet
 - `backend/transcription-server-v6.js` : unique moteur de transcription actif
-- `backend/speaker-sync-server.js` : service temporaire de confirmation des interlocuteurs, à absorber ensuite dans l'API principale
+- `backend/speaker-sync-server.js` : service temporaire de confirmation des interlocuteurs, à absorber ensuite dans l'API de transcription
 - `backend/local_transcribe.py` : Faster-Whisper
 - `backend/local_diarize.py` : Pyannote
 
@@ -51,6 +51,7 @@ La migration vers cette structure doit se faire progressivement, sans casser l'�
 
 - [x] création de la branche de consolidation à partir de l'état fonctionnel le plus récent ;
 - [x] `main` et `agent/stabilise-structure-ecran` conservées intactes comme références ;
+- [x] pull request de consolidation ouverte en brouillon vers `main` ;
 - [x] suppression du code actif des anciens moteurs de transcription V1 à V5 ;
 - [x] suppression des deux pages de démonstration obsolètes du dossier `public/` ;
 - [x] ports 8010, 8011 et 8012 limités à `127.0.0.1` ;
@@ -62,14 +63,15 @@ La migration vers cette structure doit se faire progressivement, sans casser l'�
 - [x] Pyannote ne reçoit plus un nombre de voix forcé à partir du seul nombre de participants ;
 - [x] attribution automatique des noms durcie : seule une présentation explicite de soi peut produire une association automatique ;
 - [x] suppression de l'attribution automatique d'un dernier nom « par élimination » ;
+- [x] remplacement du patch global de `Storage.prototype.setItem` par une sauvegarde explicite vers le service local ;
+- [x] le mode contrôle renforcé exige désormais une confirmation explicite avant l'envoi de l'audio, du contexte et des noms vers OpenAI ;
 - [x] ajout d'une CI de consolidation : `npm ci`, contrôle syntaxe Node/Python et build frontend ;
-- [x] premier passage de la CI réussi sur la pull request de consolidation.
+- [x] CI réussie sur le commit `d49168a` après les derniers changements frontend et sécurité.
 
 ### À faire avant intégration
 
 - [ ] mettre Multer à jour vers une version corrigée et régénérer proprement `package-lock.json` ;
-- [ ] remplacer le patch global de `Storage.prototype.setItem` par une sauvegarde explicite ;
-- [ ] absorber `speaker-sync-server.js` dans une API locale unique ;
+- [ ] absorber `speaker-sync-server.js` dans `transcription-server-v6.js` pour supprimer le port 8012 ;
 - [ ] verrouiller les dépendances JavaScript et Python ;
 - [ ] ajouter lint et tests fonctionnels ;
 - [ ] connecter progressivement l'interface aux vraies données du backend ;
@@ -81,16 +83,16 @@ La migration vers cette structure doit se faire progressivement, sans casser l'�
 ### P0 — terminer la sécurité et la stabilité
 
 1. Mise à jour de Multer + lockfile.
-2. Test local des trois services sur le poste réel.
+2. Test local des services sur le poste réel.
 3. Vérification que les ports ne répondent qu'en boucle locale.
 4. Test de duplication d'un même job sans double lancement.
 
 ### P1 — simplification technique
 
-1. Remplacer le patch global de `Storage.prototype.setItem` par une sauvegarde explicite.
-2. Réduire les services Node vers une API locale cohérente.
-3. Verrouiller les dépendances JS et Python.
-4. Ajouter lint et tests fonctionnels.
+1. Absorber le service temporaire 8012 dans le moteur de transcription.
+2. Verrouiller les dépendances JS et Python.
+3. Ajouter lint et tests fonctionnels.
+4. Renommer ensuite le moteur actif sans suffixe de version si les tests sont concluants.
 
 ### P2 — réunification produit
 
