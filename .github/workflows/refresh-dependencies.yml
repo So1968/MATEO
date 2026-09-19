@@ -26,8 +26,10 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Mettre Vite à jour vers la version corrigée
-        run: npm install vite@8.3.0 --save-exact
+      - name: Mettre à jour les dépendances directement concernées
+        run: |
+          npm install vite@8.3.0 --save-exact
+          npm install concurrently@9.2.4 --save-dev --save-exact
 
       - name: Corriger les dépendances transitives sûres
         run: npm audit fix
@@ -45,6 +47,9 @@ jobs:
 
       - name: Vérifier les vulnérabilités de production
         run: npm audit --omit=dev --audit-level=high
+
+      - name: Vérifier l’audit complet
+        run: npm audit --audit-level=high
 
       - name: Enregistrer les dépendances mises à jour
         run: |
