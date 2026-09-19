@@ -1,10 +1,95 @@
+import { useState } from "react";
 import MeetingModePanel from "./MeetingModePanel.jsx";
+import { localApi } from "../../lib/local-api.js";
 
 function formatDate(value) {
   if (!value) return "Date à confirmer";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(date);
+}
+
+function MeetingJournalCard({ meeting, onChanged }) {
+  const [report, setReport] = useState(null);
+  const [reportType, setReportType] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState("");
+
+  async function toggleReport() {
+    if (report !== null) {
+      setReport(null);
+      return;
+    }
+
+    setBusy(true);
+    setNotice("");
+    try {
+      const payload = await localApi("/api/meetings/read-report", {
+        method: "POST",
+        body: JSON.stringify({
+          projectSlug: meeting.projectSlug,
+          meetingDirName: meeting.meetingDirName
+        })
+      });
+      setReport(payload.content || "");
+      setReportType(payload.reportType || "exporte");
+    } catch (error) {
+      setNotice(error.message || "Impossible de lire le journal.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function validateReport() {
+    setBusy(true);
+    setNotice("");
+    try {
+      await localApi("/api/meetings/validate", {
+        method: "POST",
+        body: JSON.stringify({
+          projectSlug: meeting.projectSlug,
+          meetingDirName: meeting.meetingDirName
+        })
+      });
+      setNotice("Journal validé dans la mémoire locale.");
+      onChanged?.();
+      await toggleReport();
+    } catch (error) {
+      setNotice(error.message || "Impossible de valider le journal.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <article className="generic-card meeting-card">
+      <small>{meeting.projectName}</small>
+      <h3>{meeting.title}</h3>
+      <p className="meeting-date">{formatDate(meeting.date)} · {meeting.meetingType || "Escale"}</p>
+      <p>{meeting.status}</p>
+      <div className="meeting-flags">
+        {meeting.hasAudio ? <span>Audio</span> : null}
+        {meeting.hasTranscription ? <span>Transcription</span> : null}
+        {meeting.hasReport ? <span>Journal</span> : null}
+        {meeting.hasValidatedReport ? <span>Validé</span> : null}
+      </div>
+      {meeting.hasReport ? (
+        <div className="meeting-actions">
+          <button type="button" onClick={toggleReport} disabled={busy}>
+            {busy ? "Chargement…" : report !== null ? "Masquer le journal" : "Lire le journal"}
+          </button>
+          {!meeting.hasValidatedReport ? <button type="button" onClick={validateReport} disabled={busy}>Valider</button> : null}
+        </div>
+      ) : null}
+      {notice ? <p className="meeting-notice">{notice}</p> : null}
+      {report !== null ? (
+        <div className="meeting-report">
+          <small>Version {reportType === "valide" ? "validée" : "exportée"}</small>
+          <pre>{report}</pre>
+        </div>
+      ) : null}
+    </article>
+  );
 }
 
 export default function MeetingsView({ meetings, projects = [], loading, error, journalOnly = false, onSaved }) {
@@ -33,17 +118,11 @@ export default function MeetingsView({ meetings, projects = [], loading, error, 
       ) : null}
       <div className="meeting-list">
         {visibleMeetings.map((meeting) => (
-          <article className="generic-card meeting-card" key={`${meeting.projectSlug}/${meeting.meetingDirName}`}>
-            <small>{meeting.projectName}</small>
-            <h3>{meeting.title}</h3>
-            <p className="meeting-date">{formatDate(meeting.date)} · {meeting.meetingType || "Escale"}</p>
-            <p>{meeting.status}</p>
-            <div className="meeting-flags">
-              {meeting.hasAudio ? <span>Audio</span> : null}
-              {meeting.hasReport ? <span>Journal</span> : null}
-              {meeting.hasValidatedReport ? <span>Validé</span> : null}
-            </div>
-          </article>
+          <MeetingJournalCard
+            key={`${meeting.projectSlug}/${meeting.meetingDirName}`}
+            meeting={meeting}
+            onChanged={onSaved}
+          />
         ))}
       </div>
     </section>

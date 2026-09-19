@@ -109,6 +109,15 @@ test("le cache évite aussi les doubles lancements encore en cours", () => {
   assert.match(server, /already-running/u);
 });
 
+test("une transcription liée à une escale rejoint son journal", () => {
+  const server = read("backend/transcription-server-v6.js");
+  const memoryApi = read("backend/server.js");
+  assert.match(server, /persistTranscriptionToMeeting/u);
+  assert.match(server, /transcription_v6\.json/u);
+  assert.match(server, /Transcription automatique V6/u);
+  assert.match(memoryApi, /hasTranscription/u);
+});
+
 test("le nombre de participants ne force pas le nombre de voix Pyannote", () => {
   const server = read("backend/transcription-server-v6.js");
   assert.doesNotMatch(server, /args\.push\("--num-speakers"/u);

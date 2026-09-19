@@ -186,6 +186,12 @@ button { font: inherit; }
 .meeting-date { color: #806334 !important; font-size: .78rem !important; }
 .meeting-flags { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
 .meeting-flags span { padding: 4px 7px; color: #604b2e; border: 1px solid rgba(112,75,28,.22); border-radius: 999px; background: rgba(255,255,255,.26); font: .68rem Arial,sans-serif; }
+.meeting-actions { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; }
+.meeting-actions button { padding: 7px 10px; color: #3f301a; border: 1px solid rgba(112,75,28,.28); border-radius: 6px; background: rgba(255,255,255,.3); cursor: pointer; font: 700 .7rem Arial,sans-serif; }
+.meeting-actions button:disabled { opacity: .6; cursor: wait; }
+.meeting-report { max-height: 340px; margin-top: 15px; padding: 11px; overflow: auto; border: 1px solid rgba(112,75,28,.22); border-radius: 7px; background: rgba(255,255,255,.24); }
+.meeting-report small { margin-bottom: 8px; }
+.meeting-report pre { margin: 0; white-space: pre-wrap; color: #55442d; font: .75rem/1.45 Arial,sans-serif; }
 .search-form { margin-bottom: 20px; padding: 16px; color: #4d3b25; border: 1px solid #8d6431; border-radius: 9px; background: linear-gradient(180deg,#fff1ca,#e5c785); }
 .search-form label { display: block; margin-bottom: 7px; font: 700 .7rem Arial,sans-serif; letter-spacing: .06em; text-transform: uppercase; }
 .search-form > div { display: flex; gap: 8px; }
@@ -657,7 +663,7 @@ function IslandProjectView({ project, onBack }) {
 
 function GenericView({ active, meetings, projects, loading, error, onSaved }) {
   if (active === "escales") return <MeetingsView meetings={meetings} projects={projects} loading={loading} error={error} onSaved={onSaved} />;
-  if (active === "journal") return <MeetingsView meetings={meetings} loading={loading} error={error} journalOnly />;
+  if (active === "journal") return <MeetingsView meetings={meetings} loading={loading} error={error} journalOnly onSaved={onSaved} />;
   if (active === "longuevue") return <SearchView />;
 
   const labels = {

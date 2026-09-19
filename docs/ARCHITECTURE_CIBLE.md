@@ -8,6 +8,8 @@ Le parcours fonctionnel de référence est :
 
 **Projet → Escale → Source / audio → Transcription → Journal de bord → Validation → Mémoire → Reprise du cap**
 
+Quand une transcription est liée à une escale, V6 conserve le résultat technique dans `transcription_v6.json` et `transcription_v6.md`, puis remplace sa section gérée dans `journal_de_bord_exporte.md`. L'interface peut ensuite lire le journal et le valider manuellement.
+
 ## Sources de vérité
 
 Les données utilisateur ne vivent pas dans le code React.

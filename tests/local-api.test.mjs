@@ -235,7 +235,11 @@ test("API unifiée : confirme et persiste une correspondance", async () => {
     const jobDir = path.join(home, "VOGUE-MERRY-DONNEES", "99_TRANSCRIPTION_TESTS", "job-fixture");
     fs.mkdirSync(meetingDir, { recursive: true });
     fs.mkdirSync(jobDir, { recursive: true });
-    fs.writeFileSync(path.join(meetingDir, "donnees_escale.json"), JSON.stringify({ projectName: "Projet démo" }));
+    fs.writeFileSync(path.join(meetingDir, "donnees_escale.json"), JSON.stringify({
+      projectName: "Projet démo",
+      rawNotes: "Notes prises pendant la réunion"
+    }));
+    fs.writeFileSync(path.join(meetingDir, "journal_de_bord_exporte.md"), "# Journal de bord — Réunion de démonstration\n\nNotes initiales.\n", "utf8");
     fs.writeFileSync(path.join(jobDir, "status.json"), JSON.stringify({
       jobId: "job-fixture",
       state: "done",
@@ -290,5 +294,17 @@ test("API unifiée : confirme et persiste une correspondance", async () => {
 
     const meetingData = JSON.parse(fs.readFileSync(path.join(meetingDir, "donnees_escale.json"), "utf8"));
     assert.deepEqual(meetingData.transcriptionSpeakerConfirmations["job-fixture"].mapping, { SPEAKER_00: "Sofia" });
+    assert.equal(meetingData.transcription.status, "terminee");
+    assert.equal(fs.existsSync(path.join(meetingDir, "transcription_v6.json")), true);
+    assert.match(fs.readFileSync(path.join(meetingDir, "journal_de_bord_exporte.md"), "utf8"), /Transcription automatique V6/u);
+
+    const inboxResponse = await fetch("http://127.0.0.1:8010/api/inbox", {
+      headers: { Origin: "http://localhost:5173" }
+    });
+    assert.equal(inboxResponse.status, 200);
+    const inbox = await inboxResponse.json();
+    const meeting = inbox.items.find((item) => item.meetingDirName === "2026-09-19_escale_reunion");
+    assert.equal(meeting.hasTranscription, true);
+    assert.equal(meeting.status, "Transcription à relire");
   });
 });

@@ -543,10 +543,12 @@ app.get("/api/inbox", (req, res) => {
         const hasAudio = meetingHasAudio(meetingDir);
         const hasReport = fs.existsSync(reportPaths.exportedPath);
         const hasValidatedReport = fs.existsSync(reportPaths.validatedPath);
+        const hasTranscription = fs.existsSync(path.join(meetingDir, "transcription_v6.json"));
         const hasRawNotes = Boolean(data?.rawNotes && String(data.rawNotes).trim());
 
         let status = "À traiter";
         if (hasValidatedReport) status = "Validé";
+        else if (hasTranscription) status = "Transcription à relire";
         else if (hasReport && hasRawNotes) status = "Journal de bord à valider";
         else if (hasAudio && !hasRawNotes) status = "Audio à transcrire";
         else if (hasReport) status = "Exporté à compléter";
@@ -562,6 +564,7 @@ app.get("/api/inbox", (req, res) => {
           hasAudio,
           hasReport,
           hasValidatedReport,
+          hasTranscription,
           hasRawNotes,
         });
       }
