@@ -45,6 +45,7 @@ def main():
 
         cache_dir = os.path.expanduser("~/.cache/vogue-marry/whisper")
         os.makedirs(cache_dir, exist_ok=True)
+        emit({"type": "model_loading", "model": args.model})
 
         model = WhisperModel(
             args.model,
