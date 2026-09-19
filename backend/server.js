@@ -1,12 +1,25 @@
 import express from "express";
 import cors from "cors";
 import fs from "fs";
+import http from "http";
 import path from "path";
 import os from "os";
 import multer from "multer";
 
 const app = express();
 const PORT = 8010;
+const TRANSCRIPTION_HOST = "127.0.0.1";
+const TRANSCRIPTION_PORT = Number(process.env.VOGUE_TRANSCRIPTION_PORT || 8011);
+const HOP_BY_HOP_HEADERS = new Set([
+  "connection",
+  "keep-alive",
+  "proxy-authenticate",
+  "proxy-authorization",
+  "te",
+  "trailer",
+  "transfer-encoding",
+  "upgrade"
+]);
 
 const HOME = os.homedir();
 const DATA_ROOT = path.join(HOME, "VOGUE-MERRY-DONNEES");
@@ -22,9 +35,42 @@ app.use(cors({
     if (!origin || ALLOWED_ORIGINS.has(origin)) return callback(null, true);
     return callback(new Error("Origine non autorisée."));
   },
-  methods: ["GET", "POST", "OPTIONS"],
+  methods: ["GET", "POST", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type"]
 }));
+
+function proxyTranscriptionRequest(req, res) {
+  const headers = { ...req.headers, host: `${TRANSCRIPTION_HOST}:${TRANSCRIPTION_PORT}` };
+  HOP_BY_HOP_HEADERS.forEach((header) => delete headers[header]);
+
+  const proxy = http.request({
+    hostname: TRANSCRIPTION_HOST,
+    port: TRANSCRIPTION_PORT,
+    method: req.method,
+    path: req.originalUrl || req.url,
+    headers
+  }, (upstream) => {
+    res.statusCode = upstream.statusCode || 502;
+    Object.entries(upstream.headers).forEach(([header, value]) => {
+      if (!HOP_BY_HOP_HEADERS.has(header) && value !== undefined) res.setHeader(header, value);
+    });
+    upstream.pipe(res);
+  });
+
+  proxy.on("error", () => {
+    if (res.headersSent) {
+      res.destroy();
+      return;
+    }
+    res.status(503).json({ error: "Le moteur de transcription local est indisponible." });
+  });
+
+  req.on("aborted", () => proxy.destroy());
+  req.pipe(proxy);
+}
+
+// 8010 est la seule porte utilisée par l'interface. V6 reste un moteur local interne.
+app.use("/api/transcription", proxyTranscriptionRequest);
 app.use(express.json({ limit: "1mb" }));
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -641,6 +687,6 @@ app.get("/api/search", (req, res) => {
 });
 
 app.listen(PORT, "127.0.0.1", () => {
-  console.log(`Vogue Merry backend lancé : http://127.0.0.1:${PORT}`);
+  console.log(`Vogue Merry API unifiée lancée : http://127.0.0.1:${PORT} (V6 interne : ${TRANSCRIPTION_HOST}:${TRANSCRIPTION_PORT})`);
   console.log(`Dossier données : ${DATA_ROOT}`);
 });

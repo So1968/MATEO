@@ -34,7 +34,7 @@ Pendant la migration, l'écran actuel reste fonctionnel : on extrait les fonctio
 
 ## Backend local
 
-### API mémoire projet — port 8010
+### API locale unifiée — port 8010
 
 Responsabilités :
 
@@ -44,11 +44,16 @@ Responsabilités :
 - versions ;
 - coffre / dépôt ;
 - recherche ;
-- validation.
+- validation ;
+- accès aux transcriptions ;
+- confirmation des interlocuteurs ;
+- identification et suivi des besoins.
 
 Le service doit écouter uniquement sur `127.0.0.1`.
 
-### Transcription — port 8011
+L'interface ne connaît que cette adresse. Elle ne contacte jamais directement le moteur de transcription.
+
+### Moteur de transcription V6 — port interne 8011
 
 Responsabilités :
 
@@ -59,15 +64,14 @@ Responsabilités :
 - cache anti-double lancement ;
 - seconde lecture OpenAI uniquement sur demande explicite.
 
-Le service doit écouter uniquement sur `127.0.0.1`.
+Le moteur écoute uniquement sur `127.0.0.1` et n'est accessible que par la façade 8010. Il reste séparé parce que Faster-Whisper et Pyannote sont lourds et doivent pouvoir travailler sans bloquer l'API mémoire.
 
-### Confirmation des interlocuteurs — intégrée au port 8011
+### Confirmation des interlocuteurs — exposée par 8010
 
-La confirmation des interlocuteurs est désormais une route du moteur V6 :
+La confirmation est exécutée par le moteur V6, mais elle passe par la façade unifiée :
 `POST /api/transcription/:jobId/speakers`.
 
-Il n'existe plus de service séparé ni de port 8012. La pile locale active se limite à
-l'API mémoire sur 8010 et au moteur de transcription sur 8011.
+Il n'existe plus de service séparé ni de port 8012. La pile locale visible par l'interface se limite à 8010 ; 8011 reste un port interne de travail.
 
 ## Règles de sécurité
 

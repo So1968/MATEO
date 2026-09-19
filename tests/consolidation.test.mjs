@@ -18,6 +18,15 @@ test("les services locaux restent limités à la boucle locale", () => {
   }
 });
 
+test("8010 est la porte unique de l'interface", () => {
+  const gateway = read("backend/server.js");
+  const transcriptionView = read("src/TranscriptionView.jsx");
+  assert.match(gateway, /proxyTranscriptionRequest/u);
+  assert.match(gateway, /app\.use\("\/api\/transcription", proxyTranscriptionRequest\)/u);
+  assert.match(transcriptionView, /127\.0\.0\.1:8010/u);
+  assert.doesNotMatch(transcriptionView, /8011/u);
+});
+
 test("Multer reste verrouillé sur la version consolidée", () => {
   const packageJson = JSON.parse(read("package.json"));
   const packageLock = JSON.parse(read("package-lock.json"));

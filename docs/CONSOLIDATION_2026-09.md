@@ -28,9 +28,9 @@ Le détail est dans `docs/ARCHITECTURE_CIBLE.md`.
 
 Pendant la consolidation :
 
-- `backend/server.js` : API locale principale et mémoire projet ;
-- `backend/transcription-server-v6.js` : unique moteur de transcription actif ;
-- la confirmation des interlocuteurs est intégrée à `backend/transcription-server-v6.js` via `/api/transcription/:jobId/speakers` ;
+- `backend/server.js` : façade API locale unifiée sur 8010 et mémoire projet ;
+- `backend/transcription-server-v6.js` : unique moteur de transcription actif, interne sur 8011 ;
+- la confirmation des interlocuteurs est exécutée par V6 et exposée par la façade 8010 via `/api/transcription/:jobId/speakers` ;
 - `backend/local_transcribe.py` : Faster-Whisper ;
 - `backend/local_diarize.py` : Pyannote.
 
@@ -43,7 +43,7 @@ Pendant la consolidation :
 - [x] pull request de consolidation ouverte en brouillon vers `main` ;
 - [x] suppression du code actif des anciens moteurs de transcription V1 à V5 ;
 - [x] suppression des pages de démonstration obsolètes du dossier `public/` ;
-- [x] ports 8010 et 8011 limités à `127.0.0.1` ; le port 8012 a été supprimé ;
+- [x] façade locale unifiée sur 8010 ; moteur V6 interne sur 8011, tous deux limités à `127.0.0.1` ; le port 8012 a été supprimé ;
 - [x] CORS limité aux origines locales de Vogue Marry ;
 - [x] validation renforcée des chemins côté API principale et transcription ;
 - [x] limites d'upload ajoutées ;
@@ -72,6 +72,7 @@ Pendant la consolidation :
 - [x] tests fonctionnels des routes locales renforcés ;
 - [x] première tranche d'interface branchée sur `/api/projects`, `/api/inbox` et `/api/search` ;
 - [x] `MeetingMode` relié à la création d'une escale, aux marqueurs et à l'export audio ;
+- [x] interface et tests de transcription branchés sur la façade unifiée 8010 ;
 - [ ] relier transcription → journal → validation ;
 - [ ] faire tourner les tests locaux sur le poste de développement ;
 - [ ] tester une courte transcription locale sans appel API payant.
@@ -80,7 +81,7 @@ Pendant la consolidation :
 
 ### P0 — terminer la consolidation technique
 
-1. Retester CI après suppression du service 8012.
+1. Retester CI après réunification de l'accès sur 8010.
 2. Valider le lint et les tests fonctionnels sur le poste réel.
 3. Valider une transcription locale courte sur le poste réel.
 

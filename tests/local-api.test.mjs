@@ -48,6 +48,41 @@ async function withServer(script, port, callback, healthPath = port === 8010 ? "
   }
 }
 
+async function withUnifiedServer(callback) {
+  const home = makeHome();
+  const env = { ...process.env, HOME: home, VOGUE_TRANSCRIPTION_PORT: "8011" };
+  const children = [
+    spawn(process.execPath, ["backend/transcription-server-v6.js"], {
+      cwd: ROOT,
+      env,
+      stdio: ["ignore", "pipe", "pipe"]
+    }),
+    spawn(process.execPath, ["backend/server.js"], {
+      cwd: ROOT,
+      env,
+      stdio: ["ignore", "pipe", "pipe"]
+    })
+  ];
+
+  const stderr = new Map();
+  children.forEach((child, index) => {
+    stderr.set(index, "");
+    child.stderr.on("data", (chunk) => stderr.set(index, `${stderr.get(index)}${chunk.toString()}`));
+  });
+
+  try {
+    await waitFor("http://127.0.0.1:8010/api/transcription/health");
+    await callback(home);
+  } catch (error) {
+    const details = Array.from(stderr.values()).filter(Boolean).join("\n");
+    if (details) error.message += `\nServeurs : ${details}`;
+    throw error;
+  } finally {
+    children.forEach((child) => child.kill("SIGTERM"));
+    fs.rmSync(home, { recursive: true, force: true });
+  }
+}
+
 test("API mémoire : santé locale, CORS local et refus des chemins dangereux", async () => {
   await withServer("backend/server.js", 8010, async () => {
     const health = await fetch("http://127.0.0.1:8010/api/health", {
@@ -157,9 +192,9 @@ test("API mémoire : crée une escale, rattache un audio et la retrouve", async 
   });
 });
 
-test("API transcription : démarre sans secret et annonce son mode local", async () => {
-  await withServer("backend/transcription-server-v6.js", 8011, async () => {
-    const response = await fetch("http://127.0.0.1:8011/api/transcription/health", {
+test("API unifiée : expose la transcription locale sur 8010", async () => {
+  await withUnifiedServer(async () => {
+    const response = await fetch("http://127.0.0.1:8010/api/transcription/health", {
       headers: { Origin: "http://127.0.0.1:5173" }
     });
     assert.equal(response.status, 200);
@@ -171,9 +206,9 @@ test("API transcription : démarre sans secret et annonce son mode local", async
   });
 });
 
-test("API interlocuteurs : est intégrée au moteur de transcription", async () => {
-  await withServer("backend/transcription-server-v6.js", 8011, async () => {
-    const response = await fetch("http://127.0.0.1:8011/api/transcription/job-inexistant/speakers", {
+test("API unifiée : confirme que les interlocuteurs passent par 8010", async () => {
+  await withUnifiedServer(async () => {
+    const response = await fetch("http://127.0.0.1:8010/api/transcription/job-inexistant/speakers", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -186,8 +221,8 @@ test("API interlocuteurs : est intégrée au moteur de transcription", async () 
   });
 });
 
-test("API interlocuteurs : confirme et persiste une correspondance", async () => {
-  await withServer("backend/transcription-server-v6.js", 8011, async (home) => {
+test("API unifiée : confirme et persiste une correspondance", async () => {
+  await withUnifiedServer(async (home) => {
     const meetingId = "projet-demo/2026-09-19_escale_reunion";
     const meetingDir = path.join(
       home,
@@ -230,7 +265,7 @@ test("API interlocuteurs : confirme et persiste une correspondance", async () =>
       unresolvedSpeakers: ["Intervenant 1", "Intervenant 2"]
     }));
 
-    const response = await fetch("http://127.0.0.1:8011/api/transcription/job-fixture/speakers", {
+    const response = await fetch("http://127.0.0.1:8010/api/transcription/job-fixture/speakers", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
