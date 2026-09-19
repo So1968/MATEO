@@ -29,7 +29,6 @@ jobs:
           node --check backend/server.js
           node --check backend/transcription-server-v6.js
           node --check backend/speaker-sync-server.js
-          node --check scripts/local-only.cjs
 
       - name: Vérifier la syntaxe Python
         run: python3 -m py_compile backend/local_transcribe.py backend/local_diarize.py
