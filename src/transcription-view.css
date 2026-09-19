@@ -188,10 +188,9 @@
   color: #5d442e;
 }
 
-.transcription-context textarea {
+.transcription-context textarea,
+.transcription-context select {
   width: 100%;
-  resize: vertical;
-  min-height: 94px;
   padding: 11px 12px;
   border: 1px solid #c8ad79;
   border-radius: 9px;
@@ -199,6 +198,11 @@
   color: #173140;
   font: inherit;
   line-height: 1.45;
+}
+
+.transcription-context textarea {
+  resize: vertical;
+  min-height: 94px;
 }
 
 .transcription-context small {
@@ -336,14 +340,109 @@
   margin-top: 22px;
 }
 
-.transcription-result-head a {
+.transcription-result-head a,
+.transcription-downloads button {
   color: #7e3b2e;
   font-weight: 800;
+}
+
+.transcription-downloads {
+  display: grid;
+  justify-items: end;
+  gap: 7px;
+}
+
+.transcription-downloads button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
 }
 
 .transcription-result-warning {
   margin: 8px 0 0;
   color: #8a432f;
+  font-size: .9rem;
+}
+
+.transcription-speaker-confirm {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid #c69a60;
+  border-radius: 12px;
+  background: #f8edd5;
+}
+
+.transcription-speaker-confirm > div:first-child > strong {
+  color: #0b4052;
+  font: 700 1.15rem Georgia, serif;
+}
+
+.transcription-speaker-confirm p {
+  margin: 5px 0 0;
+  color: #6b593d;
+  line-height: 1.45;
+}
+
+.transcription-speaker-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.transcription-speaker-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 280px);
+  gap: 14px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #ddc79a;
+  border-radius: 10px;
+  background: rgba(255,255,255,.55);
+}
+
+.transcription-speaker-row > div {
+  display: grid;
+  gap: 4px;
+}
+
+.transcription-speaker-row small {
+  color: #6c5a40;
+  line-height: 1.4;
+}
+
+.transcription-speaker-row select {
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid #b89461;
+  border-radius: 9px;
+  background: #fff;
+  color: #173140;
+  font: inherit;
+}
+
+.transcription-speaker-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.transcription-speaker-actions button {
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 9px;
+  background: #0b5269;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.transcription-speaker-actions span {
+  color: #286345;
+  font-weight: 700;
   font-size: .9rem;
 }
 
@@ -368,6 +467,9 @@
   .transcription-filemeta,
   .transcription-result-head,
   .transcription-progress > div,
-  .transcription-callout.api-warning { align-items: flex-start; flex-direction: column; }
-  .transcription-api-config > div { grid-template-columns: 1fr; }
+  .transcription-callout.api-warning,
+  .transcription-speaker-actions { align-items: flex-start; flex-direction: column; }
+  .transcription-api-config > div,
+  .transcription-speaker-row { grid-template-columns: 1fr; }
+  .transcription-downloads { justify-items: start; }
 }
