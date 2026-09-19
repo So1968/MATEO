@@ -37,41 +37,67 @@ Cette branche part de l'état fonctionnel le plus récent de `agent/stabilise-st
 
 La migration vers cette structure doit se faire progressivement, sans casser l'écran actuel.
 
-### Backend
+### Backend pendant la consolidation
 
 - `backend/server.js` : API locale principale et mémoire projet
-- `backend/transcription-server-v6.js` : moteur de transcription actif pendant la consolidation
+- `backend/transcription-server-v6.js` : unique moteur de transcription actif
 - `backend/speaker-sync-server.js` : service temporaire de confirmation des interlocuteurs, à absorber ensuite dans l'API principale
 - `backend/local_transcribe.py` : Faster-Whisper
 - `backend/local_diarize.py` : Pyannote
 
-## Priorités
+## État au 19 septembre 2026
 
-### P0 — sécurité et stabilité
+### Fait
 
-- lier les services 8010 / 8011 / 8012 à `127.0.0.1` ;
-- limiter CORS aux origines locales de Vogue Marry ;
-- mettre à jour Multer ;
-- durcir la validation des chemins et les limites d'upload ;
-- protéger les appels payants contre les doubles lancements simultanés.
+- [x] création de la branche de consolidation à partir de l'état fonctionnel le plus récent ;
+- [x] `main` et `agent/stabilise-structure-ecran` conservées intactes comme références ;
+- [x] suppression du code actif des anciens moteurs de transcription V1 à V5 ;
+- [x] suppression des deux pages de démonstration obsolètes du dossier `public/` ;
+- [x] ports 8010, 8011 et 8012 limités à `127.0.0.1` ;
+- [x] CORS limité aux origines locales de Vogue Marry ;
+- [x] validation renforcée des chemins côté API principale et endpoints de transcription ;
+- [x] limite d'upload ajoutée à l'API principale ;
+- [x] détection de l'audio d'une escale corrigée pour accepter les extensions autres que `.webm` ;
+- [x] protection contre deux lancements simultanés d'une même transcription grâce au cache des jobs actifs ;
+- [x] Pyannote ne reçoit plus un nombre de voix forcé à partir du seul nombre de participants ;
+- [x] attribution automatique des noms durcie : seule une présentation explicite de soi peut produire une association automatique ;
+- [x] suppression de l'attribution automatique d'un dernier nom « par élimination ».
+
+### À faire avant intégration
+
+- [ ] mettre Multer à jour vers une version corrigée et régénérer proprement `package-lock.json` ;
+- [ ] remplacer le patch global de `Storage.prototype.setItem` par une sauvegarde explicite ;
+- [ ] absorber `speaker-sync-server.js` dans une API locale unique ;
+- [ ] verrouiller les dépendances JavaScript et Python ;
+- [ ] ajouter lint, tests et CI ;
+- [ ] connecter progressivement l'interface aux vraies données du backend ;
+- [ ] faire tourner le build et les tests sur le poste de développement ;
+- [ ] tester une courte transcription locale sans appel API payant.
+
+## Priorités suivantes
+
+### P0 — terminer la sécurité et la stabilité
+
+1. Mise à jour de Multer + lockfile.
+2. Test local des trois services sur le poste réel.
+3. Vérification que les ports ne répondent qu'en boucle locale.
+4. Test de duplication d'un même job sans double lancement.
 
 ### P1 — simplification technique
 
-- ne conserver que la V6 de transcription dans le code actif ;
-- supprimer les pages de test obsolètes du build public ;
-- remplacer le patch global de `Storage.prototype.setItem` par une sauvegarde explicite ;
-- réduire les trois services Node vers une API locale cohérente ;
-- verrouiller les dépendances JS et Python ;
-- ajouter lint, tests et CI.
+1. Remplacer le patch global de `Storage.prototype.setItem` par une sauvegarde explicite.
+2. Réduire les services Node vers une API locale cohérente.
+3. Verrouiller les dépendances JS et Python.
+4. Ajouter lint, tests et CI.
 
 ### P2 — réunification produit
 
-- brancher le Pont et les Îles sur `/api/projects` ;
-- brancher Escales sur les vraies réunions ;
-- brancher Longue-vue sur `/api/search` ;
-- intégrer `MeetingMode` au parcours Escale ;
-- relier transcription → journal de bord → validation ;
-- faire du Log Pose une vraie reprise de contexte.
+1. Brancher le Pont et les Îles sur `/api/projects`.
+2. Brancher Escales sur les vraies réunions.
+3. Brancher Longue-vue sur `/api/search`.
+4. Intégrer `MeetingMode` au parcours Escale.
+5. Relier transcription → journal de bord → validation.
+6. Faire du Log Pose une vraie reprise de contexte.
 
 ## Condition avant intégration dans `main`
 
@@ -82,6 +108,9 @@ La migration vers cette structure doit se faire progressivement, sans casser l'�
 - aucune donnée ou clé sensible dans Git ;
 - revue finale des changements entre `main` et la branche de consolidation.
 
-## État initial
+## Branches
 
-La branche historique `agent/stabilise-structure-ecran` reste intacte comme point de sauvegarde. La branche d'archive reste une archive et ne sera pas fusionnée dans le produit.
+- `main` : futur tronc stable, encore ancien pour le moment ;
+- `consolidation/vogue-marry-2026-09` : seule branche sur laquelle poursuivre la consolidation ;
+- `agent/stabilise-structure-ecran` : point de sauvegarde historique, ne plus développer dessus ;
+- `archive/rustines-esthetiques-20260731` : archive, ne pas fusionner dans le produit.
