@@ -60,6 +60,19 @@ export function validateKnowledge(kind, { itemId, projectSlug, item }) {
   });
 }
 
+export async function loadLogPose(projectSlug = "") {
+  const params = projectSlug ? `?projectSlug=${encodeURIComponent(projectSlug)}` : "";
+  const payload = await localApi(`/api/log-pose${params}`);
+  return payload.logPose || null;
+}
+
+export function saveLogPose({ projectSlug, whatToRemember, openQuestions, documentsToFind, nextDirection }) {
+  return localApi("/api/log-pose/save", {
+    method: "POST",
+    body: JSON.stringify({ projectSlug, whatToRemember, openQuestions, documentsToFind, nextDirection })
+  });
+}
+
 export async function searchMemory(query, projectSlug = "") {
   const params = new URLSearchParams({ q: query });
   if (projectSlug) params.set("projectSlug", projectSlug);

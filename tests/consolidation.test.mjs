@@ -152,6 +152,23 @@ test("les Manœuvres et Caps viennent des journaux validés", () => {
   assert.equal(exists("src/features/knowledge/KnowledgeView.jsx"), true);
 });
 
+test("le Log Pose persiste et reprend les validations", () => {
+  const memoryApi = read("backend/server.js");
+  const localApi = read("src/lib/local-api.js");
+  const logPoseView = read("src/features/log-pose/LogPoseView.jsx");
+  const app = read("src/App.jsx");
+  assert.match(memoryApi, /app\.get\("\/api\/log-pose"/u);
+  assert.match(memoryApi, /app\.post\("\/api\/log-pose\/save"/u);
+  assert.match(memoryApi, /syncLogPose\(safeProjectSlug\)/u);
+  assert.match(memoryApi, /log_pose\.json/u);
+  assert.match(localApi, /loadLogPose/u);
+  assert.match(localApi, /saveLogPose/u);
+  assert.match(logPoseView, /lastDecision/u);
+  assert.match(logPoseView, /priorityActions/u);
+  assert.match(app, /LogPoseView/u);
+  assert.equal(exists("src/features/log-pose/LogPoseView.jsx"), true);
+});
+
 test("le nombre de participants ne force pas le nombre de voix Pyannote", () => {
   const server = read("backend/transcription-server-v6.js");
   assert.doesNotMatch(server, /args\.push\("--num-speakers"/u);

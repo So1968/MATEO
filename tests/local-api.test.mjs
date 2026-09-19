@@ -369,6 +369,56 @@ test("API mémoire : extrait puis valide actions et décisions des journaux", as
     ), "utf8"));
     assert.equal(storedActions[0].responsable, "Sofia");
     assert.equal(storedDecisions[0].statut, "Validé");
+
+    const logPoseResponse = await fetch("http://127.0.0.1:8010/api/log-pose?projectSlug=projet_connaissance", {
+      headers: { Origin: "http://localhost:5173" }
+    });
+    assert.equal(logPoseResponse.status, 200);
+    const logPosePayload = await logPoseResponse.json();
+    assert.equal(logPosePayload.logPose.lastDecision.decision, "Utiliser la mémoire locale");
+    assert.equal(logPosePayload.logPose.priorityActions[0].responsable, "Sofia");
+    assert.equal(logPosePayload.logPose.pendingReview.total, 1);
+
+    const globalLogPoseResponse = await fetch("http://127.0.0.1:8010/api/log-pose", {
+      headers: { Origin: "http://localhost:5173" }
+    });
+    assert.equal(globalLogPoseResponse.status, 200);
+    const globalLogPosePayload = await globalLogPoseResponse.json();
+    assert.equal(globalLogPosePayload.logPose.scope, "global");
+    assert.equal(globalLogPosePayload.logPose.lastDecision.projectName, "Projet connaissance");
+
+    const saveLogPoseResponse = await fetch("http://127.0.0.1:8010/api/log-pose/save", {
+      method: "POST",
+      ...requestOptions,
+      body: JSON.stringify({
+        projectSlug: "projet_connaissance",
+        whatToRemember: "La mémoire locale est la source de vérité.",
+        openQuestions: ["Tester la transcription sur le poste réel"],
+        documentsToFind: ["Compte rendu de référence"],
+        nextDirection: "Tester une courte transcription locale."
+      })
+    });
+    assert.equal(saveLogPoseResponse.status, 200);
+
+    const savedLogPose = JSON.parse(fs.readFileSync(path.join(
+      home,
+      "VOGUE-MERRY-DONNEES",
+      "01_PROJETS",
+      "projet_connaissance",
+      "10_log_pose",
+      "log_pose.json"
+    ), "utf8"));
+    const savedLogPoseMarkdown = fs.readFileSync(path.join(
+      home,
+      "VOGUE-MERRY-DONNEES",
+      "01_PROJETS",
+      "projet_connaissance",
+      "10_log_pose",
+      "log_pose.md"
+    ), "utf8");
+    assert.equal(savedLogPose.manual.nextDirection, "Tester une courte transcription locale.");
+    assert.match(savedLogPoseMarkdown, /La mémoire locale est la source de vérité/u);
+    assert.match(savedLogPoseMarkdown, /Tester une courte transcription locale/u);
   });
 });
 

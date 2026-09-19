@@ -322,6 +322,7 @@ Structure :
   writeFileIfMissing(path.join(baseDir, "06_donnees_imports_interfaces", "donnees_imports_interfaces.md"), `# Données / imports / interfaces — ${projectName}\n\n| Élément | Source | Usage | Points ouverts |\n|---|---|---|---|\n`);
   writeFileIfMissing(path.join(baseDir, "07_questions_blocages", "questions_blocages.md"), `# Questions ouvertes / blocages — ${projectName}\n\n| Date | Sujet | Statut | Responsable | Source |\n|---|---|---|---|---|\n`);
   writeFileIfMissing(path.join(baseDir, "10_log_pose", "log_pose.md"), `# Log Pose — ${projectName}\n\n## Ce qu’il faut retenir\n\n## Dernier cap validé\n\n## Manœuvres prioritaires\n\n## Questions ouvertes\n\n## Documents à retrouver\n\n## Prochaine direction utile\n`);
+  syncLogPose(slug);
 
   return { name: projectName, slug };
 }
@@ -627,6 +628,245 @@ function safeKnowledgeKind(value) {
   const kind = String(value || "").trim();
   if (!Object.hasOwn(KNOWLEDGE_CONFIG, kind)) throw new Error("Type de mémoire invalide.");
   return kind;
+}
+
+const LOG_POSE_DEFAULTS = {
+  whatToRemember: "",
+  openQuestions: [],
+  documentsToFind: [],
+  nextDirection: ""
+};
+
+function normalizeLogPoseList(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item || "").trim()).filter(Boolean);
+  }
+  return String(value || "")
+    .split(/[\r\n;]+/u)
+    .map((item) => item.replace(/^[-*]\s+/u, "").trim())
+    .filter(Boolean);
+}
+
+function normalizeLogPoseManual(value = {}) {
+  return {
+    whatToRemember: String(value.whatToRemember || "").trim(),
+    openQuestions: normalizeLogPoseList(value.openQuestions),
+    documentsToFind: normalizeLogPoseList(value.documentsToFind),
+    nextDirection: String(value.nextDirection || "").trim()
+  };
+}
+
+function readLogPoseManual(projectSlug) {
+  const directory = safePathInside(PROJECTS_ROOT, projectSlug, "10_log_pose");
+  const jsonPath = path.join(directory, "log_pose.json");
+  const stored = readJsonIfExists(jsonPath);
+  if (stored) return normalizeLogPoseManual(stored.manual || stored);
+
+  const markdownPath = path.join(directory, "log_pose.md");
+  if (!fs.existsSync(markdownPath)) return { ...LOG_POSE_DEFAULTS };
+  const content = fs.readFileSync(markdownPath, "utf8");
+  const sectionText = (heading) => extractMarkdownSection(content, [heading])
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("|") && !/^---+$/u.test(line))
+    .join(" ")
+    .trim();
+  const sectionList = (heading) => extractMarkdownSection(content, [heading])
+    .map((line) => line.trim().replace(/^[-*]\s+/u, ""))
+    .filter((line) => line && !line.startsWith("|") && !/^---+$/u.test(line));
+
+  return normalizeLogPoseManual({
+    whatToRemember: sectionText("Ce qu’il faut retenir"),
+    openQuestions: sectionList("Questions ouvertes"),
+    documentsToFind: sectionList("Documents à retrouver"),
+    nextDirection: sectionText("Prochaine direction utile")
+  });
+}
+
+function listProjectMeetings(projectSlug) {
+  const meetingsRoot = safePathInside(PROJECTS_ROOT, projectSlug, "01_escales_reunions");
+  if (!fs.existsSync(meetingsRoot)) return [];
+
+  return fs.readdirSync(meetingsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && !entry.isSymbolicLink())
+    .map((entry) => {
+      const meetingDir = path.join(meetingsRoot, entry.name);
+      const data = readMeetingData(meetingDir) || {};
+      const reportPaths = findReportPaths(meetingDir);
+      return {
+        meetingDirName: entry.name,
+        title: data.title || entry.name,
+        date: data.meetingDate || entry.name.slice(0, 10),
+        status: fs.existsSync(reportPaths.validatedPath)
+          ? "Validé"
+          : fs.existsSync(reportPaths.exportedPath)
+            ? "À valider"
+            : "À traiter"
+      };
+    })
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+
+function isClosedKnowledgeStatus(value) {
+  return /^(fait|faite|termine|terminee|clos|close|annule|annulee|abandonne|abandonnee)$/u.test(normalizeKnowledgeText(value));
+}
+
+function sortKnowledgeByDate(entries) {
+  return [...entries].sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+}
+
+function knowledgeReviewCounts(projectSlug, kind) {
+  const accepted = readKnowledgeEntries(projectSlug, kind);
+  const acceptedIds = new Set(accepted.map((item) => item.id));
+  const pending = readValidatedKnowledgeProposals(projectSlug, kind)
+    .filter((item) => !acceptedIds.has(item.id));
+  return { accepted, pending };
+}
+
+function buildLogPose(projectSlug, manual = readLogPoseManual(projectSlug)) {
+  const meetings = listProjectMeetings(projectSlug);
+  const { accepted: decisions, pending: pendingDecisions } = knowledgeReviewCounts(projectSlug, "decision");
+  const { accepted: actions, pending: pendingActions } = knowledgeReviewCounts(projectSlug, "action");
+  const orderedDecisions = sortKnowledgeByDate(decisions);
+  const latestDecision = orderedDecisions[0] || null;
+  const priorityActions = actions
+    .filter((item) => !isClosedKnowledgeStatus(item.statut))
+    .sort((a, b) => {
+      const statusRank = (value) => normalizeKnowledgeText(value) === "en cours" ? 0 : 1;
+      return statusRank(a.statut) - statusRank(b.statut) || String(a.date || "").localeCompare(String(b.date || ""));
+    })
+    .slice(0, 5);
+  const latestMeeting = meetings[0] || null;
+  const projectName = latestDecision?.projectName
+    || priorityActions[0]?.projectName
+    || projectSlug.replaceAll("_", " ");
+  const fallbackRemember = latestDecision?.decision
+    || (latestMeeting ? `Dernière escale : ${latestMeeting.title}` : "Aucun repère validé pour le moment.");
+  const fallbackDirection = priorityActions[0]?.action
+    || (pendingActions.length || pendingDecisions.length
+      ? "Relire les propositions en attente de validation."
+      : latestMeeting
+        ? "Relire la dernière escale et poursuivre le fil."
+        : "Préparer la première escale du projet.");
+
+  return {
+    version: 1,
+    scope: "project",
+    projectSlug,
+    projectName,
+    position: projectName,
+    updatedAt: new Date().toISOString(),
+    whatToRemember: manual.whatToRemember || fallbackRemember,
+    lastMeeting: latestMeeting,
+    lastDecision: latestDecision,
+    priorityActions,
+    openQuestions: manual.openQuestions,
+    documentsToFind: manual.documentsToFind,
+    nextDirection: manual.nextDirection || fallbackDirection,
+    pendingReview: {
+      actions: pendingActions.length,
+      decisions: pendingDecisions.length,
+      total: pendingActions.length + pendingDecisions.length
+    }
+  };
+}
+
+function logPoseMarkdownList(items, emptyText) {
+  return items.length ? items.map((item) => `- ${knowledgeMarkdownValue(item)}`) : [`- ${emptyText}`];
+}
+
+function writeLogPose(projectSlug, snapshot, manual) {
+  const directory = safePathInside(PROJECTS_ROOT, projectSlug, "10_log_pose");
+  ensureDir(directory);
+  const normalizedManual = normalizeLogPoseManual(manual);
+  const payload = { ...snapshot, manual: normalizedManual };
+  fs.writeFileSync(path.join(directory, "log_pose.json"), JSON.stringify(payload, null, 2), "utf8");
+
+  const actionLines = snapshot.priorityActions.length
+    ? snapshot.priorityActions.map((item) => {
+      const details = [item.responsable, item.echeance].filter(Boolean).join(" · ");
+      return `- [${knowledgeMarkdownValue(item.statut || "À préciser")}] ${knowledgeMarkdownValue(item.action)}${details ? ` — ${knowledgeMarkdownValue(details)}` : ""}`;
+    })
+    : ["- Aucune manœuvre prioritaire validée."];
+  const decisionLine = snapshot.lastDecision
+    ? `- ${knowledgeMarkdownValue(snapshot.lastDecision.decision)} (${knowledgeMarkdownValue(snapshot.lastDecision.statut || "À préciser")})`
+    : "- Aucun cap validé pour le moment.";
+  const lines = [
+    `# Log Pose — ${knowledgeMarkdownValue(snapshot.projectName)}`,
+    "",
+    `_Mise à jour : ${snapshot.updatedAt}_`,
+    "",
+    "## Ce qu’il faut retenir",
+    "",
+    knowledgeMarkdownValue(snapshot.whatToRemember || "Aucun repère validé pour le moment."),
+    "",
+    "## Dernier cap validé",
+    "",
+    decisionLine,
+    "",
+    "## Manœuvres prioritaires",
+    "",
+    ...actionLines,
+    "",
+    "## Questions ouvertes",
+    "",
+    ...logPoseMarkdownList(normalizedManual.openQuestions, "Aucune question ouverte enregistrée."),
+    "",
+    "## Documents à retrouver",
+    "",
+    ...logPoseMarkdownList(normalizedManual.documentsToFind, "Aucun document à retrouver enregistré."),
+    "",
+    "## Prochaine direction utile",
+    "",
+    knowledgeMarkdownValue(snapshot.nextDirection || "Aucune direction définie."),
+    "",
+    "## État de validation",
+    "",
+    `- ${snapshot.pendingReview.total} élément${snapshot.pendingReview.total > 1 ? "s" : ""} en attente de validation (${snapshot.pendingReview.actions} manœuvre${snapshot.pendingReview.actions > 1 ? "s" : ""}, ${snapshot.pendingReview.decisions} cap${snapshot.pendingReview.decisions > 1 ? "s" : ""}).`
+  ];
+  fs.writeFileSync(path.join(directory, "log_pose.md"), `${lines.join("\n")}\n`, "utf8");
+  return payload;
+}
+
+function syncLogPose(projectSlug) {
+  const manual = readLogPoseManual(projectSlug);
+  return writeLogPose(projectSlug, buildLogPose(projectSlug, manual), manual);
+}
+
+function buildGlobalLogPose(projectSlugs) {
+  const projectSnapshots = projectSlugs.map((projectSlug) => buildLogPose(projectSlug));
+  const meetings = projectSnapshots
+    .map((snapshot) => snapshot.lastMeeting ? { ...snapshot.lastMeeting, projectName: snapshot.projectName } : null)
+    .filter(Boolean)
+    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+  const decisions = projectSnapshots
+    .map((snapshot) => snapshot.lastDecision ? { ...snapshot.lastDecision, projectName: snapshot.projectName } : null)
+    .filter(Boolean)
+    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+  const priorityActions = projectSnapshots
+    .flatMap((snapshot) => snapshot.priorityActions.map((item) => ({ ...item, projectName: snapshot.projectName })))
+    .slice(0, 5);
+  const pendingReview = projectSnapshots.reduce((total, snapshot) => ({
+    actions: total.actions + snapshot.pendingReview.actions,
+    decisions: total.decisions + snapshot.pendingReview.decisions,
+    total: total.total + snapshot.pendingReview.total
+  }), { actions: 0, decisions: 0, total: 0 });
+
+  return {
+    version: 1,
+    scope: "global",
+    projectSlug: "",
+    projectName: "Mémoire globale",
+    position: projectSlugs.length ? `${projectSlugs.length} île${projectSlugs.length > 1 ? "s" : ""} suivie${projectSlugs.length > 1 ? "s" : ""}` : "Aucune île enregistrée",
+    updatedAt: new Date().toISOString(),
+    whatToRemember: decisions[0]?.decision || (meetings[0] ? `Dernière escale : ${meetings[0].title}` : "Aucun repère validé pour le moment."),
+    lastMeeting: meetings[0] || null,
+    lastDecision: decisions[0] || null,
+    priorityActions,
+    openQuestions: [],
+    documentsToFind: [],
+    nextDirection: priorityActions[0]?.action || (pendingReview.total ? "Relire les propositions en attente de validation." : "Choisir une île pour reprendre le fil."),
+    pendingReview
+  };
 }
 
 function meetingHasAudio(meetingDir) {
@@ -1106,10 +1346,54 @@ app.post("/api/meetings/validate", (req, res) => {
     const content = fs.readFileSync(exportedPath, "utf8");
     createFileVersion(validatedPath, "avant_validation");
     fs.writeFileSync(validatedPath, content + "\n\n---\n\nValidé dans Vogue Merry le " + new Date().toISOString() + "\n", "utf8");
+    syncLogPose(safeProjectSlug);
 
     res.status(201).json({ status: "ok", validatedFileName: path.basename(validatedPath) });
   } catch (error) {
     res.status(400).json({ error: error.message || "Erreur pendant la validation de l’escale." });
+  }
+});
+
+app.get("/api/log-pose", (req, res) => {
+  try {
+    const requestedProject = String(req.query.projectSlug || "").trim();
+    const projectSlug = requestedProject ? safeSegment(requestedProject) : "";
+    if (requestedProject && !projectSlug) throw new Error("Île/projet invalide.");
+
+    ensureDir(PROJECTS_ROOT);
+    const projectSlugs = projectSlug
+      ? [projectSlug]
+      : fs.readdirSync(PROJECTS_ROOT, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && !entry.isSymbolicLink())
+        .map((entry) => entry.name);
+    if (projectSlug && !fs.existsSync(safePathInside(PROJECTS_ROOT, projectSlug))) {
+      throw new Error("Île/projet introuvable.");
+    }
+
+    const logPose = projectSlug ? buildLogPose(projectSlug) : buildGlobalLogPose(projectSlugs);
+    res.json({ logPose, projects: projectSlugs });
+  } catch (error) {
+    res.status(400).json({ error: error.message || "Erreur pendant la lecture du Log Pose." });
+  }
+});
+
+app.post("/api/log-pose/save", (req, res) => {
+  try {
+    const projectSlug = safeSegment(req.body.projectSlug);
+    if (!projectSlug) throw new Error("Île/projet obligatoire.");
+    const projectDir = safePathInside(PROJECTS_ROOT, projectSlug);
+    if (!fs.existsSync(projectDir)) throw new Error("Île/projet introuvable.");
+
+    const manual = normalizeLogPoseManual({
+      whatToRemember: req.body.whatToRemember,
+      openQuestions: req.body.openQuestions,
+      documentsToFind: req.body.documentsToFind,
+      nextDirection: req.body.nextDirection
+    });
+    const logPose = writeLogPose(projectSlug, buildLogPose(projectSlug, manual), manual);
+    res.status(200).json({ status: "ok", logPose });
+  } catch (error) {
+    res.status(400).json({ error: error.message || "Erreur pendant l’enregistrement du Log Pose." });
   }
 });
 
@@ -1221,6 +1505,7 @@ app.post("/api/knowledge/:kind/validate", (req, res) => {
       validatedAt: new Date().toISOString()
     };
     writeKnowledgeEntries(projectSlug, kind, [...accepted, storedItem]);
+    syncLogPose(projectSlug);
     res.status(201).json({ status: "ok", item: storedItem });
   } catch (error) {
     res.status(400).json({ error: error.message || "Erreur pendant la validation de l’élément." });

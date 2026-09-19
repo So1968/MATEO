@@ -14,6 +14,8 @@ Le Coffre expose les documents locaux via `/api/documents`. Un dépôt arrive d'
 
 Les journaux de bord validés alimentent ensuite deux sorties structurées : les actions proposées dans `03_manoeuvres_actions` et les décisions proposées dans `02_caps_valides_decisions`. Elles restent en attente tant qu'une personne ne les a pas relues et validées ; les marqueurs `Action` et `Décision` sans détail demandent une précision avant enregistrement.
 
+Après validation, ces éléments alimentent le Log Pose persistant du projet dans `10_log_pose/log_pose.json` et `10_log_pose/log_pose.md`. Le résumé conserve le dernier cap validé, les manœuvres prioritaires, les éléments encore en attente et la prochaine direction utile.
+
 ## Sources de vérité
 
 Les données utilisateur ne vivent pas dans le code React.
@@ -62,6 +64,8 @@ Les routes documentaires principales sont :
 - `POST /api/documents/validate` : classement confirmé vers une île et le Coffre ;
 - `GET /api/knowledge/action` et `GET /api/knowledge/decision` : propositions et éléments validés ;
 - `POST /api/knowledge/action/validate` et `POST /api/knowledge/decision/validate` : validation humaine d'une action ou d'une décision.
+- `GET /api/log-pose` : reprise de contexte globale ou par île ;
+- `POST /api/log-pose/save` : sauvegarde des repères manuels du Log Pose.
 
 Le service doit écouter uniquement sur `127.0.0.1`.
 

@@ -76,6 +76,7 @@ Pendant la consolidation :
 - [x] transcription V6 recopiée dans l'escale et affichée dans le journal ; lecture et validation reliées à l'interface ;
 - [x] Coffre branché sur les documents locaux, avec dépôt Water Seven, proposition de classement et validation humaine vers une île ;
 - [x] Manœuvres et Caps validés alimentés par les journaux de bord validés, avec proposition puis validation humaine ;
+- [x] Log Pose persisté par île, recalculé après validation des journaux/actions/caps et affiché depuis la mémoire locale ;
 - [ ] faire tourner les tests locaux sur le poste de développement ;
 - [ ] tester une courte transcription locale sans appel API payant.
 
@@ -97,7 +98,7 @@ Pendant la consolidation :
 
 ### P2 — réunification produit
 
-1. Faire du Log Pose une vraie reprise de contexte persistée.
+1. Enrichir le Log Pose avec les questions ouvertes et les documents à retrouver issus des briques dédiées.
 
 ## Condition avant intégration dans `main`
 

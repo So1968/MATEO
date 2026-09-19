@@ -16,6 +16,7 @@ import { loadInbox, loadProjects } from "./lib/local-api.js";
 import MeetingsView from "./features/meetings/MeetingsView.jsx";
 import DocumentsView from "./features/documents/DocumentsView.jsx";
 import KnowledgeView from "./features/knowledge/KnowledgeView.jsx";
+import LogPoseView from "./features/log-pose/LogPoseView.jsx";
 import ProjectsView from "./features/projects/ProjectsView.jsx";
 import { makeProjectViewModel } from "./features/projects/project-utils.js";
 import SearchView from "./features/search/SearchView.jsx";
@@ -372,7 +373,7 @@ button { font: inherit; }
 .mind-detail-item strong { display: block; font-size: .79rem; }
 .mind-detail-item span { display: block; margin-top: 3px; color: #6c593c; font: .67rem/1.3 Arial,sans-serif; }
 
-.log-pose { min-height: 0; padding: 22px 25px 16px; display: flex; flex-direction: column; overflow: hidden; color: #372916; background: linear-gradient(rgba(255,255,255,.24),rgba(255,255,255,.04)),repeating-linear-gradient(0deg,rgba(112,75,28,.035) 0 1px,transparent 2px 6px),#ead7aa; box-shadow: inset 18px 0 34px rgba(80,48,14,.13); }
+.log-pose { min-height: 0; padding: 22px 25px 16px; display: flex; flex-direction: column; overflow: auto; color: #372916; background: linear-gradient(rgba(255,255,255,.24),rgba(255,255,255,.04)),repeating-linear-gradient(0deg,rgba(112,75,28,.035) 0 1px,transparent 2px 6px),#ead7aa; box-shadow: inset 18px 0 34px rgba(80,48,14,.13); }
 .log-pose h2 { margin: 0; text-align: center; font-size: 2rem; font-weight: 500; }
 .log-ornament { width: 90px; height: 1px; margin: 10px auto 16px; background: #9d7845; }
 .log-compass { width: 132px; height: 132px; min-width: 132px; min-height: 132px; flex: 0 0 132px; aspect-ratio: 1 / 1; margin: 0 auto 16px; display: grid; place-items: center; color: #77501f; border: 9px double #7d5224; border-radius: 50%; background: radial-gradient(circle,#4cb1ca 0 20%,#0f6b85 21% 49%,#d5aa52 50% 53%,#6f461e 54%); box-shadow: 0 12px 24px rgba(70,42,12,.25),inset 0 0 20px rgba(255,255,255,.34); }
@@ -380,7 +381,13 @@ button { font: inherit; }
 .log-section label { display: block; margin-bottom: 6px; color: #735a34; font: .78rem Arial,sans-serif; }
 .log-section strong { display: block; font-size: 1.3rem; font-weight: 500; line-height: 1.25; }
 .log-section p { margin: 5px 0 0; color: #6b5637; font: .82rem/1.4 Arial,sans-serif; }
+.log-list { margin: 7px 0 0; padding-left: 18px; color: #6b5637; font: .82rem/1.4 Arial,sans-serif; }
+.log-list li + li { margin-top: 5px; }
+.log-pending { color: #8b4f29 !important; font-weight: 700; }
+.log-state { margin: 8px 0 14px; color: #6b5637; text-align: center; font: .8rem/1.4 Arial,sans-serif; }
+.log-state.error { padding: 9px 10px; color: #7d3024; border: 1px solid rgba(125,48,36,.3); border-radius: 7px; background: rgba(255,221,204,.55); }
 .log-button { margin-top: auto; padding: 11px 16px; display: flex; align-items: center; justify-content: center; gap: 10px; color: #3f301a; border: 1px solid rgba(111,76,31,.28); background: rgba(255,255,255,.16); cursor: pointer; }
+.log-button:disabled { cursor: default; opacity: .62; }
 
 @media (max-width: 1180px) {
   .vogue-shell { height: auto; min-height: 100vh; grid-template-columns: 245px minmax(0,1fr); overflow: visible; }
@@ -736,40 +743,6 @@ function GenericView({ active, meetings, projects, loading, error, onSaved }) {
   );
 }
 
-function LogPose({ active, project, meetings }) {
-  const current = MENU.find((item) => item.id === active) || MENU[0];
-  const currentMeetings = project?.meetings || meetings;
-  const latestMeeting = currentMeetings[0];
-  const openMeeting = currentMeetings.find((meeting) => meeting.status !== "Validé");
-  const position = project?.name || latestMeeting?.projectName || "Aucune donnée chargée";
-  const positionDetail = project?.detail || latestMeeting?.title || current.sublabel;
-  const stopPoint = openMeeting?.status || (latestMeeting ? "Escale validée" : "Aucune escale enregistrée");
-  const resume = project?.next || openMeeting?.title || (latestMeeting ? "Relire la dernière escale utile" : "Créer la première escale");
-  return (
-    <aside className="log-pose">
-      <h2>Log Pose</h2>
-      <div className="log-ornament" />
-      <div className="log-compass"><Compass size={82} /></div>
-      <section className="log-section">
-        <label>Dernière position</label>
-        <strong>{position}</strong>
-        <p>{positionDetail}</p>
-      </section>
-      <section className="log-section">
-        <label>Point d’arrêt</label>
-        <strong>{stopPoint}</strong>
-        <p>{latestMeeting ? `${latestMeeting.title} · ${latestMeeting.date || "date à confirmer"}` : "Aucun point d’arrêt n’est encore enregistré."}</p>
-      </section>
-      <section className="log-section">
-        <label>Reprendre ici</label>
-        <strong>{resume}</strong>
-        <p>{project ? project.cap : "Repartir de ce point sans reconstruire tout le contexte."}</p>
-      </section>
-      <button className="log-button">Voir le point de reprise <ChevronRight size={18} /></button>
-    </aside>
-  );
-}
-
 export default function App() {
   const [active, setActive] = useState("pont");
   const [selectedProject, setSelectedProject] = useState(null);
@@ -839,7 +812,7 @@ export default function App() {
           <StageHeader active={active} project={selectedProject} />
           <div className="stage-content">{centralView}</div>
         </section>
-        {showShipLog ? <LogPose active={active} project={null} meetings={meetings} /> : null}
+        {showShipLog ? <LogPoseView onOpen={() => setActive("manoeuvres")} /> : null}
       </main>
     </>
   );
