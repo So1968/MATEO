@@ -57,16 +57,16 @@ Pendant la consolidation :
 - [x] consentement explicite obligatoire avant l'envoi d'un audio, du contexte et des noms vers OpenAI ;
 - [x] Multer mis à jour et verrouillé en `2.4.0` et `package-lock.json` régénéré ;
 - [x] nom du paquet harmonisé en `vogue-merry` dans le lockfile ;
-- [x] garde-fou automatisé ajouté pour empêcher une régression de Multer sous `2.4.0` ;
+- [x] versions frontend auparavant déclarées en `latest` verrouillées sur les versions déjà validées par le lockfile ;
+- [x] garde-fous automatisés ajoutés pour empêcher une régression de Multer ou un retour à `latest` ;
 - [x] tests de garde-fou ajoutés avec `node:test` ;
 - [x] CI GitHub : `npm ci`, syntaxe Node/Python, tests et build frontend ;
 - [x] workflows temporaires de migration retirés après usage ;
-- [x] CI complète réussie après nettoyage des fichiers temporaires, sur le commit `743ff6b`.
+- [x] CI complète réussie après les migrations techniques.
 
 ### À faire avant intégration
 
 - [ ] absorber `speaker-sync-server.js` dans `transcription-server-v6.js` pour supprimer le port 8012 ;
-- [ ] verrouiller explicitement les versions JavaScript encore déclarées en `latest` ;
 - [ ] créer un fichier de dépendances Python reproductible ;
 - [ ] ajouter un vrai lint du frontend ;
 - [ ] ajouter des tests fonctionnels des routes locales, au-delà des garde-fous statiques ;
@@ -80,7 +80,7 @@ Pendant la consolidation :
 
 1. Absorber le service 8012 dans le moteur de transcription.
 2. Retester CI après suppression du service temporaire.
-3. Verrouiller les dépendances JS/Python.
+3. Rendre les dépendances Python reproductibles.
 4. Ajouter lint et tests de routes.
 
 ### P1 — validation sur le poste réel
