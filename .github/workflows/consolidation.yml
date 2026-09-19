@@ -35,9 +35,8 @@ jobs:
       - name: Lancer les tests de consolidation
         run: npm test
 
-      - name: Auditer les dépendances de production
-        continue-on-error: true
-        run: npm audit --omit=dev --audit-level=high
+      - name: Auditer toutes les dépendances
+        run: npm audit --audit-level=high
 
       - name: Construire le frontend
         run: npm run build
