@@ -10,6 +10,11 @@ if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
   exit 1
 fi
 
+if ! command -v ffmpeg >/dev/null 2>&1; then
+  echo "ffmpeg est requis. Sous Pop!_OS/Ubuntu : sudo apt install ffmpeg"
+  exit 1
+fi
+
 if [ ! -d "$VENV" ]; then
   echo "Création de l'environnement local Vogue Marry…"
   if ! "$PYTHON_BIN" -m venv "$VENV"; then
@@ -21,15 +26,18 @@ if [ ! -d "$VENV" ]; then
   fi
 fi
 
-"$VENV/bin/python" -m pip install --upgrade pip
-"$VENV/bin/python" -m pip install "faster-whisper>=1.1,<2"
+"$VENV/bin/python" -m pip install --upgrade pip wheel setuptools
+"$VENV/bin/python" -m pip install "faster-whisper>=1.1,<2" "pyannote.audio>=4,<5"
 
 "$VENV/bin/python" - <<'PY'
 import faster_whisper
 import av
-print("Moteur local prêt : faster-whisper + PyAV")
+import pyannote.audio
+print("Moteur local prêt : faster-whisper + PyAV + pyannote.audio")
 PY
 
 echo
-echo "Vogue Marry peut maintenant transcrire localement, sans clé API."
-echo "Le modèle Whisper sera téléchargé une seule fois au premier lancement."
+echo "Vogue Marry peut transcrire et séparer les interlocuteurs localement."
+echo "Whisper large-v3-turbo sera téléchargé automatiquement au premier usage."
+echo "Pour Pyannote Community-1 : accepte une fois les conditions du modèle Hugging Face"
+echo "puis enregistre ton jeton HF dans l'écran Transcription de Vogue Marry."
