@@ -28,6 +28,10 @@ const API_KEY_FILE = path.join(CONFIG_DIR, "openai_api_key");
 const HF_TOKEN_FILE = path.join(CONFIG_DIR, "huggingface_token");
 const OPENAI_URL = "https://api.openai.com/v1/audio/transcriptions";
 const GPT_COST_PER_MINUTE_USD = 0.0045;
+const ALLOWED_ORIGINS = new Set([
+  "http://127.0.0.1:5173",
+  "http://localhost:5173"
+]);
 
 const DEFAULT_CONTEXT = [
   "Réunion professionnelle en français.",
@@ -38,7 +42,14 @@ const DEFAULT_CONTEXT = [
 
 fs.mkdirSync(ROOT, { recursive: true });
 fs.mkdirSync(CONFIG_DIR, { recursive: true });
-app.use(cors());
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || ALLOWED_ORIGINS.has(origin)) return callback(null, true);
+    return callback(new Error("Origine non autorisée."));
+  },
+  methods: ["GET", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type"]
+}));
 app.use(express.json({ limit: "1mb" }));
 
 function safeName(value) {
@@ -54,6 +65,14 @@ function timestamp() {
 
 function jobDir(jobId) {
   return path.join(ROOT, jobId);
+}
+
+function requestJobDir(jobId) {
+  const value = String(jobId || "").trim();
+  if (!/^[A-Za-z0-9._-]+$/.test(value) || value === "." || value === "..") return null;
+  const resolved = path.resolve(ROOT, value);
+  const root = path.resolve(ROOT) + path.sep;
+  return resolved.startsWith(root) ? resolved : null;
 }
 
 function statusPath(jobId) {
@@ -358,18 +377,17 @@ async function transcribeLocal(jobId, sourcePath, progressStart = 5, progressEnd
   return { duration, segments, words };
 }
 
-async function diarizeLocal(jobId, sourcePath, participantCount, progressStart = 55, progressEnd = 82) {
+async function diarizeLocal(jobId, sourcePath, expectedParticipantCount, progressStart = 55, progressEnd = 82) {
   if (!pyannoteInstalled()) throw new Error("Pyannote n'est pas installé. Lance npm run transcription:setup puis redémarre le moteur.");
   if (!hfToken()) throw new Error("Jeton Hugging Face absent pour Pyannote Community-1.");
 
   const diarization = [];
   const args = [DIARIZE_SCRIPT, sourcePath, "--token-file", HF_TOKEN_FILE];
-  if (participantCount > 0) args.push("--num-speakers", String(participantCount));
 
   writeStatus(jobId, {
     state: "diarizing",
-    message: participantCount
-      ? `Repérage local de ${participantCount} interlocuteur${participantCount > 1 ? "s" : ""}…`
+    message: expectedParticipantCount
+      ? `Repérage local des interlocuteurs · ${expectedParticipantCount} personne${expectedParticipantCount > 1 ? "s" : ""} annoncée${expectedParticipantCount > 1 ? "s" : ""}…`
       : "Repérage local des interlocuteurs…",
     progress: progressStart
   });
@@ -453,17 +471,9 @@ function introductionScore(text, participant) {
   const normalized = normalizeText(text);
   const name = normalizeText(participant);
   if (!normalized || !name) return 0;
-  const tokens = name.split(" ").filter((token) => token.length > 2);
-  const full = normalized.includes(name);
-  const last = tokens.length ? normalized.includes(tokens[tokens.length - 1]) : false;
   const selfCue = /\b(je suis|je m appelle|moi c est|mon nom est|je me presente|je me nomme)\b/.test(normalized);
-  const helloCue = /\b(bonjour|bonsoir)\b/.test(normalized);
-  let score = 0;
-  if (full) score += 4;
-  else if (last) score += 2;
-  if (selfCue) score += 3;
-  else if (helloCue) score += 1;
-  return score;
+  if (!selfCue) return 0;
+  return normalized.includes(name) ? 10 : 0;
 }
 
 function mapSpeakersFromIntroductions(turns, participants) {
@@ -477,7 +487,7 @@ function mapSpeakersFromIntroductions(turns, participants) {
     if (turn.start > 600 || turn.sourceSpeaker === "?") continue;
     for (const participant of participants) {
       const score = introductionScore(turn.text, participant) + (turn.start <= 180 ? 1 : 0);
-      if (score >= 5) candidates.push({ speaker: turn.sourceSpeaker, participant, score, start: turn.start });
+      if (score >= 10) candidates.push({ speaker: turn.sourceSpeaker, participant, score, start: turn.start });
     }
   }
   candidates.sort((a, b) => b.score - a.score || a.start - b.start);
@@ -486,14 +496,8 @@ function mapSpeakersFromIntroductions(turns, participants) {
   const usedParticipants = new Set();
   for (const candidate of candidates) {
     if (map[candidate.speaker] || usedParticipants.has(candidate.participant)) continue;
-    map[candidate.speaker] = { name: candidate.participant, confidence: "presentation" };
+    map[candidate.speaker] = { name: candidate.participant, confidence: "presentation-explicite" };
     usedParticipants.add(candidate.participant);
-  }
-
-  const unresolvedSpeakers = speakers.filter((speaker) => !map[speaker]);
-  const unresolvedParticipants = participants.filter((participant) => !usedParticipants.has(participant));
-  if (unresolvedSpeakers.length === 1 && unresolvedParticipants.length === 1 && speakers.length === participants.length) {
-    map[unresolvedSpeakers[0]] = { name: unresolvedParticipants[0], confidence: "elimination" };
   }
 
   const order = Object.fromEntries(speakers.map((speaker, index) => [speaker, index + 1]));
@@ -606,7 +610,7 @@ function buildTranscriptMarkdown(meta, segments) {
     "",
     `- Fichier : ${meta.originalName}`,
     `- Durée : ${formatClock(meta.duration)}`,
-    `- Mode : ${meta.mode === "high" ? "Dossier sensible · vérifié" : "Local renforcé · gratuit"}`,
+    `- Mode : ${meta.mode === "high" ? "Contrôle renforcé · double lecture" : "Local renforcé · gratuit"}`,
     `- Texte structuré : Faster-Whisper ${LOCAL_MODEL}`,
     `- Interlocuteurs : ${meta.diarized ? `${DIARIZATION_MODEL} · local` : "non repérés"}`,
     meta.meeting?.title ? `- Escale : ${meta.meeting.title}` : null,
@@ -771,14 +775,17 @@ function cacheSignature(audioHash, mode, participants, context, meetingId) {
     .digest("hex");
 }
 
-function findCachedJob(cacheKey) {
+function findReusableJob(cacheKey) {
   if (!fs.existsSync(ROOT)) return null;
+  const reusableStates = new Set(["queued", "transcribing", "diarizing", "verifying", "done"]);
   const entries = fs.readdirSync(ROOT, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && !entry.name.startsWith("_"))
     .sort((a, b) => b.name.localeCompare(a.name));
   for (const entry of entries) {
     const status = readJsonIfExists(statusPath(entry.name));
-    if (status?.state === "done" && status.cacheKey === cacheKey && fs.existsSync(path.join(jobDir(entry.name), "transcription.json"))) return entry.name;
+    if (!status || !reusableStates.has(status.state) || status.cacheKey !== cacheKey) continue;
+    if (status.state === "done" && !fs.existsSync(path.join(jobDir(entry.name), "transcription.json"))) continue;
+    return { jobId: entry.name, state: status.state };
   }
   return null;
 }
@@ -794,7 +801,7 @@ const upload = multer({
       cb(null, `${Date.now()}_${randomUUID()}_${safeName(file.originalname)}`);
     }
   }),
-  limits: { fileSize: 1024 * 1024 * 1024 }
+  limits: { fileSize: 1024 * 1024 * 1024, files: 1 }
 });
 
 app.get("/api/transcription/health", (req, res) => {
@@ -819,6 +826,7 @@ app.get("/api/transcription/health", (req, res) => {
     participantAware: true,
     cacheEnabled: true,
     recoverableJobs: true,
+    host: "127.0.0.1",
     port: PORT
   });
 });
@@ -869,10 +877,16 @@ app.post("/api/transcription", upload.single("audio"), async (req, res) => {
     const context = String(req.body?.context || meeting?.context || "").trim();
     const audioHash = await fileSha256(req.file.path);
     const cacheKey = cacheSignature(audioHash, mode, participants, context, meetingId);
-    const cachedJobId = findCachedJob(cacheKey);
-    if (cachedJobId) {
+    const reusableJob = findReusableJob(cacheKey);
+    if (reusableJob) {
       fs.unlinkSync(req.file.path);
-      return res.status(200).json({ status: "cached", jobId: cachedJobId, mode, cached: true });
+      return res.status(200).json({
+        status: reusableJob.state === "done" ? "cached" : "already-running",
+        jobId: reusableJob.jobId,
+        mode,
+        cached: reusableJob.state === "done",
+        alreadyRunning: reusableJob.state !== "done"
+      });
     }
 
     const jobId = `${new Date().toISOString().replace(/[:.]/g, "-")}_${randomUUID().slice(0, 8)}`;
@@ -909,32 +923,40 @@ app.post("/api/transcription", upload.single("audio"), async (req, res) => {
 });
 
 app.get("/api/transcription/:jobId", (req, res) => {
-  const filePath = statusPath(req.params.jobId);
+  const dir = requestJobDir(req.params.jobId);
+  if (!dir) return res.status(400).json({ error: "Identifiant de transcription invalide." });
+  const filePath = path.join(dir, "status.json");
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Transcription inconnue." });
   return res.json(readJson(filePath));
 });
 
 app.get("/api/transcription/:jobId/result", (req, res) => {
-  const filePath = path.join(jobDir(req.params.jobId), "transcription.json");
+  const dir = requestJobDir(req.params.jobId);
+  if (!dir) return res.status(400).json({ error: "Identifiant de transcription invalide." });
+  const filePath = path.join(dir, "transcription.json");
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Résultat pas encore disponible." });
   return res.json(readJson(filePath));
 });
 
 app.get("/api/transcription/:jobId/download", (req, res) => {
-  const filePath = path.join(jobDir(req.params.jobId), "transcription.md");
+  const dir = requestJobDir(req.params.jobId);
+  if (!dir) return res.status(400).json({ error: "Identifiant de transcription invalide." });
+  const filePath = path.join(dir, "transcription.md");
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Résultat pas encore disponible." });
   return res.download(filePath, "transcription-vogue-marry.md");
 });
 
 app.get("/api/transcription/:jobId/download-verification", (req, res) => {
-  const filePath = path.join(jobDir(req.params.jobId), "verification-gpt.md");
+  const dir = requestJobDir(req.params.jobId);
+  if (!dir) return res.status(400).json({ error: "Identifiant de transcription invalide." });
+  const filePath = path.join(dir, "verification-gpt.md");
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Vérification GPT indisponible pour cette transcription." });
   return res.download(filePath, "verification-gpt-vogue-marry.md");
 });
 
-app.listen(PORT, () => {
-  console.log(`Vogue Marry — transcription v6 : http://localhost:${PORT}`);
+app.listen(PORT, "127.0.0.1", () => {
+  console.log(`Vogue Marry — transcription v6 : http://127.0.0.1:${PORT}`);
   console.log(`Local : ${LOCAL_MODEL} + ${DIARIZATION_MODEL}.`);
-  console.log(`Dossier sensible : local complet + vérification ${PRIMARY_MODEL}.`);
+  console.log(`Contrôle renforcé : local complet + seconde lecture ${PRIMARY_MODEL}.`);
   console.log("La diarisation des interlocuteurs est locale et gratuite.");
 });
