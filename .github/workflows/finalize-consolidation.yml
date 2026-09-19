@@ -1,5 +1,6 @@
 name: Finalise la consolidation Vogue Marry
 
+# Workflow temporaire de migration, à supprimer après succès.
 on:
   push:
     branches:
