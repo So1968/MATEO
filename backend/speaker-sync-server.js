@@ -10,8 +10,19 @@ const HOME = os.homedir();
 const DATA_ROOT = path.join(HOME, "VOGUE-MERRY-DONNEES");
 const JOBS_ROOT = path.join(DATA_ROOT, "99_TRANSCRIPTION_TESTS");
 const PROJECTS_ROOT = path.join(DATA_ROOT, "01_PROJETS");
+const ALLOWED_ORIGINS = new Set([
+  "http://127.0.0.1:5173",
+  "http://localhost:5173"
+]);
 
-app.use(cors());
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || ALLOWED_ORIGINS.has(origin)) return callback(null, true);
+    return callback(new Error("Origine non autorisée."));
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"]
+}));
 app.use(express.json({ limit: "256kb" }));
 
 function readJson(filePath) {
@@ -40,7 +51,7 @@ function formatClock(totalSeconds) {
 }
 
 function safeJobDir(jobId) {
-  if (!/^[A-Za-z0-9._-]+$/.test(jobId)) return null;
+  if (!/^[A-Za-z0-9._-]+$/.test(jobId) || jobId === "." || jobId === "..") return null;
   const resolved = path.resolve(JOBS_ROOT, jobId);
   const root = path.resolve(JOBS_ROOT) + path.sep;
   return resolved.startsWith(root) ? resolved : null;
@@ -53,6 +64,7 @@ function meetingDataPath(meetingId) {
   const projectSlug = value.slice(0, slash);
   const meetingDir = value.slice(slash + 1);
   if (!/^[A-Za-z0-9._-]+$/.test(projectSlug) || !/^[A-Za-z0-9._-]+$/.test(meetingDir)) return null;
+  if ([projectSlug, meetingDir].some((part) => part === "." || part === "..")) return null;
   const resolved = path.resolve(PROJECTS_ROOT, projectSlug, "01_escales_reunions", meetingDir, "donnees_escale.json");
   const root = path.resolve(PROJECTS_ROOT) + path.sep;
   return resolved.startsWith(root) ? resolved : null;
@@ -80,7 +92,7 @@ function buildCorrectedMarkdown(result) {
     result.duration ? `- Durée : ${formatClock(result.duration)}` : null,
     result.meeting?.title ? `- Escale : ${result.meeting.title}` : null,
     result.participants?.length ? `- Participants : ${result.participants.join(", ")}` : null,
-    result.mode === "high" ? "- Mode : Dossier sensible · vérifié" : "- Mode : Local renforcé · gratuit",
+    result.mode === "high" ? "- Mode : Contrôle renforcé · double lecture" : "- Mode : Local renforcé · gratuit",
     result.mode === "high" && Number.isFinite(Number(result.verification?.estimatedCostUsd))
       ? `- Coût API estimé : ${Number(result.verification.estimatedCostUsd).toFixed(2)} $`
       : "- Coût API : 0 $",
@@ -135,7 +147,7 @@ function persistToMeeting(result, status, mapping, updatedAt) {
 }
 
 app.get("/api/speaker-sync/health", (req, res) => {
-  res.json({ status: "ok", service: "vogue-marry-speaker-sync", port: PORT });
+  res.json({ status: "ok", service: "vogue-marry-speaker-sync", port: PORT, host: "127.0.0.1" });
 });
 
 app.post("/api/transcription/:jobId/speakers", (req, res) => {
@@ -195,6 +207,6 @@ app.post("/api/transcription/:jobId/speakers", (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Vogue Marry — confirmation des interlocuteurs : http://localhost:${PORT}`);
+app.listen(PORT, "127.0.0.1", () => {
+  console.log(`Vogue Marry — confirmation des interlocuteurs : http://127.0.0.1:${PORT}`);
 });
