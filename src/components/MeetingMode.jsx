@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Mic,
   Square,
@@ -45,7 +45,10 @@ export default function MeetingMode({
     let interval = null;
 
     if (isRecording) {
-      if (!startedAtRef.current) startedAtRef.current = Date.now();
+      if (!startedAtRef.current) {
+        startedAtRef.current = Date.now();
+        setSeconds(0);
+      }
 
       interval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startedAtRef.current) / 1000);

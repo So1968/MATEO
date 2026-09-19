@@ -54,7 +54,7 @@ function writeFileIfMissing(filePath, content) {
 function safeSegment(value) {
   const segment = String(value || "").trim();
   if (!segment || segment === "." || segment === ".." || segment.includes("..")) return "";
-  if (/[\/\\\0]/.test(segment)) return "";
+  if (segment.includes("/") || segment.includes("\\") || segment.includes("\0")) return "";
   return segment;
 }
 
@@ -252,7 +252,7 @@ Structure :
   writeFileIfMissing(path.join(baseDir, "07_questions_blocages", "questions_blocages.md"), `# Questions ouvertes / blocages — ${projectName}\n\n| Date | Sujet | Statut | Responsable | Source |\n|---|---|---|---|---|\n`);
   writeFileIfMissing(path.join(baseDir, "10_log_pose", "log_pose.md"), `# Log Pose — ${projectName}\n\n## Ce qu’il faut retenir\n\n## Dernier cap validé\n\n## Manœuvres prioritaires\n\n## Questions ouvertes\n\n## Documents à retrouver\n\n## Prochaine direction utile\n`);
 
-  return { name: projectName, slug, path: baseDir };
+  return { name: projectName, slug };
 }
 
 function readJsonIfExists(filePath) {
@@ -294,7 +294,6 @@ app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
     service: "vogue-marry-local-backend",
-    dataRoot: DATA_ROOT,
     host: "127.0.0.1",
     port: PORT
   });
@@ -319,7 +318,7 @@ app.post("/api/water-seven/deposit", upload.single("document"), (req, res) => {
       depositedAt: new Date().toISOString(),
       source: "Water Seven",
       originalName: req.file.originalname,
-      filePath,
+      relativePath: path.relative(DATA_ROOT, filePath),
       analysis
     };
 
@@ -339,8 +338,7 @@ app.get("/api/projects", (req, res) => {
     .filter((entry) => entry.isDirectory())
     .map((entry) => ({
       slug: entry.name,
-      name: entry.name.replaceAll("_", " "),
-      path: path.join(PROJECTS_ROOT, entry.name)
+      name: entry.name.replaceAll("_", " ")
     }))
     .sort((a, b) => a.slug.localeCompare(b.slug));
 
@@ -473,7 +471,7 @@ app.post("/api/meetings/export-audio", upload.single("audio"), (req, res) => {
     const audioPath = path.join(meetingDir, `audio_original${extension}`);
     fs.writeFileSync(audioPath, req.file.buffer);
 
-    res.status(201).json({ status: "ok", audioPath });
+    res.status(201).json({ status: "ok", audioFileName: path.basename(audioPath) });
   } catch (error) {
     res.status(400).json({ error: error.message || "Erreur pendant l’export audio." });
   }
@@ -519,7 +517,6 @@ app.get("/api/inbox", (req, res) => {
           hasReport,
           hasValidatedReport,
           hasRawNotes,
-          path: meetingDir
         });
       }
     }
@@ -546,7 +543,7 @@ app.post("/api/meetings/validate", (req, res) => {
     createFileVersion(validatedPath, "avant_validation");
     fs.writeFileSync(validatedPath, content + "\n\n---\n\nValidé dans Vogue Merry le " + new Date().toISOString() + "\n", "utf8");
 
-    res.status(201).json({ status: "ok", validatedPath });
+    res.status(201).json({ status: "ok", validatedFileName: path.basename(validatedPath) });
   } catch (error) {
     res.status(400).json({ error: error.message || "Erreur pendant la validation de l’escale." });
   }
@@ -566,7 +563,7 @@ app.post("/api/meetings/read-report", (req, res) => {
 
     if (!fs.existsSync(reportPath)) throw new Error("Aucun journal de bord trouvé pour cette escale.");
 
-    res.json({ status: "ok", reportType, reportPath, content: fs.readFileSync(reportPath, "utf8") });
+    res.json({ status: "ok", reportType, reportFileName: path.basename(reportPath), content: fs.readFileSync(reportPath, "utf8") });
   } catch (error) {
     res.status(400).json({ error: error.message || "Erreur pendant la lecture du journal de bord." });
   }
@@ -585,7 +582,7 @@ app.post("/api/meetings/save-report", (req, res) => {
     createFileVersion(exportedPath, "avant_sauvegarde");
     fs.writeFileSync(exportedPath, String(req.body.content || ""), "utf8");
 
-    res.json({ status: "ok", savedPath: exportedPath });
+    res.json({ status: "ok", savedFileName: path.basename(exportedPath) });
   } catch (error) {
     res.status(400).json({ error: error.message || "Erreur pendant l’enregistrement du journal de bord." });
   }
@@ -629,7 +626,6 @@ app.get("/api/search", (req, res) => {
           const parts = relativePath.split(path.sep);
           results.push({
             projectSlug: parts[0] || "",
-            filePath,
             relativePath,
             fileName: path.basename(filePath),
             snippet: extractSnippet(content, query)

@@ -30,7 +30,7 @@ Pendant la consolidation :
 
 - `backend/server.js` : API locale principale et mémoire projet ;
 - `backend/transcription-server-v6.js` : unique moteur de transcription actif ;
-- `backend/speaker-sync-server.js` : service temporaire de confirmation des interlocuteurs, à absorber ensuite dans le moteur de transcription ;
+- la confirmation des interlocuteurs est intégrée à `backend/transcription-server-v6.js` via `/api/transcription/:jobId/speakers` ;
 - `backend/local_transcribe.py` : Faster-Whisper ;
 - `backend/local_diarize.py` : Pyannote.
 
@@ -43,7 +43,7 @@ Pendant la consolidation :
 - [x] pull request de consolidation ouverte en brouillon vers `main` ;
 - [x] suppression du code actif des anciens moteurs de transcription V1 à V5 ;
 - [x] suppression des pages de démonstration obsolètes du dossier `public/` ;
-- [x] ports 8010, 8011 et 8012 limités à `127.0.0.1` ;
+- [x] ports 8010 et 8011 limités à `127.0.0.1` ; le port 8012 a été supprimé ;
 - [x] CORS limité aux origines locales de Vogue Marry ;
 - [x] validation renforcée des chemins côté API principale et transcription ;
 - [x] limites d'upload ajoutées ;
@@ -67,10 +67,12 @@ Pendant la consolidation :
 ### À faire avant intégration
 
 - [x] service de confirmation des interlocuteurs absorbé dans `transcription-server-v6.js` ; le port 8012 a été supprimé ;
-- [x] dépendances Python directes centralisées dans `requirements-transcription.txt` ;
-- [ ] ajouter un vrai lint du frontend ;
-- [ ] ajouter des tests fonctionnels des routes locales, au-delà des garde-fous statiques ;
-- [ ] connecter progressivement l'interface aux vraies données du backend ;
+- [x] dépendances Python directes verrouillées dans `requirements-transcription.txt` ;
+- [x] lint frontend et backend ajouté à `npm run lint` ;
+- [x] tests fonctionnels des routes locales renforcés ;
+- [x] première tranche d'interface branchée sur `/api/projects`, `/api/inbox` et `/api/search` ;
+- [x] `MeetingMode` relié à la création d'une escale, aux marqueurs et à l'export audio ;
+- [ ] relier transcription → journal → validation ;
 - [ ] faire tourner les tests locaux sur le poste de développement ;
 - [ ] tester une courte transcription locale sans appel API payant.
 
@@ -79,7 +81,7 @@ Pendant la consolidation :
 ### P0 — terminer la consolidation technique
 
 1. Retester CI après suppression du service 8012.
-2. Ajouter lint et approfondir les tests fonctionnels des routes.
+2. Valider le lint et les tests fonctionnels sur le poste réel.
 3. Valider une transcription locale courte sur le poste réel.
 
 ### P1 — validation sur le poste réel
@@ -92,12 +94,10 @@ Pendant la consolidation :
 
 ### P2 — réunification produit
 
-1. Brancher le Pont et les Îles sur `/api/projects`.
-2. Brancher Escales sur les vraies réunions.
-3. Brancher Longue-vue sur `/api/search`.
-4. Intégrer `MeetingMode` au parcours Escale.
-5. Relier transcription → journal de bord → validation.
-6. Faire du Log Pose une vraie reprise de contexte.
+1. Relier transcription → journal de bord → validation.
+2. Brancher le Coffre sur les documents locaux sans exposer les chemins absolus.
+3. Extraire les Manœuvres et Caps validés depuis les journaux.
+4. Faire du Log Pose une vraie reprise de contexte persistée.
 
 ## Condition avant intégration dans `main`
 

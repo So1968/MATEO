@@ -61,9 +61,13 @@ Responsabilités :
 
 Le service doit écouter uniquement sur `127.0.0.1`.
 
-### Confirmation des interlocuteurs — port 8012
+### Confirmation des interlocuteurs — intégrée au port 8011
 
-Service temporaire pendant la consolidation. Sa responsabilité doit être absorbée dans l'API de transcription ou dans l'API locale principale afin de revenir à deux services Node au maximum.
+La confirmation des interlocuteurs est désormais une route du moteur V6 :
+`POST /api/transcription/:jobId/speakers`.
+
+Il n'existe plus de service séparé ni de port 8012. La pile locale active se limite à
+l'API mémoire sur 8010 et au moteur de transcription sur 8011.
 
 ## Règles de sécurité
 

@@ -32,6 +32,9 @@ jobs:
       - name: Vérifier la syntaxe Python
         run: python3 -m py_compile backend/local_transcribe.py backend/local_diarize.py
 
+      - name: Vérifier le lint
+        run: npm run lint
+
       - name: Lancer les tests de consolidation
         run: npm test
 

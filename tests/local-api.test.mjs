@@ -25,7 +25,7 @@ async function waitFor(url, attempts = 40) {
   throw lastError || new Error(`Service indisponible : ${url}`);
 }
 
-async function withServer(script, port, callback) {
+async function withServer(script, port, callback, healthPath = port === 8010 ? "health" : "transcription/health") {
   const home = makeHome();
   const child = spawn(process.execPath, [script], {
     cwd: ROOT,
@@ -37,7 +37,7 @@ async function withServer(script, port, callback) {
   child.stderr.on("data", (chunk) => { stderr += chunk.toString(); });
 
   try {
-    await waitFor(`http://127.0.0.1:${port}/api/${port === 8010 ? "health" : port === 8011 ? "transcription/health" : "speaker-sync/health"}`);
+    await waitFor(`http://127.0.0.1:${port}/api/${healthPath}`);
     await callback(home);
   } catch (error) {
     if (stderr.trim()) error.message += `\nServeur : ${stderr.trim()}`;
@@ -75,6 +75,88 @@ test("API mémoire : santé locale, CORS local et refus des chemins dangereux", 
   });
 });
 
+test("API mémoire : crée une escale, rattache un audio et la retrouve", async () => {
+  await withServer("backend/server.js", 8010, async () => {
+    const requestOptions = {
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "http://localhost:5173"
+      }
+    };
+    const projectResponse = await fetch("http://127.0.0.1:8010/api/projects", {
+      method: "POST",
+      ...requestOptions,
+      body: JSON.stringify({ name: "Projet démo" })
+    });
+    assert.equal(projectResponse.status, 201);
+    const projectPayload = await projectResponse.json();
+    assert.equal(projectPayload.project.slug, "projet_demo");
+    assert.equal("path" in projectPayload.project, false);
+
+    const meetingResponse = await fetch("http://127.0.0.1:8010/api/meetings/export", {
+      method: "POST",
+      ...requestOptions,
+      body: JSON.stringify({
+        projectName: "Projet démo",
+        meetingDate: "2026-09-19",
+        meetingType: "réunion",
+        title: "Réunion test",
+        participants: "Sofia, Pierre",
+        context: "Test de rattachement",
+        rawNotes: "décision à confirmer"
+      })
+    });
+    assert.equal(meetingResponse.status, 201);
+    const meetingPayload = await meetingResponse.json();
+    assert.match(meetingPayload.meetingDirName, /^2026-09-19_reunion_reunion_test$/u);
+
+    const audioForm = new FormData();
+    audioForm.append("projectName", "Projet démo");
+    audioForm.append("meetingDirName", meetingPayload.meetingDirName);
+    audioForm.append("audio", new Blob(["audio-test"], { type: "audio/webm" }), "reunion.webm");
+    const audioResponse = await fetch("http://127.0.0.1:8010/api/meetings/export-audio", {
+      method: "POST",
+      headers: { Origin: "http://localhost:5173" },
+      body: audioForm
+    });
+    assert.equal(audioResponse.status, 201);
+
+    const inboxResponse = await fetch("http://127.0.0.1:8010/api/inbox", {
+      headers: { Origin: "http://localhost:5173" }
+    });
+    assert.equal(inboxResponse.status, 200);
+    const inbox = await inboxResponse.json();
+    assert.equal(inbox.items.length, 1);
+    assert.equal(inbox.items[0].status, "Journal de bord à valider");
+    assert.equal(inbox.items[0].hasAudio, true);
+    assert.equal("path" in inbox.items[0], false);
+
+    const reportResponse = await fetch("http://127.0.0.1:8010/api/meetings/read-report", {
+      method: "POST",
+      ...requestOptions,
+      body: JSON.stringify({ projectSlug: "projet_demo", meetingDirName: meetingPayload.meetingDirName })
+    });
+    assert.equal(reportResponse.status, 200);
+    const report = await reportResponse.json();
+    assert.match(report.content, /Réunion test/u);
+
+    const searchResponse = await fetch("http://127.0.0.1:8010/api/search?q=décision", {
+      headers: { Origin: "http://localhost:5173" }
+    });
+    assert.equal(searchResponse.status, 200);
+    const search = await searchResponse.json();
+    assert.ok(search.count >= 1);
+    assert.equal("filePath" in search.results[0], false);
+
+    const validateResponse = await fetch("http://127.0.0.1:8010/api/meetings/validate", {
+      method: "POST",
+      ...requestOptions,
+      body: JSON.stringify({ projectSlug: "projet_demo", meetingDirName: meetingPayload.meetingDirName })
+    });
+    assert.equal(validateResponse.status, 201);
+  });
+});
+
 test("API transcription : démarre sans secret et annonce son mode local", async () => {
   await withServer("backend/transcription-server-v6.js", 8011, async () => {
     const response = await fetch("http://127.0.0.1:8011/api/transcription/health", {
@@ -101,5 +183,77 @@ test("API interlocuteurs : est intégrée au moteur de transcription", async () 
     });
     assert.equal(response.status, 404);
     assert.equal(response.headers.get("access-control-allow-origin"), "http://localhost:5173");
+  });
+});
+
+test("API interlocuteurs : confirme et persiste une correspondance", async () => {
+  await withServer("backend/transcription-server-v6.js", 8011, async (home) => {
+    const meetingId = "projet-demo/2026-09-19_escale_reunion";
+    const meetingDir = path.join(
+      home,
+      "VOGUE-MERRY-DONNEES",
+      "01_PROJETS",
+      "projet-demo",
+      "01_escales_reunions",
+      "2026-09-19_escale_reunion"
+    );
+    const jobDir = path.join(home, "VOGUE-MERRY-DONNEES", "99_TRANSCRIPTION_TESTS", "job-fixture");
+    fs.mkdirSync(meetingDir, { recursive: true });
+    fs.mkdirSync(jobDir, { recursive: true });
+    fs.writeFileSync(path.join(meetingDir, "donnees_escale.json"), JSON.stringify({ projectName: "Projet démo" }));
+    fs.writeFileSync(path.join(jobDir, "status.json"), JSON.stringify({
+      jobId: "job-fixture",
+      state: "done",
+      meetingId
+    }));
+    fs.writeFileSync(path.join(jobDir, "transcription.json"), JSON.stringify({
+      jobId: "job-fixture",
+      originalName: "reunion.wav",
+      meeting: { id: meetingId, title: "Réunion de démonstration" },
+      participants: ["Sofia", "Pierre"],
+      segments: [
+        {
+          sourceSpeaker: "SPEAKER_00",
+          speaker: "Intervenant 1",
+          speakerConfidence: "non-identifie",
+          start: 0,
+          text: "Bonjour."
+        },
+        {
+          sourceSpeaker: "SPEAKER_01",
+          speaker: "Intervenant 2",
+          speakerConfidence: "non-identifie",
+          start: 2,
+          text: "Bonjour."
+        }
+      ],
+      unresolvedSpeakers: ["Intervenant 1", "Intervenant 2"]
+    }));
+
+    const response = await fetch("http://127.0.0.1:8011/api/transcription/job-fixture/speakers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "http://localhost:5173"
+      },
+      body: JSON.stringify({
+        mapping: {
+          SPEAKER_00: "Sofia",
+          SPEAKER_01: "Nom qui ne fait pas partie des participants"
+        }
+      })
+    });
+
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("access-control-allow-origin"), "http://localhost:5173");
+    const payload = await response.json();
+    assert.equal(payload.persistedToMeeting, true);
+    assert.deepEqual(payload.mapping, { SPEAKER_00: "Sofia" });
+    assert.equal(payload.result.segments[0].speaker, "Sofia");
+    assert.equal(payload.result.segments[0].speakerConfidence, "confirme-manuel");
+    assert.deepEqual(payload.result.unresolvedSpeakers, ["Intervenant 2"]);
+
+    const meetingData = JSON.parse(fs.readFileSync(path.join(meetingDir, "donnees_escale.json"), "utf8"));
+    assert.deepEqual(meetingData.transcriptionSpeakerConfirmations["job-fixture"].mapping, { SPEAKER_00: "Sofia" });
   });
 });

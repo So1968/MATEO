@@ -35,6 +35,18 @@ test("les dépendances frontend critiques ne reviennent pas à latest", () => {
   }
 });
 
+test("les dépendances Python de transcription sont verrouillées", () => {
+  const requirements = read("requirements-transcription.txt")
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("#"));
+
+  assert.deepEqual(requirements, [
+    "faster-whisper==1.2.1",
+    "pyannote.audio==4.0.7"
+  ]);
+});
+
 test("les anciennes versions du moteur ne restent pas dans le code actif", () => {
   for (const file of [
     "backend/transcription-server.js",
@@ -46,6 +58,17 @@ test("les anciennes versions du moteur ne restent pas dans le code actif", () =>
     assert.equal(exists(file), false, `${file} doit rester uniquement dans l'historique Git`);
   }
   assert.equal(exists("backend/transcription-server-v6.js"), true);
+});
+
+test("les écrans principaux consomment la mémoire locale plutôt qu'une maquette", () => {
+  const app = read("src/App.jsx");
+  assert.match(app, /loadProjects/u);
+  assert.match(app, /loadInbox/u);
+  assert.doesNotMatch(app, /const ISLAND_PROJECTS/u);
+  assert.doesNotMatch(app, /const GLOBAL_PRIORITIES/u);
+  assert.equal(exists("src/features/projects/ProjectsView.jsx"), true);
+  assert.equal(exists("src/features/meetings/MeetingModePanel.jsx"), true);
+  assert.equal(exists("src/features/search/SearchView.jsx"), true);
 });
 
 test("les pages de démonstration obsolètes ne sont plus publiées", () => {
