@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
 import TranscriptionView from "./TranscriptionView.jsx";
+import "./speaker-map-sync.js";
 import "./demo-stabilisation.css";
 import "./carte-mentale-aventure.css";
 
