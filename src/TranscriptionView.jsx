@@ -54,6 +54,20 @@ function parseParticipantText(value) {
   ));
 }
 
+function speakerMapKey(jobId) {
+  return `vogue-marry:speaker-map:${jobId}`;
+}
+
+function readSpeakerOverrides(jobId) {
+  if (!jobId) return {};
+  try {
+    const value = JSON.parse(window.localStorage.getItem(speakerMapKey(jobId)) || "{}");
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  } catch {
+    return {};
+  }
+}
+
 export default function TranscriptionView() {
   const [health, setHealth] = useState(null);
   const [escales, setEscales] = useState([]);
@@ -67,6 +81,8 @@ export default function TranscriptionView() {
   const [audioDuration, setAudioDuration] = useState(null);
   const [job, setJob] = useState(null);
   const [result, setResult] = useState(null);
+  const [speakerOverrides, setSpeakerOverrides] = useState({});
+  const [speakerNotice, setSpeakerNotice] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -108,6 +124,8 @@ export default function TranscriptionView() {
     if (!resultResponse.ok) return null;
     const payload = await resultResponse.json();
     setResult(payload);
+    setSpeakerOverrides(readSpeakerOverrides(jobId));
+    setSpeakerNotice("");
     return payload;
   }
 
@@ -186,19 +204,81 @@ export default function TranscriptionView() {
   const estimatedCost = mode === "high" && audioDuration ? estimateSensitiveCost(audioDuration) : 0;
   const completedCost = result?.mode === "high" ? Number(result?.verification?.estimatedCostUsd || 0) : 0;
 
-  const transcript = useMemo(() => {
-    if (!result?.segments) return "";
-    return result.segments
-      .map((segment) => `[${formatClock(segment.start)}] ${segment.speaker || "Intervenant"} — ${segment.text}`)
-      .join("\n\n");
+  const unresolvedSpeakerGroups = useMemo(() => {
+    if (!result?.segments) return [];
+    const groups = new Map();
+    for (const segment of result.segments) {
+      if (segment.speakerConfidence !== "non-identifie" || !segment.sourceSpeaker) continue;
+      if (!groups.has(segment.sourceSpeaker)) {
+        groups.set(segment.sourceSpeaker, {
+          sourceSpeaker: segment.sourceSpeaker,
+          label: segment.speaker || "Intervenant",
+          start: segment.start,
+          sample: segment.text
+        });
+      }
+    }
+    return Array.from(groups.values());
   }, [result]);
+
+  const effectiveSegments = useMemo(() => {
+    if (!result?.segments) return [];
+    return result.segments.map((segment) => ({
+      ...segment,
+      speaker: speakerOverrides[segment.sourceSpeaker] || segment.speaker || "Intervenant"
+    }));
+  }, [result, speakerOverrides]);
+
+  const transcript = useMemo(
+    () => effectiveSegments
+      .map((segment) => `[${formatClock(segment.start)}] ${segment.speaker} — ${segment.text}`)
+      .join("\n\n"),
+    [effectiveSegments]
+  );
 
   function resetRun() {
     setError("");
     setResult(null);
     setJob(null);
+    setSpeakerOverrides({});
+    setSpeakerNotice("");
     setBusy(false);
     window.localStorage.removeItem(LAST_JOB_KEY);
+  }
+
+  function updateSpeakerOverride(sourceSpeaker, name) {
+    setSpeakerNotice("");
+    setSpeakerOverrides((current) => {
+      const next = { ...current };
+      if (name) next[sourceSpeaker] = name;
+      else delete next[sourceSpeaker];
+      return next;
+    });
+  }
+
+  function saveSpeakerOverrides() {
+    if (!result?.jobId) return;
+    window.localStorage.setItem(speakerMapKey(result.jobId), JSON.stringify(speakerOverrides));
+    setSpeakerNotice("Noms mémorisés pour ce compte rendu sur cet ordinateur.");
+  }
+
+  function downloadCorrectedTranscript() {
+    if (!result || !transcript) return;
+    const header = [
+      "Transcription — Vogue Marry",
+      result.meeting?.title ? `Escale : ${result.meeting.title}` : null,
+      result.participants?.length ? `Participants : ${result.participants.join(", ")}` : null,
+      ""
+    ].filter((item) => item !== null).join("\n");
+    const blob = new Blob([`${header}\n${transcript}\n`], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `transcription-vogue-marry-${result.jobId}.txt`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   }
 
   async function saveApiKey() {
@@ -240,6 +320,8 @@ export default function TranscriptionView() {
     setBusy(true);
     setError("");
     setResult(null);
+    setSpeakerOverrides({});
+    setSpeakerNotice("");
     setJob({ state: "uploading", message: "Envoi de l’enregistrement…", progress: 1 });
 
     try {
@@ -313,6 +395,13 @@ export default function TranscriptionView() {
         {!health?.localEngineReady && health ? (
           <div className="transcription-callout">
             Lance une seule fois <code>npm run transcription:setup</code>, puis redémarre le moteur de transcription.
+          </div>
+        ) : null}
+
+        {health?.localEngineReady && !health?.pyannoteInstalled ? (
+          <div className="transcription-callout">
+            <strong>Reconnaissance des voix à installer</strong>
+            <div>Whisper est prêt, mais Pyannote manque encore. Relance <code>npm run transcription:setup</code> pour ajouter gratuitement le repérage des interlocuteurs.</div>
           </div>
         ) : null}
 
@@ -459,14 +548,49 @@ export default function TranscriptionView() {
                 {result.detectedSpeakerCount ? ` · ${result.detectedSpeakerCount} voix détectée${result.detectedSpeakerCount > 1 ? "s" : ""}` : ""}
               </p>
               {result.mode === "high" ? <p><strong>Coût API estimé : {formatUsd(completedCost)}</strong> · reconnaissance des voix : 0 $.</p> : <p><strong>Coût API : 0 $</strong>.</p>}
-              {result.unresolvedSpeakers?.length ? <p className="transcription-result-warning">À confirmer : {result.unresolvedSpeakers.join(" · ")}</p> : null}
               {result.warnings?.length ? <p className="transcription-result-warning">{result.warnings.join(" · ")}</p> : null}
             </div>
-            <div>
-              <a href={`${API}/api/transcription/${result.jobId}/download`}>Télécharger le texte</a>
-              {result.mode === "high" ? <><br /><a href={`${API}/api/transcription/${result.jobId}/download-verification`}>Télécharger la vérification GPT</a></> : null}
+            <div className="transcription-downloads">
+              <a href={`${API}/api/transcription/${result.jobId}/download`}>Texte brut du moteur</a>
+              {Object.keys(speakerOverrides).length ? <button type="button" onClick={downloadCorrectedTranscript}>Texte avec noms confirmés</button> : null}
+              {result.mode === "high" ? <a href={`${API}/api/transcription/${result.jobId}/download-verification`}>Vérification GPT</a> : null}
             </div>
           </div>
+
+          {unresolvedSpeakerGroups.length ? (
+            <div className="transcription-speaker-confirm">
+              <div>
+                <strong>Qui parle ?</strong>
+                <p>Vogue Marry n’a pas forcé les identités incertaines. Associe seulement les voix restantes aux personnes déjà prévues dans l’escale.</p>
+              </div>
+              <div className="transcription-speaker-list">
+                {unresolvedSpeakerGroups.map((group) => (
+                  <label key={group.sourceSpeaker} className="transcription-speaker-row">
+                    <div>
+                      <strong>{group.label}</strong>
+                      <small>{formatClock(group.start)} · « {String(group.sample || "").slice(0, 120)}{String(group.sample || "").length > 120 ? "…" : ""} »</small>
+                    </div>
+                    <select
+                      value={speakerOverrides[group.sourceSpeaker] || ""}
+                      onChange={(event) => updateSpeakerOverride(group.sourceSpeaker, event.target.value)}
+                    >
+                      <option value="">À confirmer</option>
+                      {(result.participants || participants).map((participant) => (
+                        <option key={participant} value={participant}>{participant}</option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+              </div>
+              <div className="transcription-speaker-actions">
+                <button type="button" onClick={saveSpeakerOverrides}>Mémoriser ces noms</button>
+                {speakerNotice ? <span>{speakerNotice}</span> : null}
+              </div>
+            </div>
+          ) : result.detectedSpeakerCount ? (
+            <div className="transcription-callout"><strong>Interlocuteurs reconnus</strong><div>Aucune voix ne reste à confirmer pour ce compte rendu.</div></div>
+          ) : null}
+
           <pre>{transcript}</pre>
         </section>
       ) : null}
