@@ -1,0 +1,41 @@
+name: Mise à jour Multer
+
+on:
+  push:
+    branches:
+      - consolidation/vogue-marry-2026-09
+    paths:
+      - scripts/refresh-multer.trigger
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+        with:
+          ref: consolidation/vogue-marry-2026-09
+
+      - name: Installer Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Mettre Multer à jour et régénérer le lockfile
+        run: npm install multer@2.4.0 --save-exact
+
+      - name: Enregistrer le lockfile régénéré
+        run: |
+          if git diff --quiet -- package.json package-lock.json; then
+            echo "Aucun changement à enregistrer."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git commit -m "Met à jour Multer vers 2.4.0"
+          git push origin HEAD:consolidation/vogue-marry-2026-09
