@@ -61,7 +61,9 @@ La migration vers cette structure doit se faire progressivement, sans casser l'�
 - [x] protection contre deux lancements simultanés d'une même transcription grâce au cache des jobs actifs ;
 - [x] Pyannote ne reçoit plus un nombre de voix forcé à partir du seul nombre de participants ;
 - [x] attribution automatique des noms durcie : seule une présentation explicite de soi peut produire une association automatique ;
-- [x] suppression de l'attribution automatique d'un dernier nom « par élimination ».
+- [x] suppression de l'attribution automatique d'un dernier nom « par élimination » ;
+- [x] ajout d'une CI de consolidation : `npm ci`, contrôle syntaxe Node/Python et build frontend ;
+- [x] premier passage de la CI réussi sur la pull request de consolidation.
 
 ### À faire avant intégration
 
@@ -69,9 +71,9 @@ La migration vers cette structure doit se faire progressivement, sans casser l'�
 - [ ] remplacer le patch global de `Storage.prototype.setItem` par une sauvegarde explicite ;
 - [ ] absorber `speaker-sync-server.js` dans une API locale unique ;
 - [ ] verrouiller les dépendances JavaScript et Python ;
-- [ ] ajouter lint, tests et CI ;
+- [ ] ajouter lint et tests fonctionnels ;
 - [ ] connecter progressivement l'interface aux vraies données du backend ;
-- [ ] faire tourner le build et les tests sur le poste de développement ;
+- [ ] faire tourner les tests locaux des routes critiques sur le poste de développement ;
 - [ ] tester une courte transcription locale sans appel API payant.
 
 ## Priorités suivantes
@@ -88,7 +90,7 @@ La migration vers cette structure doit se faire progressivement, sans casser l'�
 1. Remplacer le patch global de `Storage.prototype.setItem` par une sauvegarde explicite.
 2. Réduire les services Node vers une API locale cohérente.
 3. Verrouiller les dépendances JS et Python.
-4. Ajouter lint, tests et CI.
+4. Ajouter lint et tests fonctionnels.
 
 ### P2 — réunification produit
 
