@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "backend": "node -r ./scripts/local-only.cjs backend/server.js",
-    "transcription": "concurrently -k -n moteur,voix \"VOGUE_WHISPER_MODEL=large-v3-turbo node -r ./scripts/local-only.cjs backend/transcription-server-v6.js\" \"node -r ./scripts/local-only.cjs backend/speaker-sync-server.js\"",
+    "backend": "node backend/server.js",
+    "transcription": "concurrently -k -n moteur,voix \"VOGUE_WHISPER_MODEL=large-v3-turbo node backend/transcription-server-v6.js\" \"node backend/speaker-sync-server.js\"",
     "transcription:setup": "bash scripts/setup-local-transcription.sh",
     "dev:all": "concurrently \"npm run backend\" \"npm run transcription\" \"npm run dev\""
   },
