@@ -12,7 +12,7 @@ def emit(payload):
 def main():
     parser = argparse.ArgumentParser(description="Vogue Marry — transcription locale")
     parser.add_argument("audio")
-    parser.add_argument("--model", default=os.environ.get("VOGUE_WHISPER_MODEL", "small"))
+    parser.add_argument("--model", default=os.environ.get("VOGUE_WHISPER_MODEL", "large-v3-turbo"))
     parser.add_argument("--language", default="fr")
     parser.add_argument("--device", default=os.environ.get("VOGUE_WHISPER_DEVICE", "cpu"))
     parser.add_argument("--compute-type", default=os.environ.get("VOGUE_WHISPER_COMPUTE", "int8"))
@@ -59,26 +59,45 @@ def main():
             language=args.language,
             beam_size=5,
             vad_filter=True,
+            vad_parameters={"min_silence_duration_ms": 500},
             condition_on_previous_text=True,
+            word_timestamps=True,
         )
 
         count = 0
+        word_count = 0
         for segment in segments:
             text = (segment.text or "").strip()
             if not text:
                 continue
             count += 1
+            words = []
+            for word in (segment.words or []):
+                raw = word.word or ""
+                if not raw.strip():
+                    continue
+                word_count += 1
+                words.append({
+                    "id": word_count,
+                    "start": float(word.start or segment.start or 0),
+                    "end": float(word.end or word.start or segment.end or 0),
+                    "word": raw,
+                    "probability": float(word.probability or 0),
+                })
+
             emit({
                 "type": "segment",
                 "id": count,
                 "start": float(segment.start or 0),
                 "end": float(segment.end or segment.start or 0),
                 "text": text,
+                "words": words,
             })
 
         emit({
             "type": "done",
             "segments": count,
+            "words": word_count,
             "language": getattr(info, "language", args.language),
             "languageProbability": float(getattr(info, "language_probability", 0) or 0),
             "duration": duration,
